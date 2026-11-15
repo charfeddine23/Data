@@ -32,9 +32,10 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val appThemeMode by viewModel.appThemeMode.collectAsStateWithLifecycle()
+            val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
             val shouldPromptVpnConsent by pendingTileVpnConsent.collectAsStateWithLifecycle()
 
-            com.example.ui.theme.DataPulseTheme(appThemeMode = appThemeMode) {
+            com.example.ui.theme.DataPulseTheme(appThemeMode = appThemeMode, themeMode = themeMode) {
                 // Request Phone State (for Dual SIM carrier resolution) & Notification permissions
                 val permissionLauncher = rememberLauncherForActivityResult(
                     contract = ActivityResultContracts.RequestMultiplePermissions()

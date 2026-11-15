@@ -3,7 +3,7 @@ package com.example.ui.theme
 import androidx.compose.ui.graphics.Color
 
 /**
- * Dedicated color token system for the Tactile Neumorphism (Soft UI) theme.
+ * Dedicated color token system for the Light Tactile Neumorphism (Soft UI) theme.
  *
  * Uses a soft ice-gray canvas (#EEF2F6) paired with dual highlight (#FFFFFF) and
  * cool ambient shadow (#D1D9E6) tokens to sculpt physical extruded and pressed depth.
@@ -25,4 +25,29 @@ object NeumorphicColors {
 
     val BorderLight = Color(0xD9FFFFFF)
     val BorderDark = Color(0x99D1D9E6)
+}
+
+/**
+ * Dedicated color token system for the Dark Tactile Neumorphism (Dark Soft UI) theme.
+ *
+ * Uses a matte dark slate-charcoal canvas (#1E232B) paired with soft elevated highlight
+ * (#2D3542) and deep ambient shadow (#0E1116) tokens for extruded and pressed 3D depth.
+ */
+object NeumorphicDarkColors {
+    val Background = Color(0xFF1E232B)
+    val Surface = Color(0xFF1E232B)
+    val SurfaceSubtle = Color(0xFF171B22)
+    val Highlight = Color(0xFF2D3542)
+    val DarkShadow = Color(0xFF0E1116)
+
+    val TextPrimary = Color(0xFFF1F5F9)
+    val TextSecondary = Color(0xFF94A3B8)
+    val TextTertiary = Color(0xFF64748B)
+
+    val AccentBlue = Color(0xFF3B82F6)
+    val AccentMint = Color(0xFF10B981)
+    val AccentRed = Color(0xFFEF4444)
+
+    val BorderLight = Color(0x2EFFFFFF)
+    val BorderDark = Color(0x990B0E12)
 }

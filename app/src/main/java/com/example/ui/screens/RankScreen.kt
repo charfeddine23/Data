@@ -711,7 +711,13 @@ fun RankedAppRow(
                     .fillMaxWidth()
                     .height(4.dp)
                     .clip(RoundedCornerShape(2.dp))
-                    .background(if (glassStyle.isDark) Color(0xFF0D1524) else Color(0xFFE2E8F0))
+                    .background(
+                        when {
+                            glassStyle.isNeumorphic -> glassStyle.cardSubtleBg
+                            glassStyle.isDark -> Color(0xFF0D1524)
+                            else -> Color(0xFFE2E8F0)
+                        }
+                    )
             ) {
                 Box(
                     modifier = Modifier

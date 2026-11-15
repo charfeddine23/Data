@@ -107,6 +107,7 @@ import com.example.ui.theme.AmberAlert
 import com.example.ui.theme.LocalAppDimensions
 import com.example.ui.theme.LocalLiquidGlass
 import com.example.ui.theme.NeumorphicColors
+import com.example.ui.theme.NeumorphicDarkColors
 
 /**
  * Dedicated standalone DNS Control & Local VPN Shield screen crafted in the
@@ -162,11 +163,23 @@ fun DnsControlScreen(
         }
     }
 
-    val emeraldAdGuard = if (glassStyle.isNeumorphic) NeumorphicColors.AccentMint else Color(0xFF00E676)
-    val electricCyan = if (glassStyle.isNeumorphic) NeumorphicColors.AccentBlue else Color(0xFF00E5FF)
-    val googleBlue = if (glassStyle.isNeumorphic) NeumorphicColors.AccentBlue else Color(0xFF4285F4)
-    val quad9Violet = if (glassStyle.isNeumorphic) Color(0xFF7C3AED) else Color(0xFFB388FF)
-    val openDnsAmber = if (glassStyle.isNeumorphic) Color(0xFFD97706) else Color(0xFFFFB300)
+    val emeraldAdGuard = when {
+        glassStyle.isNeumorphic && glassStyle.isDark -> NeumorphicDarkColors.AccentMint
+        glassStyle.isNeumorphic -> NeumorphicColors.AccentMint
+        else -> Color(0xFF00E676)
+    }
+    val electricCyan = when {
+        glassStyle.isNeumorphic && glassStyle.isDark -> NeumorphicDarkColors.AccentBlue
+        glassStyle.isNeumorphic -> NeumorphicColors.AccentBlue
+        else -> Color(0xFF00E5FF)
+    }
+    val googleBlue = when {
+        glassStyle.isNeumorphic && glassStyle.isDark -> NeumorphicDarkColors.AccentBlue
+        glassStyle.isNeumorphic -> NeumorphicColors.AccentBlue
+        else -> Color(0xFF4285F4)
+    }
+    val quad9Violet = if (glassStyle.isNeumorphic && !glassStyle.isDark) Color(0xFF7C3AED) else Color(0xFFB388FF)
+    val openDnsAmber = if (glassStyle.isNeumorphic && !glassStyle.isDark) Color(0xFFD97706) else Color(0xFFFFB300)
 
     val presetAccent: (PrivateDnsPreset) -> Color = { preset ->
         when (preset) {
@@ -866,7 +879,7 @@ private fun DnsShieldHeroCard(
                     // Subtle static core ring
                     drawCircle(
                         color = when {
-                            glassStyle.isNeumorphic -> NeumorphicColors.SurfaceSubtle
+                            glassStyle.isNeumorphic -> glassStyle.cardSubtleBg
                             glassStyle.isDark -> Color(0xFF0B111C)
                             else -> Color(0xFFF1F5F9)
                         },

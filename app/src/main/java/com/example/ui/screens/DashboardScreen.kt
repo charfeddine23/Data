@@ -926,7 +926,7 @@ fun EditDataCapDialog(
                                 ) {
                                     Text(
                                         text = "${preset.toInt()}G",
-                                        color = if (isSelected) (if (glassStyle.isDark) Color.Black else Color.White) else glassStyle.textSecondary,
+                                        color = if (isSelected) (if (glassStyle.isDark && !glassStyle.isNeumorphic) Color.Black else Color.White) else glassStyle.textSecondary,
                                         fontSize = 10.sp,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -971,13 +971,13 @@ fun EditDataCapDialog(
                                 Icon(
                                     imageVector = Icons.Default.Check,
                                     contentDescription = null,
-                                    tint = if (glassStyle.isDark) Color.Black else Color.White,
+                                    tint = if (glassStyle.isDark && !glassStyle.isNeumorphic) Color.Black else Color.White,
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     text = if (appLanguage == com.example.model.AppLanguage.ARABIC) "حفظ السقف" else "Save Cap",
-                                    color = if (glassStyle.isDark) Color.Black else Color.White,
+                                    color = if (glassStyle.isDark && !glassStyle.isNeumorphic) Color.Black else Color.White,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold
                                 )

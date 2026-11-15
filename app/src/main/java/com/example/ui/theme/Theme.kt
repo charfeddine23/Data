@@ -108,6 +108,29 @@ fun createAppColorScheme(mode: AppThemeMode, isSystemDark: Boolean = false): Col
         onError = Color.White
     )
 
+    AppThemeMode.NEUMORPHISM_DARK -> darkColorScheme(
+        primary = NeumorphicDarkColors.AccentBlue,
+        onPrimary = Color.White,
+        primaryContainer = Color(0xFF1E3A8A),
+        onPrimaryContainer = Color(0xFFDBEAFE),
+        secondary = NeumorphicDarkColors.AccentMint,
+        onSecondary = Color.White,
+        secondaryContainer = Color(0xFF064E3B),
+        onSecondaryContainer = Color(0xFFD1FAE5),
+        tertiary = NeumorphicDarkColors.AccentBlue,
+        onTertiary = Color.White,
+        background = NeumorphicDarkColors.Background,
+        onBackground = NeumorphicDarkColors.TextPrimary,
+        surface = NeumorphicDarkColors.Surface,
+        onSurface = NeumorphicDarkColors.TextPrimary,
+        surfaceVariant = NeumorphicDarkColors.SurfaceSubtle,
+        onSurfaceVariant = NeumorphicDarkColors.TextSecondary,
+        outline = NeumorphicDarkColors.Highlight,
+        outlineVariant = NeumorphicDarkColors.BorderDark,
+        error = NeumorphicDarkColors.AccentRed,
+        onError = Color.White
+    )
+
     AppThemeMode.LIQUID_GLASS_DEFAULT -> darkColorScheme(
         primary = LiquidGlassDefaultPrimary,
         onPrimary = Color.White,
@@ -173,6 +196,8 @@ fun createAppColorScheme(mode: AppThemeMode, isSystemDark: Boolean = false): Col
         error = RedAlert,
         onError = TextPrimary
     )
+
+    else -> createExtendedColorScheme(getExtendedPaletteSpec(mode))
 }
 
 /**
@@ -251,6 +276,40 @@ fun createLiquidGlassStyle(mode: AppThemeMode, isSystemDark: Boolean = false): L
         neumorphicShadow = NeumorphicColors.DarkShadow,
         neumorphicBorderLight = NeumorphicColors.BorderLight,
         neumorphicBorderDark = NeumorphicColors.BorderDark
+    )
+
+    AppThemeMode.NEUMORPHISM_DARK -> LiquidGlassStyle(
+        surfaceColor = NeumorphicDarkColors.Surface,
+        surfaceTranslucent = NeumorphicDarkColors.Surface,
+        borderColor = NeumorphicDarkColors.DarkShadow,
+        textPrimary = NeumorphicDarkColors.TextPrimary,
+        textSecondary = NeumorphicDarkColors.TextSecondary,
+        textTertiary = NeumorphicDarkColors.TextTertiary,
+        accentPrimary = NeumorphicDarkColors.AccentBlue,
+        accentSecondary = NeumorphicDarkColors.AccentMint,
+        cardBackground = NeumorphicDarkColors.Surface,
+        cardSubtleBg = NeumorphicDarkColors.SurfaceSubtle,
+        rimLightBrush = Brush.linearGradient(
+            listOf(
+                NeumorphicDarkColors.Highlight,
+                NeumorphicDarkColors.DarkShadow.copy(alpha = 0.85f)
+            )
+        ),
+        backdropBrush = Brush.verticalGradient(
+            listOf(
+                NeumorphicDarkColors.Background,
+                NeumorphicDarkColors.Background
+            )
+        ),
+        blurRadius = 0.dp,
+        isDark = true,
+        isNeumorphic = true,
+        neumorphicBase = NeumorphicDarkColors.Background,
+        neumorphicSurface = NeumorphicDarkColors.Surface,
+        neumorphicHighlight = NeumorphicDarkColors.Highlight,
+        neumorphicShadow = NeumorphicDarkColors.DarkShadow,
+        neumorphicBorderLight = NeumorphicDarkColors.BorderLight,
+        neumorphicBorderDark = NeumorphicDarkColors.BorderDark
     )
 
     AppThemeMode.LIQUID_GLASS_DEFAULT -> LiquidGlassStyle(
@@ -333,6 +392,51 @@ fun createLiquidGlassStyle(mode: AppThemeMode, isSystemDark: Boolean = false): L
         neumorphicBorderLight = Color(0x1FFFFFFF),
         neumorphicBorderDark = Color(0x80000000)
     )
+
+    else -> createExtendedLiquidGlassStyle(getExtendedPaletteSpec(mode))
+}
+
+/**
+ * Finds the natural Light/Dark counterpart for paired theme families
+ * (e.g. Neumorphism Light <-> Dark, Solarized Light <-> Dark, Gruvbox, One, Ayu, GitHub).
+ */
+fun findPairedThemeMode(mode: AppThemeMode, wantDark: Boolean): AppThemeMode = when (mode) {
+    AppThemeMode.NEUMORPHISM, AppThemeMode.NEUMORPHISM_DARK ->
+        if (wantDark) AppThemeMode.NEUMORPHISM_DARK else AppThemeMode.NEUMORPHISM
+    AppThemeMode.SOLARIZED_LIGHT, AppThemeMode.SOLARIZED_DARK ->
+        if (wantDark) AppThemeMode.SOLARIZED_DARK else AppThemeMode.SOLARIZED_LIGHT
+    AppThemeMode.ONE_LIGHT, AppThemeMode.ONE_DARK_PRO ->
+        if (wantDark) AppThemeMode.ONE_DARK_PRO else AppThemeMode.ONE_LIGHT
+    AppThemeMode.AYU_LIGHT, AppThemeMode.AYU_DARK ->
+        if (wantDark) AppThemeMode.AYU_DARK else AppThemeMode.AYU_LIGHT
+    AppThemeMode.GRUVBOX_LIGHT, AppThemeMode.GRUVBOX_DARK ->
+        if (wantDark) AppThemeMode.GRUVBOX_DARK else AppThemeMode.GRUVBOX_LIGHT
+    AppThemeMode.GITHUB_LIGHT, AppThemeMode.GITHUB_DARK ->
+        if (wantDark) AppThemeMode.GITHUB_DARK else AppThemeMode.GITHUB_LIGHT
+    else -> {
+        if (mode == AppThemeMode.SYSTEM) {
+            if (wantDark) AppThemeMode.LIQUID_GLASS_DEFAULT else AppThemeMode.LIGHT_MODE
+        } else if (mode.isDark == wantDark) {
+            mode
+        } else {
+            if (wantDark) AppThemeMode.LIQUID_GLASS_DEFAULT else AppThemeMode.LIGHT_MODE
+        }
+    }
+}
+
+/**
+ * Resolves the effective [AppThemeMode] taking into account whether the user chose
+ * Light, Dark, or Follow System appearance alongside their selected Multi-Theme Engine.
+ */
+fun resolveEffectiveThemeMode(
+    appThemeMode: AppThemeMode,
+    themeMode: ThemeMode? = null,
+    isSystemDark: Boolean = false
+): AppThemeMode = when (themeMode) {
+    ThemeMode.SYSTEM -> findPairedThemeMode(appThemeMode, wantDark = isSystemDark)
+    ThemeMode.LIGHT -> findPairedThemeMode(appThemeMode, wantDark = false)
+    ThemeMode.DARK -> findPairedThemeMode(appThemeMode, wantDark = true)
+    null -> appThemeMode
 }
 
 /**
@@ -341,11 +445,13 @@ fun createLiquidGlassStyle(mode: AppThemeMode, isSystemDark: Boolean = false): L
 @Composable
 fun DataPulseTheme(
     appThemeMode: AppThemeMode = AppThemeMode.LIQUID_GLASS_DEFAULT,
+    themeMode: ThemeMode? = null,
     content: @Composable () -> Unit
 ) {
     val isSystemDark = androidx.compose.foundation.isSystemInDarkTheme()
-    val colorScheme = createAppColorScheme(appThemeMode, isSystemDark)
-    val liquidGlassStyle = createLiquidGlassStyle(appThemeMode, isSystemDark)
+    val effectiveMode = resolveEffectiveThemeMode(appThemeMode, themeMode, isSystemDark)
+    val colorScheme = createAppColorScheme(effectiveMode, isSystemDark)
+    val liquidGlassStyle = createLiquidGlassStyle(effectiveMode, isSystemDark)
 
     val view = LocalView.current
     if (!view.isInEditMode) {

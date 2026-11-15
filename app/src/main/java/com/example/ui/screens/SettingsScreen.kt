@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,6 +40,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.Eco
+import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.LightMode
@@ -74,9 +77,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.R
 import com.example.model.AppLanguage
 import com.example.model.AppStrings
+import com.example.model.AppThemeMode
 import com.example.model.PrivateDnsPreset
+import com.example.model.ThemeCategory
+import com.example.model.ThemeMode
 import com.example.ui.MainViewModel
 import com.example.ui.components.GlassContainer
+import com.example.ui.components.ThemeGalleryDialog
+import com.example.ui.components.ThemeSwatchCard
 import com.example.ui.components.neumorphicDepth
 import com.example.ui.components.rememberAppHaptics
 import com.example.ui.components.tactileSpringPress
@@ -84,6 +92,7 @@ import com.example.update.AppUpdateUiState
 import com.example.ui.theme.AmberAlert
 import com.example.ui.theme.LocalAppDimensions
 import com.example.ui.theme.NeumorphicColors
+import com.example.ui.theme.NeumorphicDarkColors
 import com.example.ui.theme.RedAlert
 
 /**
@@ -123,6 +132,7 @@ fun SettingsScreen(
     val quota by viewModel.dataPlanQuota.collectAsStateWithLifecycle()
     val hasUsagePerm by viewModel.hasUsagePermission.collectAsStateWithLifecycle()
     val appThemeMode by viewModel.appThemeMode.collectAsStateWithLifecycle()
+    val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
     val powerSavingMode by viewModel.powerSavingMode.collectAsStateWithLifecycle()
     val appLanguage by viewModel.appLanguage.collectAsStateWithLifecycle()
     val privateDnsPreset by viewModel.privateDnsPreset.collectAsStateWithLifecycle()
@@ -135,6 +145,7 @@ fun SettingsScreen(
     val glassStyle = com.example.ui.theme.LocalLiquidGlass.current
     val dimensions = LocalAppDimensions.current
     val appHaptics = rememberAppHaptics()
+    var showThemeGallery by remember { mutableStateOf(false) }
 
     // 1. Language Selection Card
     val languageCard: @Composable () -> Unit = {
@@ -204,8 +215,8 @@ fun SettingsScreen(
         }
     }
 
-    // 2. Multi-Theme Engine Section (Small buttons, without explanation, mode name only)
-    val multiThemeEngineCard: @Composable () -> Unit = {
+    // 2. Separated Light & Dark Mode Card (Appearance Mode)
+    val appearanceModeCard: @Composable () -> Unit = {
         GlassContainer(modifier = Modifier.fillMaxWidth()) {
             Column {
                 Row(
@@ -214,6 +225,126 @@ fun SettingsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(glassStyle.accentPrimary.copy(alpha = if (glassStyle.isDark) 0.18f else 0.12f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = if (themeMode == ThemeMode.DARK || (themeMode == ThemeMode.SYSTEM && glassStyle.isDark)) {
+                                    Icons.Default.DarkMode
+                                } else {
+                                    Icons.Default.LightMode
+                                },
+                                contentDescription = "Appearance Mode",
+                                tint = glassStyle.accentPrimary,
+                                modifier = Modifier.size(13.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = if (appLanguage == AppLanguage.ARABIC) "الوضع الليلي والنهاري" else "Light & Dark Mode",
+                            color = glassStyle.textPrimary,
+                            fontSize = 12.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.5.sp
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(glassStyle.cardSubtleBg)
+                            .border(0.8.dp, glassStyle.borderColor, RoundedCornerShape(8.dp))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = when (themeMode) {
+                                ThemeMode.SYSTEM -> if (appLanguage == AppLanguage.ARABIC) "تلقائي" else "System"
+                                ThemeMode.LIGHT -> if (appLanguage == AppLanguage.ARABIC) "نهاري" else "Light"
+                                ThemeMode.DARK -> if (appLanguage == AppLanguage.ARABIC) "ليلي" else "Dark"
+                            },
+                            color = glassStyle.accentPrimary,
+                            fontSize = 9.5.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(glassStyle.cardSubtleBg)
+                        .border(0.8.dp, glassStyle.borderColor, RoundedCornerShape(14.dp))
+                        .padding(4.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        LanguagePillOption(
+                            label = if (appLanguage == AppLanguage.ARABIC) "اتبع الهاتف" else "System",
+                            isSelected = themeMode == ThemeMode.SYSTEM,
+                            onClick = {
+                                appHaptics.performSegmentSwitch()
+                                viewModel.setThemeMode(ThemeMode.SYSTEM)
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .testTag("appearance_mode_system")
+                        )
+
+                        LanguagePillOption(
+                            label = if (appLanguage == AppLanguage.ARABIC) "نهاري" else "Light",
+                            isSelected = themeMode == ThemeMode.LIGHT,
+                            onClick = {
+                                appHaptics.performSegmentSwitch()
+                                viewModel.setThemeMode(ThemeMode.LIGHT)
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .testTag("appearance_mode_light")
+                        )
+
+                        LanguagePillOption(
+                            label = if (appLanguage == AppLanguage.ARABIC) "ليلي" else "Dark",
+                            isSelected = themeMode == ThemeMode.DARK,
+                            onClick = {
+                                appHaptics.performSegmentSwitch()
+                                viewModel.setThemeMode(ThemeMode.DARK)
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .testTag("appearance_mode_dark")
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    // 3. Dedicated Multi-Theme Engine Section (Core Engines + Dark/Light Neumorphism + 60 Themes)
+    val extendedThemes = remember {
+        AppThemeMode.values().filter { it.category != ThemeCategory.CORE }
+    }
+
+    val multiThemeEngineCard: @Composable () -> Unit = {
+        GlassContainer(modifier = Modifier.fillMaxWidth()) {
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f, fill = false)
+                    ) {
                         Box(
                             modifier = Modifier
                                 .size(24.dp)
@@ -234,11 +365,15 @@ fun SettingsScreen(
                             color = glassStyle.textPrimary,
                             fontSize = 12.5.sp,
                             fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.5.sp
+                            letterSpacing = 0.5.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
 
-                    // Active badge
+                    Spacer(modifier = Modifier.width(6.dp))
+
+                    // Active theme badge
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
@@ -250,105 +385,176 @@ fun SettingsScreen(
                             text = appThemeMode.getDisplayName(appLanguage),
                             color = glassStyle.accentPrimary,
                             fontSize = 9.5.sp,
-                            fontWeight = FontWeight.SemiBold
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Row 1: System Auto-Switch, Light Mode & Neumorphism
+                // Row 1: Glass & Cyber Engines
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     SmallThemeButton(
-                        themeMode = com.example.model.AppThemeMode.SYSTEM,
-                        icon = Icons.Default.BrightnessAuto,
-                        accentColor = glassStyle.accentPrimary,
-                        isSelected = appThemeMode == com.example.model.AppThemeMode.SYSTEM,
+                        themeMode = AppThemeMode.LIQUID_GLASS_DEFAULT,
+                        icon = Icons.Default.DarkMode,
+                        accentColor = com.example.ui.theme.LiquidGlassDefaultPrimary,
+                        isSelected = appThemeMode == AppThemeMode.LIQUID_GLASS_DEFAULT,
                         appLanguage = appLanguage,
                         onClick = {
                             appHaptics.performSegmentSwitch()
-                            viewModel.setAppThemeMode(com.example.model.AppThemeMode.SYSTEM)
+                            viewModel.setAppThemeMode(AppThemeMode.LIQUID_GLASS_DEFAULT)
                         },
                         modifier = Modifier.weight(1f)
                     )
 
                     SmallThemeButton(
-                        themeMode = com.example.model.AppThemeMode.LIGHT_MODE,
-                        icon = Icons.Default.LightMode,
-                        accentColor = com.example.ui.theme.LightModePrimary,
-                        isSelected = appThemeMode == com.example.model.AppThemeMode.LIGHT_MODE,
+                        themeMode = AppThemeMode.LIQUID_NEON_CYAN,
+                        icon = Icons.Default.Palette,
+                        accentColor = com.example.ui.theme.LiquidNeonCyanPrimary,
+                        isSelected = appThemeMode == AppThemeMode.LIQUID_NEON_CYAN,
                         appLanguage = appLanguage,
                         onClick = {
                             appHaptics.performSegmentSwitch()
-                            viewModel.setAppThemeMode(com.example.model.AppThemeMode.LIGHT_MODE)
+                            viewModel.setAppThemeMode(AppThemeMode.LIQUID_NEON_CYAN)
                         },
                         modifier = Modifier.weight(1f)
                     )
 
                     SmallThemeButton(
-                        themeMode = com.example.model.AppThemeMode.NEUMORPHISM,
-                        icon = Icons.Default.Layers,
-                        accentColor = NeumorphicColors.AccentBlue,
-                        isSelected = appThemeMode == com.example.model.AppThemeMode.NEUMORPHISM,
+                        themeMode = AppThemeMode.AMOLED_PITCH_BLACK,
+                        icon = Icons.Default.Eco,
+                        accentColor = com.example.ui.theme.AmoledPitchBlackPrimary,
+                        isSelected = appThemeMode == AppThemeMode.AMOLED_PITCH_BLACK,
                         appLanguage = appLanguage,
                         onClick = {
                             appHaptics.performSegmentSwitch()
-                            viewModel.setAppThemeMode(com.example.model.AppThemeMode.NEUMORPHISM)
+                            viewModel.setAppThemeMode(AppThemeMode.AMOLED_PITCH_BLACK)
                         },
-                        modifier = Modifier
-                            .weight(1f)
-                            .testTag("theme_option_neumorphism")
+                        modifier = Modifier.weight(1f)
                     )
                 }
 
                 Spacer(modifier = Modifier.height(6.dp))
 
-                // Row 2: Liquid Glass, Neon Cyan & AMOLED Black
+                // Row 2: Pearl Glass, Neumorphism Light & Neumorphism Dark
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     SmallThemeButton(
-                        themeMode = com.example.model.AppThemeMode.LIQUID_GLASS_DEFAULT,
-                        icon = Icons.Default.DarkMode,
-                        accentColor = com.example.ui.theme.LiquidGlassDefaultPrimary,
-                        isSelected = appThemeMode == com.example.model.AppThemeMode.LIQUID_GLASS_DEFAULT,
+                        themeMode = AppThemeMode.LIGHT_MODE,
+                        icon = Icons.Default.LightMode,
+                        accentColor = com.example.ui.theme.LightModePrimary,
+                        isSelected = appThemeMode == AppThemeMode.LIGHT_MODE,
                         appLanguage = appLanguage,
                         onClick = {
                             appHaptics.performSegmentSwitch()
-                            viewModel.setAppThemeMode(com.example.model.AppThemeMode.LIQUID_GLASS_DEFAULT)
+                            viewModel.setAppThemeMode(AppThemeMode.LIGHT_MODE)
                         },
                         modifier = Modifier.weight(1f)
                     )
 
                     SmallThemeButton(
-                        themeMode = com.example.model.AppThemeMode.LIQUID_NEON_CYAN,
-                        icon = Icons.Default.Palette,
-                        accentColor = com.example.ui.theme.LiquidNeonCyanPrimary,
-                        isSelected = appThemeMode == com.example.model.AppThemeMode.LIQUID_NEON_CYAN,
+                        themeMode = AppThemeMode.NEUMORPHISM,
+                        icon = Icons.Default.Layers,
+                        accentColor = NeumorphicColors.AccentBlue,
+                        isSelected = appThemeMode == AppThemeMode.NEUMORPHISM,
                         appLanguage = appLanguage,
                         onClick = {
                             appHaptics.performSegmentSwitch()
-                            viewModel.setAppThemeMode(com.example.model.AppThemeMode.LIQUID_NEON_CYAN)
+                            viewModel.setAppThemeMode(AppThemeMode.NEUMORPHISM)
                         },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .testTag("theme_option_neumorphism")
                     )
 
                     SmallThemeButton(
-                        themeMode = com.example.model.AppThemeMode.AMOLED_PITCH_BLACK,
-                        icon = Icons.Default.Eco,
-                        accentColor = com.example.ui.theme.AmoledPitchBlackPrimary,
-                        isSelected = appThemeMode == com.example.model.AppThemeMode.AMOLED_PITCH_BLACK,
+                        themeMode = AppThemeMode.NEUMORPHISM_DARK,
+                        icon = Icons.Default.Layers,
+                        accentColor = NeumorphicDarkColors.AccentBlue,
+                        isSelected = appThemeMode == AppThemeMode.NEUMORPHISM_DARK,
                         appLanguage = appLanguage,
                         onClick = {
                             appHaptics.performSegmentSwitch()
-                            viewModel.setAppThemeMode(com.example.model.AppThemeMode.AMOLED_PITCH_BLACK)
+                            viewModel.setAppThemeMode(AppThemeMode.NEUMORPHISM_DARK)
                         },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .testTag("theme_option_neumorphism_dark")
                     )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Subheader + "Explore All 66 Themes" Trigger
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = if (appLanguage == AppLanguage.ARABIC) {
+                            "مكتبة الثيمات (+${extendedThemes.size} ثيم)"
+                        } else {
+                            "Curated Studio (${extendedThemes.size} Themes)"
+                        },
+                        color = glassStyle.textSecondary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .tactileSpringPress(pressedScale = 0.95f, onClick = { showThemeGallery = true })
+                            .clip(RoundedCornerShape(9.dp))
+                            .background(glassStyle.accentPrimary.copy(alpha = if (glassStyle.isDark) 0.18f else 0.12f))
+                            .border(0.8.dp, glassStyle.accentPrimary.copy(alpha = 0.45f), RoundedCornerShape(9.dp))
+                            .padding(horizontal = 10.dp, vertical = 5.dp)
+                            .testTag("open_theme_gallery_button")
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.GridView,
+                                contentDescription = null,
+                                tint = glassStyle.accentPrimary,
+                                modifier = Modifier.size(12.dp)
+                            )
+                            Spacer(modifier = Modifier.width(5.dp))
+                            Text(
+                                text = if (appLanguage == AppLanguage.ARABIC) "استعراض الكل (66)" else "Browse All (66)",
+                                color = glassStyle.accentPrimary,
+                                fontSize = 10.5.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Horizontal scrollable 60-theme color swatch strip
+                LazyRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(extendedThemes, key = { it.name }) { mode ->
+                        ThemeSwatchCard(
+                            themeMode = mode,
+                            isSelected = appThemeMode == mode,
+                            appLanguage = appLanguage,
+                            onClick = {
+                                appHaptics.performSegmentSwitch()
+                                viewModel.setAppThemeMode(mode)
+                            },
+                            modifier = Modifier.width(142.dp)
+                        )
+                    }
                 }
             }
         }
@@ -446,10 +652,11 @@ fun SettingsScreen(
                             .testTag("settings_open_dns_button"),
                         contentAlignment = Alignment.Center
                     ) {
+                        val btnFg = if (glassStyle.isNeumorphic) Color.White else Color.Black
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = AppStrings.dnsOpenDedicatedPage(appLanguage),
-                                color = Color.Black,
+                                color = btnFg,
                                 fontSize = 10.5.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -457,7 +664,7 @@ fun SettingsScreen(
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                 contentDescription = null,
-                                tint = Color.Black,
+                                tint = btnFg,
                                 modifier = Modifier.size(12.dp)
                             )
                         }
@@ -942,6 +1149,7 @@ fun SettingsScreen(
                     verticalArrangement = Arrangement.spacedBy(dimensions.sectionSpacing)
                 ) {
                     languageCard()
+                    appearanceModeCard()
                     multiThemeEngineCard()
                     dnsShortcutCard()
                 }
@@ -962,6 +1170,7 @@ fun SettingsScreen(
                 verticalArrangement = Arrangement.spacedBy(dimensions.sectionSpacing)
             ) {
                 languageCard()
+                appearanceModeCard()
                 multiThemeEngineCard()
                 dnsShortcutCard()
                 billingCycleCard()
@@ -973,6 +1182,18 @@ fun SettingsScreen(
         }
 
         Spacer(modifier = Modifier.height(dimensions.sectionSpacing * 2))
+    }
+
+    if (showThemeGallery) {
+        ThemeGalleryDialog(
+            currentThemeMode = appThemeMode,
+            appLanguage = appLanguage,
+            onSelectTheme = { mode ->
+                appHaptics.performSegmentSwitch()
+                viewModel.setAppThemeMode(mode)
+            },
+            onDismiss = { showThemeGallery = false }
+        )
     }
 }
 
@@ -988,8 +1209,8 @@ fun LanguagePillOption(
 
     val animatedBgTop by animateColorAsState(
         targetValue = when {
-            isSelected && glassStyle.isDark -> glassStyle.accentPrimary.copy(alpha = 0.24f)
             isSelected && glassStyle.isNeumorphic -> glassStyle.surfaceColor
+            isSelected && glassStyle.isDark -> glassStyle.accentPrimary.copy(alpha = 0.24f)
             isSelected -> Color.White
             else -> Color.Transparent
         },
@@ -998,8 +1219,8 @@ fun LanguagePillOption(
     )
     val animatedBgBottom by animateColorAsState(
         targetValue = when {
-            isSelected && glassStyle.isDark -> glassStyle.accentSecondary.copy(alpha = 0.14f)
             isSelected && glassStyle.isNeumorphic -> glassStyle.neumorphicBase
+            isSelected && glassStyle.isDark -> glassStyle.accentSecondary.copy(alpha = 0.14f)
             isSelected -> glassStyle.accentPrimary.copy(alpha = 0.08f)
             else -> Color.Transparent
         },
@@ -1018,8 +1239,8 @@ fun LanguagePillOption(
     )
     val animatedTextColor by animateColorAsState(
         targetValue = when {
+            isSelected && glassStyle.isNeumorphic -> if (glassStyle.isDark) Color.White else glassStyle.accentPrimary
             isSelected && glassStyle.isDark -> Color.White
-            isSelected && glassStyle.isNeumorphic -> glassStyle.accentPrimary
             isSelected -> glassStyle.textPrimary
             else -> glassStyle.textSecondary
         },

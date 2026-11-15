@@ -451,21 +451,48 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _dataForecast.value = updatedForecast
     }
 
+    private var lastDarkThemeEngine = com.example.model.AppThemeMode.LIQUID_GLASS_DEFAULT
+    private var lastLightThemeEngine = com.example.model.AppThemeMode.LIGHT_MODE
+
     fun setThemeMode(mode: com.example.model.ThemeMode) {
         preferences.themeMode = mode.name
         _themeMode.value = mode
+
+        val currentEngine = appThemeMode.value
+        val paired = when (mode) {
+            com.example.model.ThemeMode.LIGHT -> {
+                val naturalLight = com.example.ui.theme.findPairedThemeMode(currentEngine, wantDark = false)
+                if (naturalLight != com.example.model.AppThemeMode.LIGHT_MODE) naturalLight else lastLightThemeEngine
+            }
+            com.example.model.ThemeMode.DARK -> {
+                val naturalDark = com.example.ui.theme.findPairedThemeMode(currentEngine, wantDark = true)
+                if (naturalDark != com.example.model.AppThemeMode.LIQUID_GLASS_DEFAULT) naturalDark else lastDarkThemeEngine
+            }
+            com.example.model.ThemeMode.SYSTEM -> currentEngine
+        }
+
+        if (paired != currentEngine) {
+            viewModelScope.launch {
+                themePreferences.setThemeMode(paired)
+            }
+        }
     }
 
     fun setAppThemeMode(themeMode: com.example.model.AppThemeMode) {
         viewModelScope.launch {
             themePreferences.setThemeMode(themeMode)
-            val legacy = if (!themeMode.isDark && themeMode != com.example.model.AppThemeMode.SYSTEM) {
-                com.example.model.ThemeMode.LIGHT
-            } else {
-                com.example.model.ThemeMode.DARK
+            if (themeMode.isDark) {
+                lastDarkThemeEngine = themeMode
+            } else if (themeMode != com.example.model.AppThemeMode.SYSTEM) {
+                lastLightThemeEngine = themeMode
             }
-            preferences.themeMode = legacy.name
-            _themeMode.value = legacy
+            val appearance = when {
+                themeMode == com.example.model.AppThemeMode.SYSTEM -> com.example.model.ThemeMode.SYSTEM
+                themeMode.isDark -> com.example.model.ThemeMode.DARK
+                else -> com.example.model.ThemeMode.LIGHT
+            }
+            preferences.themeMode = appearance.name
+            _themeMode.value = appearance
         }
     }
 

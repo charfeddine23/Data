@@ -737,7 +737,13 @@ fun AppUsageCard(
                     .fillMaxWidth()
                     .height(5.dp)
                     .clip(RoundedCornerShape(3.dp))
-                    .background(if (glassStyle.isDark) Color(0xFF0B111E) else Color(0xFFE2E8F0))
+                    .background(
+                        when {
+                            glassStyle.isNeumorphic -> glassStyle.cardSubtleBg
+                            glassStyle.isDark -> Color(0xFF0B111E)
+                            else -> Color(0xFFE2E8F0)
+                        }
+                    )
             ) {
                 Box(
                     modifier = Modifier

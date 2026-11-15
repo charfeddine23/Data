@@ -312,7 +312,11 @@ fun NeumorphicButton(
             }
             .neumorphicDepth(
                 shape = shape,
-                lightColor = if (buttonColor != null) Color.White.copy(alpha = 0.85f) else glassStyle.neumorphicHighlight,
+                lightColor = if (buttonColor != null) {
+                    if (glassStyle.isDark) glassStyle.neumorphicHighlight else Color.White.copy(alpha = 0.85f)
+                } else {
+                    glassStyle.neumorphicHighlight
+                },
                 darkColor = if (buttonColor != null) buttonColor.copy(alpha = 0.40f) else glassStyle.neumorphicShadow,
                 offsetDp = if (glassStyle.isNeumorphic) 5.dp else 4.dp,
                 isPressed = isPressed,
@@ -550,6 +554,12 @@ fun NeumorphicSwitch(
         contentAlignment = Alignment.CenterStart
     ) {
         // Extruded tactile thumb
+        val thumbColor = when {
+            checked -> effectiveAccent
+            glassStyle.isNeumorphic && glassStyle.isDark -> Color(0xFF475569)
+            glassStyle.isNeumorphic -> Color.White
+            else -> Color(0xFFD1D5DB)
+        }
         Box(
             modifier = Modifier
                 .padding(start = thumbOffset.dp)
@@ -559,20 +569,16 @@ fun NeumorphicSwitch(
                     lightColor = if (checked) effectiveAccent.copy(alpha = 0.5f) else glassStyle.neumorphicHighlight,
                     darkColor = glassStyle.neumorphicShadow,
                     offsetDp = 2.dp,
-                    surfaceColor = if (glassStyle.isNeumorphic) {
-                        if (checked) effectiveAccent else Color.White
-                    } else Color.Unspecified,
+                    surfaceColor = if (glassStyle.isNeumorphic) thumbColor else Color.Unspecified,
                     blurDp = 4.dp
                 )
                 .clip(CircleShape)
-                .background(
-                    when {
-                        checked -> effectiveAccent
-                        glassStyle.isNeumorphic -> Color.White
-                        else -> Color(0xFFD1D5DB)
-                    }
+                .background(thumbColor)
+                .border(
+                    0.5.dp,
+                    if (glassStyle.isDark) Color.White.copy(alpha = 0.25f) else Color.White.copy(alpha = 0.6f),
+                    CircleShape
                 )
-                .border(0.5.dp, Color.White.copy(alpha = 0.6f), CircleShape)
         )
     }
 }
