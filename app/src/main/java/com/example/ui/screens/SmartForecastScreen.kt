@@ -52,13 +52,9 @@ import com.example.model.FormatUtils
 import com.example.model.SmartDataForecast
 import com.example.ui.MainViewModel
 import com.example.ui.components.GlassContainer
+import com.example.ui.components.IosLiquidGlassIconBadge
 import com.example.ui.components.SmartDataForecastingCard
-import com.example.ui.theme.AmberAlert
-import com.example.ui.theme.CyanPulse
-import com.example.ui.theme.ElectricBlue
-import com.example.ui.theme.EmeraldSafe
 import com.example.ui.theme.LocalLiquidGlass
-import com.example.ui.theme.RedAlert
 
 /**
  * Dedicated "Smart Analytics & Forecast" screen for Data Pulse.
@@ -91,21 +87,14 @@ fun SmartForecastScreen(
             Spacer(modifier = Modifier.height(6.dp))
             Column(modifier = Modifier.fillMaxWidth()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(dimensions.headerIconBoxSize)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(glassStyle.accentPrimary.copy(alpha = 0.16f))
-                            .border(1.dp, glassStyle.accentPrimary.copy(alpha = 0.45f), RoundedCornerShape(12.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Insights,
-                            contentDescription = null,
-                            tint = glassStyle.accentPrimary,
-                            modifier = Modifier.size(dimensions.headerIconSize * 0.55f)
-                        )
-                    }
+                    IosLiquidGlassIconBadge(
+                        icon = Icons.Default.Insights,
+                        contentDescription = null,
+                        size = dimensions.headerIconBoxSize,
+                        iconSize = dimensions.headerIconSize * 0.55f,
+                        tintColor = glassStyle.accentPrimary,
+                        shape = RoundedCornerShape(12.dp)
+                    )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
                         text = AppStrings.smartAnalyticsTitle(appLanguage),
@@ -206,9 +195,9 @@ private fun CycleRunwayCard(
     val glassStyle = LocalLiquidGlass.current
 
     val velocityColor = when {
-        forecast.status == ForecastStatus.CRITICAL_DEPLETION || forecast.status == ForecastStatus.EXHAUSTED -> RedAlert
-        forecast.willDepleteBeforeCycleEnd -> AmberAlert
-        else -> EmeraldSafe
+        forecast.status == ForecastStatus.CRITICAL_DEPLETION || forecast.status == ForecastStatus.EXHAUSTED -> glassStyle.statusDanger
+        forecast.willDepleteBeforeCycleEnd -> glassStyle.statusWarning
+        else -> glassStyle.statusSafe
     }
 
     val velocityText = when {
@@ -235,11 +224,13 @@ private fun CycleRunwayCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Timeline,
+                    IosLiquidGlassIconBadge(
+                        icon = Icons.Default.Timeline,
                         contentDescription = null,
-                        tint = glassStyle.accentPrimary,
-                        modifier = Modifier.size(18.dp)
+                        size = 28.dp,
+                        iconSize = 16.dp,
+                        tintColor = glassStyle.accentPrimary,
+                        shape = RoundedCornerShape(8.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -307,7 +298,7 @@ private fun CycleRunwayCard(
                     .fillMaxWidth()
                     .height(8.dp)
                     .clip(RoundedCornerShape(4.dp))
-                    .background(if (glassStyle.isDark) Color(0xFF0F172A) else Color(0xFFE2E8F0))
+                    .background(glassStyle.progressTrackBg)
             ) {
                 Box(
                     modifier = Modifier
@@ -334,7 +325,7 @@ private fun CycleRunwayCard(
                     label = AppStrings.safeRunwayBudget(appLanguage),
                     value = forecast.recommendedSafeDailyFormatted,
                     subtext = AppStrings.safeRunwayDesc(forecast.daysRemainingInCycle, appLanguage),
-                    accentColor = EmeraldSafe,
+                    accentColor = glassStyle.statusSafe,
                     modifier = Modifier.weight(1f)
                 )
 
@@ -348,7 +339,7 @@ private fun CycleRunwayCard(
                     label = AppStrings.forecastBurnRate(appLanguage),
                     value = forecast.dailyBurnRateFormatted,
                     subtext = burnSubtext,
-                    accentColor = if (forecast.willDepleteBeforeCycleEnd) AmberAlert else CyanPulse,
+                    accentColor = if (forecast.willDepleteBeforeCycleEnd) glassStyle.statusWarning else glassStyle.accentPrimary,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -420,11 +411,11 @@ private fun SmartRunwayTipsCard(
 
     val (tipText, tipColor, tipIcon) = when (forecast.status) {
         ForecastStatus.CRITICAL_DEPLETION, ForecastStatus.EXHAUSTED ->
-            Triple(AppStrings.recCritical(appLanguage), RedAlert, Icons.Default.WarningAmber)
+            Triple(AppStrings.recCritical(appLanguage), glassStyle.statusDanger, Icons.Default.WarningAmber)
         ForecastStatus.EARLY_DEPLETION ->
-            Triple(AppStrings.recWarning(appLanguage), AmberAlert, Icons.Default.Speed)
+            Triple(AppStrings.recWarning(appLanguage), glassStyle.statusWarning, Icons.Default.Speed)
         ForecastStatus.SUSTAINABLE ->
-            Triple(AppStrings.recSafe(appLanguage), EmeraldSafe, Icons.Default.AutoAwesome)
+            Triple(AppStrings.recSafe(appLanguage), glassStyle.statusSafe, Icons.Default.AutoAwesome)
     }
 
     Box(
@@ -439,20 +430,14 @@ private fun SmartRunwayTipsCard(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(tipColor.copy(alpha = 0.18f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = tipIcon,
-                    contentDescription = null,
-                    tint = tipColor,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+            IosLiquidGlassIconBadge(
+                icon = tipIcon,
+                contentDescription = null,
+                size = 38.dp,
+                iconSize = 20.dp,
+                tintColor = tipColor,
+                shape = CircleShape
+            )
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(

@@ -57,8 +57,6 @@ import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.VerifiedUser
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -99,15 +97,16 @@ import com.example.model.AppStrings
 import com.example.model.PrivateDnsPreset
 import com.example.ui.MainViewModel
 import com.example.ui.components.GlassContainer
+import com.example.ui.components.IosLiquidGlassButton
+import com.example.ui.components.IosLiquidGlassIconBadge
 import com.example.ui.components.NeumorphicSwitch
+import com.example.ui.components.iosLiquidGlassSurface
 import com.example.ui.components.neumorphicDepth
 import com.example.ui.components.rememberAppHaptics
 import com.example.ui.components.tactileSpringPress
-import com.example.ui.theme.AmberAlert
 import com.example.ui.theme.LocalAppDimensions
 import com.example.ui.theme.LocalLiquidGlass
-import com.example.ui.theme.NeumorphicColors
-import com.example.ui.theme.NeumorphicDarkColors
+import com.example.ui.theme.contrastOnColor
 
 /**
  * Dedicated standalone DNS Control & Local VPN Shield screen crafted in the
@@ -163,23 +162,11 @@ fun DnsControlScreen(
         }
     }
 
-    val emeraldAdGuard = when {
-        glassStyle.isNeumorphic && glassStyle.isDark -> NeumorphicDarkColors.AccentMint
-        glassStyle.isNeumorphic -> NeumorphicColors.AccentMint
-        else -> Color(0xFF00E676)
-    }
-    val electricCyan = when {
-        glassStyle.isNeumorphic && glassStyle.isDark -> NeumorphicDarkColors.AccentBlue
-        glassStyle.isNeumorphic -> NeumorphicColors.AccentBlue
-        else -> Color(0xFF00E5FF)
-    }
-    val googleBlue = when {
-        glassStyle.isNeumorphic && glassStyle.isDark -> NeumorphicDarkColors.AccentBlue
-        glassStyle.isNeumorphic -> NeumorphicColors.AccentBlue
-        else -> Color(0xFF4285F4)
-    }
-    val quad9Violet = if (glassStyle.isNeumorphic && !glassStyle.isDark) Color(0xFF7C3AED) else Color(0xFFB388FF)
-    val openDnsAmber = if (glassStyle.isNeumorphic && !glassStyle.isDark) Color(0xFFD97706) else Color(0xFFFFB300)
+    val emeraldAdGuard = glassStyle.statusSafe
+    val electricCyan = glassStyle.accentPrimary
+    val googleBlue = glassStyle.accentSecondary
+    val quad9Violet = if (glassStyle.isDark) Color(0xFFC084FC) else Color(0xFF7C3AED)
+    val openDnsAmber = glassStyle.statusWarning
 
     val presetAccent: (PrivateDnsPreset) -> Color = { preset ->
         when (preset) {
@@ -300,11 +287,13 @@ fun DnsControlScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.weight(1f)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Dns,
+                        IosLiquidGlassIconBadge(
+                            icon = Icons.Default.Dns,
                             contentDescription = null,
-                            tint = activeAccent,
-                            modifier = Modifier.size(16.dp)
+                            size = 28.dp,
+                            iconSize = 15.dp,
+                            tintColor = activeAccent,
+                            shape = RoundedCornerShape(8.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
@@ -320,42 +309,36 @@ fun DnsControlScreen(
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    Box(
-                        modifier = Modifier
-                            .tactileSpringPress(
-                                pressedScale = 0.92f,
-                                enabled = !isPingingDns,
-                                onClick = {
-                                    haptics.performSegmentSwitch()
-                                    viewModel.refreshDnsLatencies()
-                                }
-                            )
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(AmberAlert.copy(alpha = if (glassStyle.isDark) 0.16f else 0.12f))
-                            .border(0.9.dp, AmberAlert.copy(alpha = 0.65f), RoundedCornerShape(10.dp))
-                            .padding(horizontal = 10.dp, vertical = 5.dp)
-                            .testTag("dns_ping_refresh_button"),
-                        contentAlignment = Alignment.Center
+                    IosLiquidGlassButton(
+                        onClick = {
+                            haptics.performSegmentSwitch()
+                            viewModel.refreshDnsLatencies()
+                        },
+                        enabled = !isPingingDns,
+                        containerColor = glassStyle.statusWarning,
+                        contentColor = glassStyle.statusWarning,
+                        isFilledAccent = false,
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp),
+                        modifier = Modifier.testTag("dns_ping_refresh_button")
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Refresh,
-                                contentDescription = AppStrings.dnsPingLatencyBtn(appLanguage),
-                                tint = AmberAlert,
-                                modifier = Modifier
-                                    .size(13.dp)
-                                    .graphicsLayer {
-                                        rotationZ = if (isPingingDns) pingIconRotation else 0f
-                                    }
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = AppStrings.dnsPingLatencyBtn(appLanguage),
-                                color = AmberAlert,
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = AppStrings.dnsPingLatencyBtn(appLanguage),
+                            tint = glassStyle.statusWarning,
+                            modifier = Modifier
+                                .size(13.dp)
+                                .graphicsLayer {
+                                    rotationZ = if (isPingingDns) pingIconRotation else 0f
+                                }
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = AppStrings.dnsPingLatencyBtn(appLanguage),
+                            color = glassStyle.statusWarning,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
 
@@ -496,7 +479,7 @@ fun DnsControlScreen(
                                 shape = RoundedCornerShape(12.dp)
                             )
 
-                            Button(
+                            IosLiquidGlassButton(
                                 onClick = {
                                     focusManager.clearFocus()
                                     haptics.performConfirm()
@@ -507,13 +490,15 @@ fun DnsControlScreen(
                                         showCopiedNotice = true
                                     }
                                 },
-                                modifier = Modifier.height(50.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = electricCyan),
-                                shape = RoundedCornerShape(12.dp)
+                                containerColor = electricCyan,
+                                contentColor = contrastOnColor(electricCyan),
+                                isFilledAccent = true,
+                                shape = RoundedCornerShape(12.dp),
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
                             ) {
                                 Text(
                                     text = AppStrings.privateDnsApplyBtn(appLanguage),
-                                    color = if (glassStyle.isNeumorphic) Color.White else Color(0xFF061018),
+                                    color = contrastOnColor(electricCyan),
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.ExtraBold
                                 )
@@ -535,20 +520,14 @@ fun DnsControlScreen(
         GlassContainer(modifier = Modifier.fillMaxWidth()) {
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(28.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(activeAccent.copy(alpha = 0.16f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Lock,
-                            contentDescription = null,
-                            tint = activeAccent,
-                            modifier = Modifier.size(15.dp)
-                        )
-                    }
+                    IosLiquidGlassIconBadge(
+                        icon = Icons.Default.Lock,
+                        contentDescription = null,
+                        size = 30.dp,
+                        iconSize = 15.dp,
+                        tintColor = activeAccent,
+                        shape = RoundedCornerShape(9.dp)
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = AppStrings.dnsSystemDotTitle(appLanguage),
@@ -598,7 +577,9 @@ fun DnsControlScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Button(
+                val settingsBtnBg = if (privateDnsPreset == PrivateDnsPreset.ADGUARD) emeraldAdGuard else glassStyle.accentPrimary
+                val settingsBtnFg = contrastOnColor(settingsBtnBg)
+                IosLiquidGlassButton(
                     onClick = {
                         haptics.performConfirm()
                         if (!copyableHost.isNullOrBlank()) {
@@ -608,26 +589,24 @@ fun DnsControlScreen(
                         }
                         openPrivateDnsSettings(context)
                     },
+                    containerColor = settingsBtnBg,
+                    contentColor = settingsBtnFg,
+                    isFilledAccent = true,
+                    shape = RoundedCornerShape(14.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp)
-                        .testTag("dns_open_system_settings_button"),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (privateDnsPreset == PrivateDnsPreset.ADGUARD) emeraldAdGuard else glassStyle.accentPrimary
-                    ),
-                    shape = RoundedCornerShape(14.dp)
+                        .testTag("dns_open_system_settings_button")
                 ) {
-                    val btnFg = if (glassStyle.isNeumorphic) Color.White else Color(0xFF061018)
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.OpenInNew,
                         contentDescription = null,
-                        tint = btnFg,
+                        tint = settingsBtnFg,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = AppStrings.privateDnsOpenSettingsBtn(appLanguage),
-                        color = btnFg,
+                        color = settingsBtnFg,
                         fontSize = 12.5.sp,
                         fontWeight = FontWeight.ExtraBold
                     )
@@ -647,21 +626,14 @@ fun DnsControlScreen(
         item {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(dimensions.headerIconBoxSize)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(activeAccent.copy(alpha = 0.16f))
-                            .border(1.dp, activeAccent.copy(alpha = 0.45f), RoundedCornerShape(12.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Shield,
-                            contentDescription = null,
-                            tint = activeAccent,
-                            modifier = Modifier.size(dimensions.headerIconSize * 0.56f)
-                        )
-                    }
+                    IosLiquidGlassIconBadge(
+                        icon = Icons.Default.Shield,
+                        contentDescription = null,
+                        size = dimensions.headerIconBoxSize,
+                        iconSize = dimensions.headerIconSize * 0.56f,
+                        tintColor = activeAccent,
+                        shape = RoundedCornerShape(12.dp)
+                    )
                     Spacer(modifier = Modifier.width(10.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
@@ -850,7 +822,7 @@ private fun DnsShieldHeroCard(
                                 colors = listOf(
                                     Color.Transparent,
                                     accentColor.copy(alpha = if (isActive) 0.85f else 0.28f),
-                                    Color(0xFF00E5FF).copy(alpha = if (isActive) 0.65f else 0.18f),
+                                    glassStyle.accentSecondary.copy(alpha = if (isActive) 0.65f else 0.18f),
                                     Color.Transparent
                                 )
                             ),
@@ -876,13 +848,9 @@ private fun DnsShieldHeroCard(
                         )
                     }
 
-                    // Subtle static core ring
+                    // Subtle static core ring aligned with active theme
                     drawCircle(
-                        color = when {
-                            glassStyle.isNeumorphic -> glassStyle.cardSubtleBg
-                            glassStyle.isDark -> Color(0xFF0B111C)
-                            else -> Color(0xFFF1F5F9)
-                        },
+                        color = glassStyle.surfaceColor,
                         radius = innerRadius,
                         center = Offset(cx, cy)
                     )
@@ -894,19 +862,28 @@ private fun DnsShieldHeroCard(
                     )
                 }
 
-                // Inner Glowing Shield Emblem
+                // Inner Glowing Shield Emblem in optical iOS Liquid Glass capsule
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.graphicsLayer {
-                        scaleX = orbScale
-                        scaleY = orbScale
-                    }
+                    modifier = Modifier
+                        .size(86.dp)
+                        .graphicsLayer {
+                            scaleX = orbScale
+                            scaleY = orbScale
+                        }
+                        .iosLiquidGlassSurface(
+                            shape = CircleShape,
+                            tintColor = if (isActive) accentColor else glassStyle.textTertiary,
+                            isFilledAccent = false,
+                            elevation = if (glassStyle.iosLiquidGlassEnabled) 4.dp else 0.dp
+                        ),
+                    verticalArrangement = Arrangement.Center
                 ) {
                     Icon(
                         imageVector = if (isActive) Icons.Default.Shield else Icons.Default.PowerSettingsNew,
                         contentDescription = AppStrings.dnsVpnShieldTitle(appLanguage),
                         tint = if (isActive) accentColor else glassStyle.textSecondary,
-                        modifier = Modifier.size(34.dp)
+                        modifier = Modifier.size(32.dp)
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
@@ -987,20 +964,14 @@ private fun DnsTelemetryMetricCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(26.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(accentColor.copy(alpha = if (glassStyle.isDark) 0.18f else 0.12f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = title,
-                        tint = accentColor,
-                        modifier = Modifier.size(14.dp)
-                    )
-                }
+                IosLiquidGlassIconBadge(
+                    icon = icon,
+                    contentDescription = title,
+                    size = 28.dp,
+                    iconSize = 14.dp,
+                    tintColor = accentColor,
+                    shape = RoundedCornerShape(8.dp)
+                )
                 Text(
                     text = title,
                     color = glassStyle.textSecondary,
@@ -1052,15 +1023,12 @@ private fun DnsPresetChip(
         modifier = modifier
             .height(58.dp)
             .tactileSpringPress(pressedScale = 0.94f, onClick = onClick)
-            .clip(RoundedCornerShape(14.dp))
-            .background(
-                if (isSelected) accentColor.copy(alpha = if (glassStyle.isDark) 0.20f else 0.12f)
-                else glassStyle.cardSubtleBg
-            )
-            .border(
-                width = if (isSelected) 1.3.dp else 0.8.dp,
-                color = if (isSelected) accentColor else glassStyle.borderColor,
-                shape = RoundedCornerShape(14.dp)
+            .iosLiquidGlassSurface(
+                shape = RoundedCornerShape(14.dp),
+                tintColor = if (isSelected) accentColor else glassStyle.textTertiary,
+                isFilledAccent = false,
+                isPressed = isSelected,
+                elevation = if (glassStyle.iosLiquidGlassEnabled && isSelected) 4.dp else 0.dp
             )
             .padding(horizontal = 8.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center
@@ -1071,7 +1039,7 @@ private fun DnsPresetChip(
                     imageVector = icon,
                     contentDescription = title,
                     tint = if (isSelected) accentColor else glassStyle.textTertiary,
-                    modifier = Modifier.size(12.dp)
+                    modifier = Modifier.size(13.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
@@ -1096,10 +1064,11 @@ private fun DnsPresetChip(
 }
 
 /**
- * Integrated DNS Server Provider card in the Dark Liquid Glass (#161B22) style:
+ * Integrated DNS Server Provider card harmonized with the active theme palette
+ * and Apple iOS Liquid Glass optical accents:
  * Displays provider name, primary & secondary IP addresses in smaller monospace text,
- * luminous neon selection border, tactile spring press feedback, and a glowing
- * gold/amber live latency badge ("40 ms", "-- ms").
+ * luminous theme-aware selection border, tactile spring press feedback, and a glowing
+ * amber/gold live latency badge ("40 ms", "-- ms").
  */
 @Composable
 private fun DnsServerProviderCard(
@@ -1117,9 +1086,9 @@ private fun DnsServerProviderCard(
     modifier: Modifier = Modifier
 ) {
     val glassStyle = LocalLiquidGlass.current
-    val cardBaseColor = if (glassStyle.isDark) Color(0xFF161B22) else glassStyle.surfaceColor
-    val goldBorder = Color(0xFFFFB300)
-    val goldBright = Color(0xFFFFD54F)
+    val cardBaseColor = glassStyle.surfaceColor
+    val goldBorder = glassStyle.statusWarning
+    val goldBright = if (glassStyle.isDark) Color(0xFFFFD54F) else glassStyle.statusWarning
 
     val infiniteTransition = rememberInfiniteTransition(label = "dns_card_glow")
     val glowPulse by infiniteTransition.animateFloat(
@@ -1149,14 +1118,14 @@ private fun DnsServerProviderCard(
         isSelected -> Brush.linearGradient(
             colors = listOf(
                 accentColor.copy(alpha = 0.95f),
-                Color(0xFF00E5FF).copy(alpha = 0.65f * glowPulse),
+                glassStyle.accentSecondary.copy(alpha = 0.65f * glowPulse),
                 accentColor.copy(alpha = 0.80f)
             )
         )
         else -> Brush.linearGradient(
             colors = listOf(
-                if (glassStyle.isDark) Color(0xFF2B3442) else glassStyle.borderColor,
-                if (glassStyle.isDark) Color(0xFF1E2633) else glassStyle.borderColor
+                glassStyle.borderColor.copy(alpha = 0.75f),
+                glassStyle.borderColor.copy(alpha = 0.35f)
             )
         )
     }
@@ -1201,7 +1170,7 @@ private fun DnsServerProviderCard(
                     else -> Brush.verticalGradient(
                         colors = listOf(
                             cardBaseColor,
-                            if (glassStyle.isDark) Color(0xFF12171E) else cardBaseColor
+                            glassStyle.cardSubtleBg
                         )
                     )
                 }
@@ -1223,25 +1192,15 @@ private fun DnsServerProviderCard(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.weight(1f)
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(38.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(accentColor.copy(alpha = if (glassStyle.isDark) 0.18f else 0.12f))
-                        .border(
-                            0.9.dp,
-                            accentColor.copy(alpha = if (isSelected) 0.70f else 0.30f),
-                            RoundedCornerShape(12.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = name,
-                        tint = accentColor,
-                        modifier = Modifier.size(19.dp)
-                    )
-                }
+                IosLiquidGlassIconBadge(
+                    icon = icon,
+                    contentDescription = name,
+                    size = 40.dp,
+                    iconSize = 20.dp,
+                    tintColor = accentColor,
+                    shape = RoundedCornerShape(12.dp),
+                    isFilled = isSelected
+                )
 
                 Spacer(modifier = Modifier.width(12.dp))
 
@@ -1312,22 +1271,19 @@ private fun DnsServerProviderCard(
 
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(
-                        brush = Brush.verticalGradient(
-                            colors = listOf(
-                                goldBorder.copy(alpha = if (glassStyle.isDark) 0.16f else 0.12f),
-                                goldBorder.copy(alpha = if (glassStyle.isDark) 0.06f else 0.05f)
-                            )
-                        )
+                    .iosLiquidGlassSurface(
+                        shape = RoundedCornerShape(10.dp),
+                        tintColor = goldBorder,
+                        isFilledAccent = false,
+                        elevation = 2.dp
                     )
                     .border(
-                        width = 1.1.dp,
+                        width = 1.dp,
                         brush = Brush.linearGradient(
                             colors = listOf(
-                                goldBright.copy(alpha = 0.90f * glowPulse),
-                                goldBorder.copy(alpha = 0.65f),
-                                goldBright.copy(alpha = 0.85f)
+                                goldBright.copy(alpha = 0.85f * glowPulse),
+                                goldBorder.copy(alpha = 0.55f),
+                                goldBright.copy(alpha = 0.80f)
                             )
                         ),
                         shape = RoundedCornerShape(10.dp)
@@ -1337,7 +1293,7 @@ private fun DnsServerProviderCard(
             ) {
                 Text(
                     text = latencyText,
-                    color = if (glassStyle.isDark) goldBright else Color(0xFFB45309),
+                    color = goldBright,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = FontFamily.Monospace,

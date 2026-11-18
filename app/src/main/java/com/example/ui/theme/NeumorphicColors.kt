@@ -17,7 +17,7 @@ object NeumorphicColors {
 
     val TextPrimary = Color(0xFF1E293B)
     val TextSecondary = Color(0xFF64748B)
-    val TextTertiary = Color(0xFF94A3B8)
+    val TextTertiary = Color(0xFF6B7C93)
 
     val AccentBlue = Color(0xFF2563EB)
     val AccentMint = Color(0xFF10B981)

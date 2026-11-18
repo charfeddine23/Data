@@ -57,6 +57,7 @@ import com.example.ui.components.LocalRootFlameOverlay
 import com.example.ui.components.PersistentTopAppBar
 import com.example.ui.components.RootFlameOverlayCanvas
 import com.example.ui.components.RootFlameOverlayController
+import com.example.ui.components.iosLiquidGlassSurface
 import com.example.ui.components.neumorphicDepth
 import com.example.ui.components.tactileSpringPress
 import com.example.update.AppUpdateUiState
@@ -397,6 +398,7 @@ fun LiquidGlassBottomNav(
             navigationItems.forEach { destination ->
                 val isSelected = (destination == currentDestination)
                 val destLabel = destination.getLabel(appLanguage)
+                val pillShape = RoundedCornerShape(16.dp)
 
                 Box(
                     modifier = Modifier
@@ -407,7 +409,7 @@ fun LiquidGlassBottomNav(
                         .then(
                             if (glassStyle.isNeumorphic && isSelected) {
                                 Modifier.neumorphicDepth(
-                                    shape = RoundedCornerShape(16.dp),
+                                    shape = pillShape,
                                     lightColor = glassStyle.neumorphicHighlight,
                                     darkColor = glassStyle.neumorphicShadow,
                                     offsetDp = 2.dp,
@@ -415,16 +417,19 @@ fun LiquidGlassBottomNav(
                                 )
                             } else Modifier
                         )
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(
+                        .then(
                             if (isSelected) {
-                                glassStyle.accentPrimary.copy(alpha = if (glassStyle.isDark) 0.20f else 0.12f)
-                            } else Color.Transparent
-                        )
-                        .border(
-                            width = if (isSelected) 0.9.dp else 0.dp,
-                            color = if (isSelected) glassStyle.accentPrimary.copy(alpha = if (glassStyle.isDark) 0.45f else 0.35f) else Color.Transparent,
-                            shape = RoundedCornerShape(16.dp)
+                                Modifier.iosLiquidGlassSurface(
+                                    shape = pillShape,
+                                    tintColor = glassStyle.accentPrimary,
+                                    isFilledAccent = false,
+                                    elevation = if (glassStyle.iosLiquidGlassEnabled) 3.dp else 0.dp
+                                )
+                            } else {
+                                Modifier
+                                    .clip(pillShape)
+                                    .background(Color.Transparent)
+                            }
                         )
                         .padding(horizontal = 12.dp, vertical = 6.dp)
                         .testTag(destination.tag),
@@ -434,12 +439,28 @@ fun LiquidGlassBottomNav(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Icon(
-                            imageVector = destination.icon,
-                            contentDescription = destLabel,
-                            tint = if (isSelected) glassStyle.accentPrimary else glassStyle.textTertiary,
-                            modifier = Modifier.size(20.dp)
-                        )
+                        Box(
+                            modifier = Modifier
+                                .size(30.dp)
+                                .then(
+                                    if (glassStyle.iosLiquidGlassEnabled) {
+                                        Modifier.iosLiquidGlassSurface(
+                                            shape = CircleShape,
+                                            tintColor = if (isSelected) glassStyle.accentPrimary else glassStyle.textSecondary,
+                                            isFilledAccent = false,
+                                            elevation = 0.dp
+                                        )
+                                    } else Modifier
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = destination.icon,
+                                contentDescription = destLabel,
+                                tint = if (isSelected) glassStyle.accentPrimary else glassStyle.textTertiary,
+                                modifier = Modifier.size(19.dp)
+                            )
+                        }
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
                             text = destLabel,

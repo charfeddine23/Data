@@ -3,6 +3,7 @@ package com.example.data
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -17,12 +18,14 @@ import java.io.IOException
 val Context.themeDataStore: DataStore<Preferences> by preferencesDataStore(name = "data_pulse_theme_prefs")
 
 /**
- * Persists and observes the user's selected AppThemeMode asynchronously using Jetpack DataStore.
+ * Persists and observes the user's selected AppThemeMode and Apple iOS Liquid Glass button/icon toggle
+ * asynchronously using Jetpack DataStore.
  */
 class ThemePreferences(private val context: Context) {
 
     private object PreferencesKeys {
         val KEY_THEME_MODE = stringPreferencesKey("app_theme_mode")
+        val KEY_IOS_LIQUID_GLASS = booleanPreferencesKey("ios_liquid_glass_enabled")
     }
 
     /**
@@ -51,11 +54,36 @@ class ThemePreferences(private val context: Context) {
         }
 
     /**
+     * Reactive Flow for Apple iOS-style Liquid Glass styling on buttons and icons.
+     * Enabled by default.
+     */
+    val iosLiquidGlassEnabledFlow: Flow<Boolean> = context.themeDataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences ->
+            preferences[PreferencesKeys.KEY_IOS_LIQUID_GLASS] ?: true
+        }
+
+    /**
      * Asynchronously saves the selected theme mode to Preferences DataStore.
      */
     suspend fun setThemeMode(themeMode: AppThemeMode) {
         context.themeDataStore.edit { preferences ->
             preferences[PreferencesKeys.KEY_THEME_MODE] = themeMode.name
+        }
+    }
+
+    /**
+     * Asynchronously toggles Apple iOS Liquid Glass styling for buttons & icons.
+     */
+    suspend fun setIosLiquidGlassEnabled(enabled: Boolean) {
+        context.themeDataStore.edit { preferences ->
+            preferences[PreferencesKeys.KEY_IOS_LIQUID_GLASS] = enabled
         }
     }
 }

@@ -33,9 +33,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             val appThemeMode by viewModel.appThemeMode.collectAsStateWithLifecycle()
             val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
+            val iosLiquidGlassEnabled by viewModel.iosLiquidGlassEnabled.collectAsStateWithLifecycle()
             val shouldPromptVpnConsent by pendingTileVpnConsent.collectAsStateWithLifecycle()
 
-            com.example.ui.theme.DataPulseTheme(appThemeMode = appThemeMode, themeMode = themeMode) {
+            com.example.ui.theme.DataPulseTheme(
+                appThemeMode = appThemeMode,
+                themeMode = themeMode,
+                iosLiquidGlassEnabled = iosLiquidGlassEnabled
+            ) {
                 // Request Phone State (for Dual SIM carrier resolution) & Notification permissions
                 val permissionLauncher = rememberLauncherForActivityResult(
                     contract = ActivityResultContracts.RequestMultiplePermissions()

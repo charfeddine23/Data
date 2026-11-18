@@ -35,7 +35,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.BrightnessAuto
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Dns
@@ -50,10 +50,7 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.SystemUpdate
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -65,7 +62,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
@@ -83,17 +79,20 @@ import com.example.model.ThemeCategory
 import com.example.model.ThemeMode
 import com.example.ui.MainViewModel
 import com.example.ui.components.GlassContainer
+import com.example.ui.components.IosLiquidGlassButton
+import com.example.ui.components.IosLiquidGlassIconBadge
+import com.example.ui.components.IosLiquidGlassIconButton
 import com.example.ui.components.ThemeGalleryDialog
 import com.example.ui.components.ThemeSwatchCard
+import com.example.ui.components.iosLiquidGlassSurface
 import com.example.ui.components.neumorphicDepth
 import com.example.ui.components.rememberAppHaptics
 import com.example.ui.components.tactileSpringPress
 import com.example.update.AppUpdateUiState
-import com.example.ui.theme.AmberAlert
 import com.example.ui.theme.LocalAppDimensions
 import com.example.ui.theme.NeumorphicColors
 import com.example.ui.theme.NeumorphicDarkColors
-import com.example.ui.theme.RedAlert
+import com.example.ui.theme.contrastOnColor
 
 /**
  * Safely launches the system's Private DNS or Wireless settings activity across all Android versions.
@@ -141,6 +140,7 @@ fun SettingsScreen(
     val dnsVpnHost by viewModel.dnsVpnHost.collectAsStateWithLifecycle()
     val dnsQueriesForwarded by viewModel.dnsQueriesForwarded.collectAsStateWithLifecycle()
     val appUpdateState by viewModel.appUpdateState.collectAsStateWithLifecycle()
+    val iosLiquidGlassEnabled by viewModel.iosLiquidGlassEnabled.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
     val glassStyle = com.example.ui.theme.LocalLiquidGlass.current
     val dimensions = LocalAppDimensions.current
@@ -152,13 +152,15 @@ fun SettingsScreen(
         GlassContainer(modifier = Modifier.fillMaxWidth()) {
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Language,
+                    IosLiquidGlassIconBadge(
+                        icon = Icons.Default.Language,
                         contentDescription = "Language",
-                        tint = glassStyle.accentPrimary,
-                        modifier = Modifier.size(15.dp)
+                        size = 26.dp,
+                        iconSize = 14.dp,
+                        tintColor = glassStyle.accentPrimary,
+                        shape = RoundedCornerShape(8.dp)
                     )
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = AppStrings.appLanguageSection(appLanguage),
                         color = glassStyle.textPrimary,
@@ -225,25 +227,19 @@ fun SettingsScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(glassStyle.accentPrimary.copy(alpha = if (glassStyle.isDark) 0.18f else 0.12f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = if (themeMode == ThemeMode.DARK || (themeMode == ThemeMode.SYSTEM && glassStyle.isDark)) {
-                                    Icons.Default.DarkMode
-                                } else {
-                                    Icons.Default.LightMode
-                                },
-                                contentDescription = "Appearance Mode",
-                                tint = glassStyle.accentPrimary,
-                                modifier = Modifier.size(13.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(6.dp))
+                        IosLiquidGlassIconBadge(
+                            icon = if (themeMode == ThemeMode.DARK || (themeMode == ThemeMode.SYSTEM && glassStyle.isDark)) {
+                                Icons.Default.DarkMode
+                            } else {
+                                Icons.Default.LightMode
+                            },
+                            contentDescription = "Appearance Mode",
+                            size = 26.dp,
+                            iconSize = 14.dp,
+                            tintColor = glassStyle.accentPrimary,
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = if (appLanguage == AppLanguage.ARABIC) "الوضع الليلي والنهاري" else "Light & Dark Mode",
                             color = glassStyle.textPrimary,
@@ -345,21 +341,15 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.weight(1f, fill = false)
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(24.dp)
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(glassStyle.accentPrimary.copy(alpha = if (glassStyle.isDark) 0.18f else 0.12f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Palette,
-                                contentDescription = "Theme",
-                                tint = glassStyle.accentPrimary,
-                                modifier = Modifier.size(13.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(6.dp))
+                        IosLiquidGlassIconBadge(
+                            icon = Icons.Default.Palette,
+                            contentDescription = "Theme",
+                            size = 26.dp,
+                            iconSize = 14.dp,
+                            tintColor = glassStyle.accentPrimary,
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "Multi-Theme Engine",
                             color = glassStyle.textPrimary,
@@ -509,30 +499,31 @@ fun SettingsScreen(
                         fontWeight = FontWeight.SemiBold
                     )
 
-                    Box(
-                        modifier = Modifier
-                            .tactileSpringPress(pressedScale = 0.95f, onClick = { showThemeGallery = true })
-                            .clip(RoundedCornerShape(9.dp))
-                            .background(glassStyle.accentPrimary.copy(alpha = if (glassStyle.isDark) 0.18f else 0.12f))
-                            .border(0.8.dp, glassStyle.accentPrimary.copy(alpha = 0.45f), RoundedCornerShape(9.dp))
-                            .padding(horizontal = 10.dp, vertical = 5.dp)
-                            .testTag("open_theme_gallery_button")
+                    IosLiquidGlassButton(
+                        onClick = {
+                            appHaptics.performConfirm()
+                            showThemeGallery = true
+                        },
+                        containerColor = glassStyle.accentPrimary,
+                        contentColor = glassStyle.accentPrimary,
+                        isFilledAccent = false,
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 10.dp, vertical = 5.dp),
+                        modifier = Modifier.testTag("open_theme_gallery_button")
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.GridView,
-                                contentDescription = null,
-                                tint = glassStyle.accentPrimary,
-                                modifier = Modifier.size(12.dp)
-                            )
-                            Spacer(modifier = Modifier.width(5.dp))
-                            Text(
-                                text = if (appLanguage == AppLanguage.ARABIC) "استعراض الكل (66)" else "Browse All (66)",
-                                color = glassStyle.accentPrimary,
-                                fontSize = 10.5.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.GridView,
+                            contentDescription = null,
+                            tint = glassStyle.accentPrimary,
+                            modifier = Modifier.size(13.dp)
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            text = if (appLanguage == AppLanguage.ARABIC) "استعراض الكل (66)" else "Browse All (66)",
+                            color = glassStyle.accentPrimary,
+                            fontSize = 10.5.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
 
@@ -560,9 +551,103 @@ fun SettingsScreen(
         }
     }
 
-    // 3. Dedicated DNS Shield Shortcut Card (Full engine lives in its own bottom-bar screen)
+    // 3B. Apple iOS Liquid Glass Effect Card (Toggleable)
+    val iosLiquidGlassCard: @Composable () -> Unit = {
+        GlassContainer(
+            modifier = Modifier.fillMaxWidth(),
+            borderColor = if (iosLiquidGlassEnabled) glassStyle.accentPrimary.copy(alpha = 0.45f) else glassStyle.borderColor
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    IosLiquidGlassIconBadge(
+                        icon = Icons.Default.AutoAwesome,
+                        contentDescription = if (appLanguage == AppLanguage.ARABIC) "الزجاج السائل iOS" else "iOS Liquid Glass",
+                        size = 34.dp,
+                        iconSize = 18.dp,
+                        tintColor = glassStyle.accentPrimary,
+                        shape = RoundedCornerShape(10.dp),
+                        isFilled = iosLiquidGlassEnabled
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = if (appLanguage == AppLanguage.ARABIC) "الزجاج السائل (Apple iOS)" else "Apple iOS Liquid Glass",
+                                color = glassStyle.textPrimary,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f, fill = false)
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(
+                                        (if (iosLiquidGlassEnabled) glassStyle.statusSafe else glassStyle.textTertiary)
+                                            .copy(alpha = 0.16f)
+                                    )
+                                    .padding(horizontal = 5.dp, vertical = 1.dp)
+                            ) {
+                                Text(
+                                    text = if (iosLiquidGlassEnabled) {
+                                        if (appLanguage == AppLanguage.ARABIC) "مفعّل" else "ON"
+                                    } else {
+                                        if (appLanguage == AppLanguage.ARABIC) "معطّل" else "OFF"
+                                    },
+                                    color = if (iosLiquidGlassEnabled) glassStyle.statusSafe else glassStyle.textTertiary,
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.ExtraBold
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = if (appLanguage == AppLanguage.ARABIC) {
+                                "إضافة بريق وانعكاس الزجاج السائل على جميع الأزرار والأيقونات"
+                            } else {
+                                "Refractive specular glass styling across all buttons & icons"
+                            },
+                            color = glassStyle.textSecondary,
+                            fontSize = 10.5.sp,
+                            lineHeight = 14.sp
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Switch(
+                    checked = iosLiquidGlassEnabled,
+                    onCheckedChange = { enabled ->
+                        appHaptics.performSegmentSwitch()
+                        viewModel.toggleIosLiquidGlass(enabled)
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = glassStyle.onAccentPrimary,
+                        checkedTrackColor = glassStyle.accentPrimary,
+                        uncheckedThumbColor = glassStyle.textTertiary,
+                        uncheckedTrackColor = glassStyle.progressTrackBg
+                    ),
+                    modifier = Modifier.testTag("settings_ios_liquid_glass_switch")
+                )
+            }
+        }
+    }
+
+    // 4. Dedicated DNS Shield Shortcut Card (Full engine lives in its own bottom-bar screen)
     val dnsShortcutCard: @Composable () -> Unit = {
-        val emeraldAdGuard = Color(0xFF00E676)
+        val emeraldAdGuard = glassStyle.statusSafe
         val isShieldHighlighted = dnsVpnActive || privateDnsPreset == PrivateDnsPreset.ADGUARD
         val resolvedHost = when {
             dnsVpnActive -> dnsVpnHost
@@ -591,26 +676,14 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.weight(1f, fill = false)
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(30.dp)
-                                .clip(RoundedCornerShape(9.dp))
-                                .background(
-                                    if (isShieldHighlighted) {
-                                        emeraldAdGuard.copy(alpha = if (glassStyle.isDark) 0.20f else 0.14f)
-                                    } else {
-                                        glassStyle.accentPrimary.copy(alpha = if (glassStyle.isDark) 0.18f else 0.12f)
-                                    }
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = if (isShieldHighlighted) Icons.Default.Shield else Icons.Default.Dns,
-                                contentDescription = AppStrings.dnsScreenTitle(appLanguage),
-                                tint = if (isShieldHighlighted) emeraldAdGuard else glassStyle.accentPrimary,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
+                        IosLiquidGlassIconBadge(
+                            icon = if (isShieldHighlighted) Icons.Default.Shield else Icons.Default.Dns,
+                            contentDescription = AppStrings.dnsScreenTitle(appLanguage),
+                            size = 34.dp,
+                            iconSize = 17.dp,
+                            tintColor = if (isShieldHighlighted) emeraldAdGuard else glassStyle.accentPrimary,
+                            shape = RoundedCornerShape(10.dp)
+                        )
                         Spacer(modifier = Modifier.width(8.dp))
                         Column {
                             Text(
@@ -635,39 +708,33 @@ fun SettingsScreen(
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    Box(
-                        modifier = Modifier
-                            .tactileSpringPress(
-                                pressedScale = 0.95f,
-                                onClick = {
-                                    appHaptics.performConfirm()
-                                    onNavigateToDns()
-                                }
-                            )
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                if (isShieldHighlighted) emeraldAdGuard else glassStyle.accentPrimary
-                            )
-                            .padding(horizontal = 10.dp, vertical = 7.dp)
-                            .testTag("settings_open_dns_button"),
-                        contentAlignment = Alignment.Center
+                    val btnContainer = if (isShieldHighlighted) emeraldAdGuard else glassStyle.accentPrimary
+                    val btnFg = contrastOnColor(btnContainer)
+                    IosLiquidGlassButton(
+                        onClick = {
+                            appHaptics.performConfirm()
+                            onNavigateToDns()
+                        },
+                        containerColor = btnContainer,
+                        contentColor = btnFg,
+                        isFilledAccent = true,
+                        shape = RoundedCornerShape(12.dp),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                        modifier = Modifier.testTag("settings_open_dns_button")
                     ) {
-                        val btnFg = if (glassStyle.isNeumorphic) Color.White else Color.Black
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = AppStrings.dnsOpenDedicatedPage(appLanguage),
-                                color = btnFg,
-                                fontSize = 10.5.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                contentDescription = null,
-                                tint = btnFg,
-                                modifier = Modifier.size(12.dp)
-                            )
-                        }
+                        Text(
+                            text = AppStrings.dnsOpenDedicatedPage(appLanguage),
+                            color = btnFg,
+                            fontSize = 10.5.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            tint = btnFg,
+                            modifier = Modifier.size(13.dp)
+                        )
                     }
                 }
             }
@@ -698,17 +765,17 @@ fun SettingsScreen(
                     }
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        IconButton(
+                        IosLiquidGlassIconButton(
                             onClick = { viewModel.updateBillingCycleDay(quota.billingCycleStartDay - 1) },
-                            modifier = Modifier
-                                .size(32.dp)
-                                .clip(CircleShape)
-                                .background(glassStyle.cardSubtleBg)
-                        ) {
-                            Icon(imageVector = Icons.Default.Remove, contentDescription = "Decrease", tint = glassStyle.accentPrimary)
-                        }
+                            icon = Icons.Default.Remove,
+                            contentDescription = "Decrease",
+                            visualSize = 36.dp,
+                            iconSize = 18.dp,
+                            tintColor = glassStyle.accentPrimary,
+                            shape = CircleShape
+                        )
 
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
 
                         Text(
                             text = "${quota.billingCycleStartDay}",
@@ -717,17 +784,17 @@ fun SettingsScreen(
                             fontWeight = FontWeight.Bold
                         )
 
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
 
-                        IconButton(
+                        IosLiquidGlassIconButton(
                             onClick = { viewModel.updateBillingCycleDay(quota.billingCycleStartDay + 1) },
-                            modifier = Modifier
-                                .size(32.dp)
-                                .clip(CircleShape)
-                                .background(glassStyle.cardSubtleBg)
-                        ) {
-                            Icon(imageVector = Icons.Default.Add, contentDescription = "Increase", tint = glassStyle.accentPrimary)
-                        }
+                            icon = Icons.Default.Add,
+                            contentDescription = "Increase",
+                            visualSize = 36.dp,
+                            iconSize = 18.dp,
+                            tintColor = glassStyle.accentPrimary,
+                            shape = CircleShape
+                        )
                     }
                 }
             }
@@ -739,11 +806,13 @@ fun SettingsScreen(
         GlassContainer(modifier = Modifier.fillMaxWidth()) {
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.NotificationsActive,
+                    IosLiquidGlassIconBadge(
+                        icon = Icons.Default.NotificationsActive,
                         contentDescription = "Alerts",
-                        tint = AmberAlert,
-                        modifier = Modifier.size(20.dp)
+                        size = 28.dp,
+                        iconSize = 16.dp,
+                        tintColor = glassStyle.statusWarning,
+                        shape = RoundedCornerShape(8.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -780,10 +849,10 @@ fun SettingsScreen(
                         checked = quota.alertThreshold80,
                         onCheckedChange = { viewModel.toggleAlert80(it) },
                         colors = SwitchDefaults.colors(
-                            checkedThumbColor = AmberAlert,
-                            checkedTrackColor = AmberAlert.copy(alpha = 0.4f),
+                            checkedThumbColor = glassStyle.statusWarning,
+                            checkedTrackColor = glassStyle.statusWarning.copy(alpha = 0.4f),
                             uncheckedThumbColor = glassStyle.textTertiary,
-                            uncheckedTrackColor = if (glassStyle.isDark) Color(0xFF162238) else Color(0xFFCBD5E1)
+                            uncheckedTrackColor = glassStyle.progressTrackBg
                         )
                     )
                 }
@@ -813,10 +882,10 @@ fun SettingsScreen(
                         checked = quota.alertThreshold95,
                         onCheckedChange = { viewModel.toggleAlert95(it) },
                         colors = SwitchDefaults.colors(
-                            checkedThumbColor = RedAlert,
-                            checkedTrackColor = RedAlert.copy(alpha = 0.4f),
+                            checkedThumbColor = glassStyle.statusDanger,
+                            checkedTrackColor = glassStyle.statusDanger.copy(alpha = 0.4f),
                             uncheckedThumbColor = glassStyle.textTertiary,
-                            uncheckedTrackColor = if (glassStyle.isDark) Color(0xFF162238) else Color(0xFFCBD5E1)
+                            uncheckedTrackColor = glassStyle.progressTrackBg
                         )
                     )
                 }
@@ -824,16 +893,14 @@ fun SettingsScreen(
                 Spacer(modifier = Modifier.height(14.dp))
 
                 // Test Heads-Up Notification Button
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(glassStyle.accentPrimary.copy(alpha = 0.12f))
-                        .border(1.dp, glassStyle.accentPrimary.copy(alpha = 0.35f), RoundedCornerShape(14.dp))
-                        .clickable { viewModel.sendTestNotification() }
-                        .padding(horizontal = 14.dp, vertical = 11.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                IosLiquidGlassButton(
+                    onClick = { viewModel.sendTestNotification() },
+                    containerColor = glassStyle.accentPrimary,
+                    contentColor = glassStyle.textPrimary,
+                    isFilledAccent = false,
+                    shape = RoundedCornerShape(14.dp),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp, vertical = 11.dp),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
@@ -849,11 +916,13 @@ fun SettingsScreen(
                         )
                     }
                     Spacer(modifier = Modifier.width(8.dp))
-                    Icon(
-                        imageVector = Icons.Default.NotificationsActive,
+                    IosLiquidGlassIconBadge(
+                        icon = Icons.Default.NotificationsActive,
                         contentDescription = "Test Notification",
-                        tint = glassStyle.accentPrimary,
-                        modifier = Modifier.size(20.dp)
+                        size = 30.dp,
+                        iconSize = 16.dp,
+                        tintColor = glassStyle.accentPrimary,
+                        shape = RoundedCornerShape(9.dp)
                     )
                 }
             }
@@ -865,11 +934,13 @@ fun SettingsScreen(
         GlassContainer(modifier = Modifier.fillMaxWidth()) {
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Eco,
+                    IosLiquidGlassIconBadge(
+                        icon = Icons.Default.Eco,
                         contentDescription = "Power Saving",
-                        tint = glassStyle.accentPrimary,
-                        modifier = Modifier.size(20.dp)
+                        size = 28.dp,
+                        iconSize = 16.dp,
+                        tintColor = glassStyle.accentPrimary,
+                        shape = RoundedCornerShape(8.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -912,7 +983,7 @@ fun SettingsScreen(
                             checkedThumbColor = glassStyle.accentPrimary,
                             checkedTrackColor = glassStyle.accentPrimary.copy(alpha = 0.4f),
                             uncheckedThumbColor = glassStyle.textTertiary,
-                            uncheckedTrackColor = if (glassStyle.isDark) Color(0xFF162238) else Color(0xFFCBD5E1)
+                            uncheckedTrackColor = glassStyle.progressTrackBg
                         ),
                         modifier = Modifier.testTag("power_saving_switch")
                     )
@@ -926,11 +997,13 @@ fun SettingsScreen(
         GlassContainer(modifier = Modifier.fillMaxWidth()) {
             Column {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Security,
+                    IosLiquidGlassIconBadge(
+                        icon = Icons.Default.Security,
                         contentDescription = "Permissions",
-                        tint = glassStyle.accentPrimary,
-                        modifier = Modifier.size(20.dp)
+                        size = 28.dp,
+                        iconSize = 16.dp,
+                        tintColor = glassStyle.accentPrimary,
+                        shape = RoundedCornerShape(8.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -958,26 +1031,37 @@ fun SettingsScreen(
                         )
                         Text(
                             text = if (hasUsagePerm) AppStrings.permGranted(appLanguage) else AppStrings.permNotGranted(appLanguage),
-                            color = if (hasUsagePerm) glassStyle.accentPrimary else AmberAlert,
+                            color = if (hasUsagePerm) glassStyle.statusSafe else glassStyle.statusWarning,
                             fontSize = 11.sp
                         )
                     }
 
                     if (!hasUsagePerm) {
-                        Button(
+                        val grantFg = contrastOnColor(glassStyle.statusWarning)
+                        IosLiquidGlassButton(
                             onClick = onRequestUsagePermission,
-                            colors = ButtonDefaults.buttonColors(containerColor = AmberAlert),
-                            shape = RoundedCornerShape(10.dp),
+                            containerColor = glassStyle.statusWarning,
+                            contentColor = grantFg,
+                            isFilledAccent = true,
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 14.dp, vertical = 8.dp),
                             modifier = Modifier.testTag("settings_grant_permission_button")
                         ) {
-                            Text(AppStrings.grantPerm(appLanguage), color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                            Text(
+                                text = AppStrings.grantPerm(appLanguage),
+                                color = grantFg,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 11.sp
+                            )
                         }
                     } else {
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
+                        IosLiquidGlassIconBadge(
+                            icon = Icons.Default.CheckCircle,
                             contentDescription = "Granted",
-                            tint = glassStyle.accentPrimary,
-                            modifier = Modifier.size(22.dp)
+                            size = 32.dp,
+                            iconSize = 18.dp,
+                            tintColor = glassStyle.statusSafe,
+                            shape = CircleShape
                         )
                     }
                 }
@@ -989,8 +1073,12 @@ fun SettingsScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(glassStyle.cardSubtleBg)
+                            .iosLiquidGlassSurface(
+                                shape = RoundedCornerShape(10.dp),
+                                tintColor = glassStyle.accentPrimary,
+                                isFilledAccent = false,
+                                elevation = 0.dp
+                            )
                             .clickable { showGuide = true }
                             .padding(horizontal = 10.dp, vertical = 8.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -1080,52 +1168,38 @@ fun SettingsScreen(
                 // In-Device Automatic Update Check Trigger
                 val isCheckingUpdate = (appUpdateState is AppUpdateUiState.Checking)
                 val isUpToDate = (appUpdateState is AppUpdateUiState.UpToDate)
-                Box(
+                IosLiquidGlassButton(
+                    onClick = {
+                        appHaptics.performConfirm()
+                        viewModel.checkForAppUpdate(manual = true)
+                    },
+                    enabled = !isCheckingUpdate,
+                    containerColor = glassStyle.accentPrimary,
+                    contentColor = glassStyle.accentPrimary,
+                    isFilledAccent = false,
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp, vertical = 10.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .tactileSpringPress(
-                            pressedScale = 0.965f,
-                            enabled = !isCheckingUpdate,
-                            onClick = {
-                                appHaptics.performConfirm()
-                                viewModel.checkForAppUpdate(manual = true)
-                            }
-                        )
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(
-                            glassStyle.accentPrimary.copy(alpha = if (glassStyle.isDark) 0.14f else 0.10f)
-                        )
-                        .border(
-                            1.dp,
-                            glassStyle.accentPrimary.copy(alpha = 0.45f),
-                            RoundedCornerShape(12.dp)
-                        )
-                        .padding(horizontal = 12.dp, vertical = 9.dp)
-                        .testTag("settings_check_update_button"),
-                    contentAlignment = Alignment.Center
+                        .testTag("settings_check_update_button")
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = if (isUpToDate) Icons.Default.CheckCircle else Icons.Default.SystemUpdate,
-                            contentDescription = null,
-                            tint = glassStyle.accentPrimary,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = when {
-                                isCheckingUpdate -> if (appLanguage == AppLanguage.ARABIC) "جاري التحقق من التحديثات..." else "Checking for updates..."
-                                isUpToDate -> if (appLanguage == AppLanguage.ARABIC) "أنت تستخدم أحدث إصدار ✓" else "You're on the latest version ✓"
-                                else -> if (appLanguage == AppLanguage.ARABIC) "التحقق من التحديثات التلقائية" else "Check for In-App Updates"
-                            },
-                            color = glassStyle.accentPrimary,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                    Icon(
+                        imageVector = if (isUpToDate) Icons.Default.CheckCircle else Icons.Default.SystemUpdate,
+                        contentDescription = null,
+                        tint = glassStyle.accentPrimary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = when {
+                            isCheckingUpdate -> if (appLanguage == AppLanguage.ARABIC) "جاري التحقق من التحديثات..." else "Checking for updates..."
+                            isUpToDate -> if (appLanguage == AppLanguage.ARABIC) "أنت تستخدم أحدث إصدار ✓" else "You're on the latest version ✓"
+                            else -> if (appLanguage == AppLanguage.ARABIC) "التحقق من التحديثات التلقائية" else "Check for In-App Updates"
+                        },
+                        color = glassStyle.accentPrimary,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
@@ -1151,6 +1225,7 @@ fun SettingsScreen(
                     languageCard()
                     appearanceModeCard()
                     multiThemeEngineCard()
+                    iosLiquidGlassCard()
                     dnsShortcutCard()
                 }
                 Column(
@@ -1172,6 +1247,7 @@ fun SettingsScreen(
                 languageCard()
                 appearanceModeCard()
                 multiThemeEngineCard()
+                iosLiquidGlassCard()
                 dnsShortcutCard()
                 billingCycleCard()
                 smartAlertsCard()
@@ -1239,8 +1315,6 @@ fun LanguagePillOption(
     )
     val animatedTextColor by animateColorAsState(
         targetValue = when {
-            isSelected && glassStyle.isNeumorphic -> if (glassStyle.isDark) Color.White else glassStyle.accentPrimary
-            isSelected && glassStyle.isDark -> Color.White
             isSelected -> glassStyle.textPrimary
             else -> glassStyle.textSecondary
         },
@@ -1262,27 +1336,33 @@ fun LanguagePillOption(
                         surfaceColor = glassStyle.surfaceColor,
                         blurDp = 6.dp
                     )
-                    isSelected && !glassStyle.isDark -> Modifier.shadow(
-                        elevation = 3.dp,
-                        shape = shape,
-                        spotColor = Color(0x140F172A),
-                        ambientColor = Color(0x0A0F172A)
-                    )
                     else -> Modifier
                 }
             )
-            .clip(shape)
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(animatedBgTop, animatedBgBottom)
-                )
-            )
-            .border(
-                width = if (isSelected) 1.2.dp else 0.dp,
-                brush = Brush.linearGradient(
-                    colors = listOf(animatedBorderStart, animatedBorderEnd)
-                ),
-                shape = shape
+            .then(
+                if (isSelected && glassStyle.iosLiquidGlassEnabled) {
+                    Modifier.iosLiquidGlassSurface(
+                        shape = shape,
+                        tintColor = glassStyle.accentPrimary,
+                        isFilledAccent = false,
+                        elevation = if (glassStyle.isNeumorphic) 0.dp else 4.dp
+                    )
+                } else {
+                    Modifier
+                        .clip(shape)
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(animatedBgTop, animatedBgBottom)
+                            )
+                        )
+                        .border(
+                            width = if (isSelected) 1.2.dp else 0.dp,
+                            brush = Brush.linearGradient(
+                                colors = listOf(animatedBorderStart, animatedBorderEnd)
+                            ),
+                            shape = shape
+                        )
+                }
             )
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center
@@ -1342,11 +1422,7 @@ fun SmallThemeButton(
     )
 
     val animatedContentColor by animateColorAsState(
-        targetValue = if (isSelected) {
-            if (glassStyle.isDark) Color.White else glassStyle.textPrimary
-        } else {
-            glassStyle.textSecondary
-        },
+        targetValue = if (isSelected) glassStyle.textPrimary else glassStyle.textSecondary,
         animationSpec = tween(durationMillis = 200),
         label = "small_theme_text"
     )
@@ -1368,12 +1444,25 @@ fun SmallThemeButton(
                     )
                 } else Modifier
             )
-            .clip(shape)
-            .background(animatedBg)
-            .border(
-                width = if (isSelected) 1.2.dp else 0.8.dp,
-                color = animatedBorderColor,
-                shape = shape
+            .then(
+                if (glassStyle.iosLiquidGlassEnabled) {
+                    Modifier.iosLiquidGlassSurface(
+                        shape = shape,
+                        tintColor = if (isSelected) accentColor else glassStyle.textTertiary,
+                        isFilledAccent = false,
+                        isPressed = isSelected,
+                        elevation = if (glassStyle.isNeumorphic || !isSelected) 0.dp else 4.dp
+                    )
+                } else {
+                    Modifier
+                        .clip(shape)
+                        .background(animatedBg)
+                        .border(
+                            width = if (isSelected) 1.2.dp else 0.8.dp,
+                            color = animatedBorderColor,
+                            shape = shape
+                        )
+                }
             )
             .padding(horizontal = 8.dp),
         contentAlignment = Alignment.Center
@@ -1386,7 +1475,7 @@ fun SmallThemeButton(
                 imageVector = icon,
                 contentDescription = themeMode.getDisplayName(appLanguage),
                 tint = if (isSelected) accentColor else glassStyle.textTertiary,
-                modifier = Modifier.size(13.dp)
+                modifier = Modifier.size(14.dp)
             )
             Spacer(modifier = Modifier.width(5.dp))
             Text(

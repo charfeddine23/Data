@@ -166,30 +166,19 @@ fun AppUpdateDialog(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(38.dp)
-                                .tactileSpringPress(
-                                    pressedScale = 0.88f,
-                                    enabled = state !is AppUpdateUiState.Downloading,
-                                    onClick = {
-                                        haptics.performSegmentSwitch()
-                                        onDismiss()
-                                    }
-                                )
-                                .clip(CircleShape)
-                                .background(glassStyle.cardSubtleBg)
-                                .border(0.8.dp, glassStyle.borderColor, CircleShape)
-                                .testTag("update_dialog_close_button"),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = if (isArabic) "إغلاق" else "Close",
-                                tint = glassStyle.textSecondary,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
+                        IosLiquidGlassIconButton(
+                            onClick = {
+                                haptics.performSegmentSwitch()
+                                onDismiss()
+                            },
+                            icon = Icons.Default.Close,
+                            contentDescription = if (isArabic) "إغلاق" else "Close",
+                            visualSize = 38.dp,
+                            iconSize = 18.dp,
+                            tintColor = glassStyle.textSecondary,
+                            enabled = state !is AppUpdateUiState.Downloading,
+                            modifier = Modifier.testTag("update_dialog_close_button")
+                        )
 
                         if (activeInfo != null) {
                             Row(
@@ -404,6 +393,13 @@ private fun UpdateActionPillButton(
         }
     }
 
+    val glassStyle = LocalLiquidGlass.current
+    val resolvedCtaText = if (isDownloading) {
+        glassStyle.textPrimary
+    } else {
+        com.example.ui.theme.contrastOnColor(primaryAccent)
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -413,24 +409,11 @@ private fun UpdateActionPillButton(
                 enabled = buttonEnabled,
                 onClick = onClickAction
             )
-            .clip(ctaShape)
-            .background(
-                if (isDownloading) {
-                    Color(0xFF0A1018).copy(alpha = if (isDark) 0.92f else 0.14f)
-                } else {
-                    primaryAccent
-                }
-            )
-            .then(
-                if (!isDownloading) {
-                    Modifier.background(
-                        Brush.horizontalGradient(
-                            colors = listOf(primaryAccent, secondaryAccent)
-                        )
-                    )
-                } else {
-                    Modifier.border(1.dp, primaryAccent.copy(alpha = 0.45f), ctaShape)
-                }
+            .iosLiquidGlassSurface(
+                shape = ctaShape,
+                tintColor = primaryAccent,
+                isFilledAccent = !isDownloading,
+                elevation = if (glassStyle.iosLiquidGlassEnabled) 6.dp else 0.dp
             )
             .testTag("update_dialog_action_button"),
         contentAlignment = Alignment.Center
@@ -465,23 +448,18 @@ private fun UpdateActionPillButton(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                val ctaContentColor = if (isDownloading) {
-                    if (isDark) Color.White else Color(0xFF0B1320)
-                } else {
-                    if (isDark) Color(0xFF061018) else Color.White
-                }
                 if (state !is AppUpdateUiState.Available) {
                     Icon(
                         imageVector = ctaIcon,
                         contentDescription = null,
-                        tint = ctaContentColor,
+                        tint = resolvedCtaText,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                 }
                 Text(
                     text = targetLabel,
-                    color = ctaContentColor,
+                    color = resolvedCtaText,
                     fontSize = 15.5.sp,
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 0.3.sp

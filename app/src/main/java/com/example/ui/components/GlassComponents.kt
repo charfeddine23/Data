@@ -212,8 +212,8 @@ fun GlassContainer(
                         )
                         else -> Brush.verticalGradient(
                             colors = listOf(
-                                Color(0xFFFFFFFF),
-                                Color(0xFFFAFBFC)
+                                effectiveBg,
+                                glassStyle.cardSubtleBg.copy(alpha = 0.65f)
                             )
                         )
                     }
@@ -318,8 +318,8 @@ fun PersistentTopAppBar(
                     )
                     else -> Brush.verticalGradient(
                         colors = listOf(
-                            Color(0xF8FFFFFF),
-                            Color(0xEEF4F6F9)
+                            glassStyle.surfaceColor.copy(alpha = 0.96f),
+                            glassStyle.cardSubtleBg.copy(alpha = 0.90f)
                         )
                     )
                 }
@@ -495,8 +495,8 @@ fun DynamicGlowingLightbulbButton(
     modifier: Modifier = Modifier
 ) {
     val glassStyle = LocalLiquidGlass.current
-    val warmGold = if (glassStyle.isDark) Color(0xFFFFD54F) else Color(0xFFD97706)
-    val warmAmber = if (glassStyle.isDark) Color(0xFFFF9100) else Color(0xFFF59E0B)
+    val warmGold = glassStyle.statusWarning
+    val warmAmber = if (glassStyle.isDark) Color(0xFFFF9100) else glassStyle.statusWarning
 
     val infiniteTransition = rememberInfiniteTransition(label = "lightbulb_dynamics")
     val glowAlpha by infiniteTransition.animateFloat(
@@ -579,28 +579,15 @@ fun DynamicGlowingLightbulbButton(
             }
         }
 
-        // Elevated frosted glass pill enclosing the lightbulb
+        // Elevated Apple iOS Liquid Glass pill enclosing the lightbulb
         Box(
             modifier = Modifier
                 .size(38.dp)
-                .clip(CircleShape)
-                .background(
-                    brush = Brush.radialGradient(
-                        colors = listOf(
-                            warmGold.copy(alpha = if (glassStyle.isDark) 0.24f else 0.16f),
-                            glassStyle.cardSubtleBg
-                        )
-                    )
-                )
-                .border(
-                    width = 1.2.dp,
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            warmGold.copy(alpha = 0.85f * glowAlpha),
-                            glassStyle.accentPrimary.copy(alpha = 0.45f)
-                        )
-                    ),
-                    shape = CircleShape
+                .iosLiquidGlassSurface(
+                    shape = CircleShape,
+                    tintColor = warmGold,
+                    isFilledAccent = false,
+                    elevation = 4.dp
                 ),
             contentAlignment = Alignment.Center
         ) {
@@ -628,7 +615,7 @@ fun AnalyticsTipPopupDialog(
     onDismiss: () -> Unit
 ) {
     val glassStyle = LocalLiquidGlass.current
-    val warmGold = if (glassStyle.isDark) Color(0xFFFFD54F) else Color(0xFFD97706)
+    val warmGold = glassStyle.statusWarning
     val scaleAnim = remember { Animatable(0.86f) }
 
     LaunchedEffect(Unit) {
@@ -661,34 +648,15 @@ fun AnalyticsTipPopupDialog(
                         .padding(vertical = 6.dp, horizontal = 4.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Glowing Emblem Header
-                    Box(
-                        modifier = Modifier
-                            .size(58.dp)
-                            .clip(CircleShape)
-                            .background(
-                                brush = Brush.radialGradient(
-                                    colors = listOf(
-                                        warmGold.copy(alpha = 0.30f),
-                                        glassStyle.accentPrimary.copy(alpha = 0.12f),
-                                        Color.Transparent
-                                    )
-                                )
-                            )
-                            .border(
-                                1.5.dp,
-                                Brush.linearGradient(listOf(warmGold, glassStyle.accentPrimary)),
-                                CircleShape
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Lightbulb,
-                            contentDescription = null,
-                            tint = warmGold,
-                            modifier = Modifier.size(30.dp)
-                        )
-                    }
+                    // Glowing Liquid Glass Emblem Header
+                    IosLiquidGlassIconBadge(
+                        icon = Icons.Default.Lightbulb,
+                        contentDescription = null,
+                        size = 58.dp,
+                        iconSize = 30.dp,
+                        tintColor = warmGold,
+                        shape = CircleShape
+                    )
 
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -727,21 +695,18 @@ fun AnalyticsTipPopupDialog(
 
                     Spacer(modifier = Modifier.height(18.dp))
 
-                    Button(
+                    IosLiquidGlassButton(
                         onClick = onDismiss,
+                        containerColor = glassStyle.accentPrimary,
+                        shape = RoundedCornerShape(14.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(44.dp)
-                            .testTag("analytics_tip_dismiss_button"),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = glassStyle.accentPrimary
-                        ),
-                        shape = RoundedCornerShape(14.dp)
+                            .testTag("analytics_tip_dismiss_button")
                     ) {
                         Text(
                             text = if (appLanguage == AppLanguage.ARABIC) "حسناً، فهمت" else "Got it",
-                            color = if (glassStyle.isDark) Color.Black else Color.White,
-                            fontSize = 13.sp,
+                            color = glassStyle.onAccentPrimary,
+                            fontSize = 13.5.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -763,35 +728,28 @@ fun LiquidGlassHamburgerMenuButton(
     contentDescription: String = "Open Settings"
 ) {
     val glassStyle = LocalLiquidGlass.current
+    val shape = RoundedCornerShape(14.dp)
 
     Box(
         modifier = modifier
             .size(40.dp)
             .tactileSpringPress(pressedScale = 0.90f, onClick = onClick)
-            .clip(RoundedCornerShape(14.dp))
-            .background(
-                if (isSelected) {
-                    glassStyle.accentPrimary.copy(alpha = if (glassStyle.isDark) 0.22f else 0.14f)
-                } else {
-                    glassStyle.cardSubtleBg
-                }
+            .iosLiquidGlassSurface(
+                shape = shape,
+                tintColor = if (isSelected) glassStyle.accentPrimary else glassStyle.accentSecondary,
+                isFilledAccent = false,
+                elevation = if (glassStyle.iosLiquidGlassEnabled) 4.dp else 0.dp
             )
-            .border(
-                width = if (isSelected) 1.4.dp else 1.dp,
-                brush = Brush.linearGradient(
-                    colors = if (isSelected) {
-                        listOf(
-                            glassStyle.accentPrimary,
-                            glassStyle.accentSecondary.copy(alpha = 0.7f)
-                        )
-                    } else {
-                        listOf(
-                            glassStyle.accentPrimary.copy(alpha = 0.55f),
-                            glassStyle.accentSecondary.copy(alpha = 0.25f)
-                        )
-                    }
-                ),
-                shape = RoundedCornerShape(14.dp)
+            .then(
+                if (isSelected) {
+                    Modifier.border(
+                        width = 1.3.dp,
+                        brush = Brush.linearGradient(
+                            colors = listOf(glassStyle.accentPrimary, glassStyle.accentSecondary.copy(alpha = 0.7f))
+                        ),
+                        shape = shape
+                    )
+                } else Modifier
             )
             .testTag("top_bar_settings_menu_button"),
         contentAlignment = Alignment.Center
@@ -801,7 +759,6 @@ fun LiquidGlassHamburgerMenuButton(
             verticalArrangement = Arrangement.spacedBy(3.5.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Top line with glowing primary gradient
             Box(
                 modifier = Modifier
                     .width(18.dp)
@@ -813,7 +770,6 @@ fun LiquidGlassHamburgerMenuButton(
                         )
                     )
             )
-            // Middle line with glowing highlight
             Box(
                 modifier = Modifier
                     .width(18.dp)
@@ -825,7 +781,6 @@ fun LiquidGlassHamburgerMenuButton(
                         )
                     )
             )
-            // Bottom line with secondary accent glow
             Box(
                 modifier = Modifier
                     .width(14.dp)
@@ -843,7 +798,8 @@ fun LiquidGlassHamburgerMenuButton(
 
 /**
  * Sleek Top Bar shortcut button for Smart Analytics positioned right next to the
- * Network Type pill, featuring a 60/120fps breathing neon aura and tactile spring physics.
+ * Network Type pill, featuring a 60/120fps breathing neon aura, Apple iOS Liquid Glass,
+ * and tactile spring physics.
  */
 @Composable
 fun TopBarSmartForecastButton(
@@ -872,20 +828,18 @@ fun TopBarSmartForecastButton(
         modifier = modifier
             .height(38.dp)
             .tactileSpringPress(pressedScale = 0.90f, onClick = onClick)
-            .clip(forecastShape)
-            .background(
-                if (isSelected) {
-                    glassStyle.accentPrimary.copy(alpha = if (glassStyle.isDark) 0.24f else 0.16f)
-                } else {
-                    glassStyle.cardSubtleBg
-                }
+            .iosLiquidGlassSurface(
+                shape = forecastShape,
+                tintColor = glassStyle.accentPrimary,
+                isFilledAccent = isSelected,
+                elevation = if (glassStyle.iosLiquidGlassEnabled) 4.dp else 0.dp
             )
             .border(
                 width = if (isSelected) 1.4.dp else 1.dp,
                 brush = Brush.linearGradient(
                     colors = listOf(
                         glassStyle.accentPrimary.copy(alpha = if (isSelected) 1f else 0.65f * glowAlpha),
-                        NeonPurple.copy(alpha = if (isSelected) 0.85f else 0.45f * glowAlpha)
+                        glassStyle.accentSecondary.copy(alpha = if (isSelected) 0.85f else 0.45f * glowAlpha)
                     )
                 ),
                 shape = forecastShape
@@ -901,14 +855,14 @@ fun TopBarSmartForecastButton(
             Icon(
                 imageVector = Icons.Default.AutoAwesome,
                 contentDescription = label,
-                tint = if (isSelected) glassStyle.accentPrimary else CyanPulse,
+                tint = if (isSelected) glassStyle.onAccentPrimary else glassStyle.accentPrimary,
                 modifier = Modifier.size(18.dp)
             )
             if (dimensions.isTablet) {
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = label,
-                    color = if (isSelected) glassStyle.textPrimary else glassStyle.textSecondary,
+                    color = if (isSelected) glassStyle.onAccentPrimary else glassStyle.textSecondary,
                     fontSize = 11.5.sp,
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
                     maxLines = 1
@@ -929,16 +883,19 @@ fun ConnectionStatusPill(
         NetworkType.WIFI -> Triple(Icons.Default.Wifi, glassStyle.accentPrimary, AppStrings.wifiActive(appLanguage))
         NetworkType.CELLULAR_5G -> Triple(Icons.Default.SignalCellularAlt, glassStyle.accentSecondary, AppStrings.cellular5g(appLanguage))
         NetworkType.CELLULAR_4G, NetworkType.CELLULAR_3G, NetworkType.CELLULAR_GENERIC ->
-            Triple(Icons.Default.SignalCellularAlt, ElectricBlue, AppStrings.cellularGeneric(appLanguage))
-        NetworkType.ETHERNET -> Triple(Icons.Default.Wifi, EmeraldSafe, AppStrings.ethernet(appLanguage))
-        NetworkType.OFFLINE -> Triple(Icons.Default.WifiOff, RedAlert, AppStrings.disconnected(appLanguage))
+            Triple(Icons.Default.SignalCellularAlt, glassStyle.accentSecondary, AppStrings.cellularGeneric(appLanguage))
+        NetworkType.ETHERNET -> Triple(Icons.Default.Wifi, glassStyle.statusSafe, AppStrings.ethernet(appLanguage))
+        NetworkType.OFFLINE -> Triple(Icons.Default.WifiOff, glassStyle.statusDanger, AppStrings.disconnected(appLanguage))
     }
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(glassStyle.cardSubtleBg)
-            .border(1.dp, tint.copy(alpha = 0.4f), RoundedCornerShape(20.dp))
+            .iosLiquidGlassSurface(
+                shape = RoundedCornerShape(20.dp),
+                tintColor = tint,
+                isFilledAccent = false,
+                elevation = 2.dp
+            )
             .padding(horizontal = 8.dp, vertical = 5.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1065,20 +1022,14 @@ fun SpeedMetricItem(
     ) {
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clip(CircleShape)
-                        .background(color.copy(alpha = 0.15f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = title,
-                        tint = color,
-                        modifier = Modifier.size(15.dp)
-                    )
-                }
+                IosLiquidGlassIconBadge(
+                    icon = icon,
+                    contentDescription = title,
+                    size = 28.dp,
+                    iconSize = 15.dp,
+                    tintColor = color,
+                    shape = CircleShape
+                )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = title,
@@ -1191,13 +1142,13 @@ fun CircularQuotaProgressGauge(
     val dimensions = LocalAppDimensions.current
     val statusColor = when (status) {
         QuotaStatus.SAFE -> glassStyle.accentPrimary
-        QuotaStatus.WARNING -> AmberAlert
-        QuotaStatus.CRITICAL, QuotaStatus.EXCEEDED -> RedAlert
+        QuotaStatus.WARNING -> glassStyle.statusWarning
+        QuotaStatus.CRITICAL, QuotaStatus.EXCEEDED -> glassStyle.statusDanger
     }
 
     val isArabic = (appLanguage == AppLanguage.ARABIC)
-    val heartParams = remember(percentage, isArabic) {
-        BiologicalHeartCalculator.calculate(percentage, isArabic)
+    val heartParams = remember(percentage, isArabic, glassStyle.isDark) {
+        BiologicalHeartCalculator.calculate(percentage, isArabic, glassStyle.isDark)
     }
 
     val animatedEngineColor by animateColorAsState(
@@ -1289,10 +1240,13 @@ fun CircularQuotaProgressGauge(
                 Box(
                     modifier = Modifier
                         .tactileSpringPress(pressedScale = 0.93f, onClick = onConfigureClick)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(glassStyle.cardSubtleBg)
-                        .border(0.8.dp, animatedEngineColor.copy(alpha = 0.45f), RoundedCornerShape(12.dp))
-                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                        .iosLiquidGlassSurface(
+                            shape = RoundedCornerShape(12.dp),
+                            tintColor = animatedEngineColor,
+                            isFilledAccent = false,
+                            elevation = 2.dp
+                        )
+                        .padding(horizontal = 10.dp, vertical = 6.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
@@ -1327,7 +1281,7 @@ fun CircularQuotaProgressGauge(
 
                     // 1. Track Background Circle
                     drawArc(
-                        color = if (glassStyle.isDark) Color(0xFF131D30) else Color(0xFFE2E8F0),
+                        color = glassStyle.progressTrackBg,
                         startAngle = -90f,
                         sweepAngle = 360f,
                         useCenter = false,
@@ -1468,17 +1422,19 @@ fun UsagePermissionCard(
 
     GlassContainer(
         modifier = modifier.fillMaxWidth(),
-        borderColor = AmberAlert.copy(alpha = 0.6f)
+        borderColor = glassStyle.statusWarning.copy(alpha = 0.6f)
     ) {
         Column(horizontalAlignment = Alignment.Start) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Default.Security,
+                IosLiquidGlassIconBadge(
+                    icon = Icons.Default.Security,
                     contentDescription = AppStrings.usageAccess(appLanguage),
-                    tint = AmberAlert,
-                    modifier = Modifier.size(22.dp)
+                    size = 34.dp,
+                    iconSize = 18.dp,
+                    tintColor = glassStyle.statusWarning,
+                    shape = RoundedCornerShape(10.dp)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(10.dp))
                 Text(
                     text = AppStrings.permCardTitle(appLanguage),
                     color = glassStyle.textPrimary,
@@ -1494,13 +1450,13 @@ fun UsagePermissionCard(
                 Icon(
                     imageVector = Icons.Default.VerifiedUser,
                     contentDescription = AppStrings.privacySafe(appLanguage),
-                    tint = EmeraldSafe,
+                    tint = glassStyle.statusSafe,
                     modifier = Modifier.size(14.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = AppStrings.privacySafe(appLanguage),
-                    color = EmeraldSafe,
+                    color = glassStyle.statusSafe,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -1521,9 +1477,9 @@ fun UsagePermissionCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Button(
+                IosLiquidGlassButton(
                     onClick = onRequestPermission,
-                    colors = ButtonDefaults.buttonColors(containerColor = AmberAlert),
+                    containerColor = glassStyle.statusWarning,
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
                         .weight(1f)
@@ -1531,32 +1487,30 @@ fun UsagePermissionCard(
                 ) {
                     Text(
                         text = AppStrings.grantPerm(appLanguage),
-                        color = Color.Black,
+                        color = com.example.ui.theme.contrastOnColor(glassStyle.statusWarning),
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp
                     )
                 }
 
                 // Android 13+ Restricted Settings Helper
-                OutlinedButton(
+                IosLiquidGlassButton(
                     onClick = { showRestrictedDialog = true },
+                    containerColor = glassStyle.accentPrimary,
+                    isFilledAccent = false,
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = glassStyle.accentPrimary
-                    ),
-                    border = ButtonDefaults.outlinedButtonBorder.copy(
-                        brush = Brush.horizontalGradient(listOf(glassStyle.accentPrimary, glassStyle.accentSecondary))
-                    ),
                     modifier = Modifier.testTag("restricted_settings_help_button")
                 ) {
                     Icon(
                         imageVector = Icons.Default.HelpOutline,
                         contentDescription = "Help",
+                        tint = glassStyle.accentPrimary,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = AppStrings.restrictedSettingsHelp(appLanguage),
+                        color = glassStyle.accentPrimary,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -1607,20 +1561,14 @@ fun RestrictedSettingsGuideDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .clip(CircleShape)
-                                .background(AmberAlert.copy(alpha = 0.2f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.LockOpen,
-                                contentDescription = null,
-                                tint = AmberAlert,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
+                        IosLiquidGlassIconBadge(
+                            icon = Icons.Default.LockOpen,
+                            contentDescription = null,
+                            size = 34.dp,
+                            iconSize = 18.dp,
+                            tintColor = glassStyle.statusWarning,
+                            shape = CircleShape
+                        )
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
                             text = AppStrings.restrictedDialogTitle(appLanguage),
@@ -1629,9 +1577,14 @@ fun RestrictedSettingsGuideDialog(
                             fontWeight = FontWeight.Bold
                         )
                     }
-                    IconButton(onClick = onDismiss, modifier = Modifier.size(28.dp)) {
-                        Icon(imageVector = Icons.Default.Close, contentDescription = "Close", tint = glassStyle.textTertiary)
-                    }
+                    IosLiquidGlassIconButton(
+                        onClick = onDismiss,
+                        icon = Icons.Default.Close,
+                        contentDescription = "Close",
+                        visualSize = 32.dp,
+                        iconSize = 16.dp,
+                        tintColor = glassStyle.textSecondary
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -1645,7 +1598,6 @@ fun RestrictedSettingsGuideDialog(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Step 1
                 GuideStepItem(
                     stepNumber = "1",
                     title = AppStrings.step1Title(appLanguage),
@@ -1654,7 +1606,6 @@ fun RestrictedSettingsGuideDialog(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Step 2
                 GuideStepItem(
                     stepNumber = "2",
                     title = AppStrings.step2Title(appLanguage),
@@ -1663,7 +1614,6 @@ fun RestrictedSettingsGuideDialog(
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Step 3
                 GuideStepItem(
                     stepNumber = "3",
                     title = AppStrings.step3Title(appLanguage),
@@ -1677,36 +1627,37 @@ fun RestrictedSettingsGuideDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Button(
+                    IosLiquidGlassButton(
                         onClick = {
                             onOpenAppInfo()
                             onDismiss()
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = glassStyle.accentPrimary),
+                        containerColor = glassStyle.accentPrimary,
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.weight(1f)
                     ) {
                         Icon(
                             imageVector = Icons.Default.OpenInNew,
                             contentDescription = null,
-                            tint = Color.Black,
+                            tint = glassStyle.onAccentPrimary,
                             modifier = Modifier.size(14.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = AppStrings.btnAppInfo(appLanguage),
-                            color = Color.Black,
+                            color = glassStyle.onAccentPrimary,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
 
-                    Button(
+                    IosLiquidGlassButton(
                         onClick = {
                             onOpenUsageSettings()
                             onDismiss()
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = glassStyle.cardSubtleBg),
+                        containerColor = glassStyle.accentPrimary,
+                        isFilledAccent = false,
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.weight(1f)
                     ) {
@@ -1742,13 +1693,17 @@ fun GuideStepItem(
         Box(
             modifier = Modifier
                 .size(24.dp)
-                .clip(CircleShape)
-                .background(glassStyle.accentPrimary),
+                .iosLiquidGlassSurface(
+                    shape = CircleShape,
+                    tintColor = glassStyle.accentPrimary,
+                    isFilledAccent = true,
+                    elevation = 2.dp
+                ),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = stepNumber,
-                color = Color.Black,
+                color = glassStyle.onAccentPrimary,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold
             )

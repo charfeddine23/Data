@@ -7,6 +7,8 @@ import com.example.ui.components.BiologicalHeartCalculator
 import com.example.ui.components.BiologicalHeartState
 import com.example.ui.navigation.NavDestination
 import com.example.ui.navigation.getLabel
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -251,5 +253,41 @@ class ExampleRobolectricTest {
     assertEquals("Smart Forecast", NavDestination.FORECAST.getLabel(com.example.model.AppLanguage.ENGLISH))
     assertEquals("درع DNS الذكي", com.example.model.AppStrings.dnsScreenTitle(com.example.model.AppLanguage.ARABIC))
     assertEquals("Smart DNS Shield", com.example.model.AppStrings.dnsScreenTitle(com.example.model.AppLanguage.ENGLISH))
+  }
+
+  @Test
+  fun `verify ios liquid glass toggle and contrast tokens across all 67 themes`() {
+    // 1. contrastOnColor produces dark ink on bright accents and white on deep accents
+    val onBrightCyan = com.example.ui.theme.contrastOnColor(androidx.compose.ui.graphics.Color(0xFF00E5FF))
+    val onDeepBlue = com.example.ui.theme.contrastOnColor(androidx.compose.ui.graphics.Color(0xFF2563EB))
+    assertEquals(androidx.compose.ui.graphics.Color(0xFF0A1018), onBrightCyan)
+    assertEquals(androidx.compose.ui.graphics.Color(0xFFFFFFFF), onDeepBlue)
+
+    // 2. Verify iosLiquidGlassEnabled propagates cleanly across all 67 themes
+    com.example.model.AppThemeMode.values().forEach { mode ->
+      val enabledStyle = com.example.ui.theme.createLiquidGlassStyle(mode, iosLiquidGlassEnabled = true)
+      val disabledStyle = com.example.ui.theme.createLiquidGlassStyle(mode, iosLiquidGlassEnabled = false)
+
+      assertEquals(true, enabledStyle.iosLiquidGlassEnabled)
+      assertEquals(false, disabledStyle.iosLiquidGlassEnabled)
+      assertTrue(enabledStyle.statusSafe.alpha > 0.9f)
+      assertTrue(enabledStyle.statusWarning.alpha > 0.9f)
+      assertTrue(enabledStyle.statusDanger.alpha > 0.9f)
+      assertTrue(enabledStyle.progressTrackBg.alpha > 0.05f)
+      assertEquals(com.example.ui.theme.contrastOnColor(enabledStyle.accentPrimary), enabledStyle.onAccentPrimary)
+      assertEquals(com.example.ui.theme.contrastOnColor(enabledStyle.accentSecondary), enabledStyle.onAccentSecondary)
+    }
+
+    // 3. Verify ThemePreferences persists iOS Liquid Glass toggle (default true -> false -> true)
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    val prefs = com.example.data.ThemePreferences(context)
+    runBlocking {
+      val initial = prefs.iosLiquidGlassEnabledFlow.first()
+      assertEquals(true, initial)
+      prefs.setIosLiquidGlassEnabled(false)
+      assertEquals(false, prefs.iosLiquidGlassEnabledFlow.first())
+      prefs.setIosLiquidGlassEnabled(true)
+      assertEquals(true, prefs.iosLiquidGlassEnabledFlow.first())
+    }
   }
 }

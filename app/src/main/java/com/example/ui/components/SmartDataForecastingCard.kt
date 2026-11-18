@@ -67,10 +67,10 @@ fun SmartDataForecastingCard(
 ) {
     val glassStyle = LocalLiquidGlass.current
 
-    // Semantic status color
+    // Semantic status color from harmonized active theme
     val statusColor = when (forecast.status) {
-        ForecastStatus.CRITICAL_DEPLETION, ForecastStatus.EXHAUSTED -> RedAlert
-        ForecastStatus.EARLY_DEPLETION -> AmberAlert
+        ForecastStatus.CRITICAL_DEPLETION, ForecastStatus.EXHAUSTED -> glassStyle.statusDanger
+        ForecastStatus.EARLY_DEPLETION -> glassStyle.statusWarning
         ForecastStatus.SUSTAINABLE -> glassStyle.accentPrimary
     }
 
@@ -114,21 +114,14 @@ fun SmartDataForecastingCard(
                     modifier = Modifier.weight(1f),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(38.dp)
-                            .clip(CircleShape)
-                            .background(statusColor.copy(alpha = 0.18f))
-                            .border(1.dp, statusColor.copy(alpha = 0.45f), CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.AutoAwesome,
-                            contentDescription = AppStrings.smartForecastTitle(appLanguage),
-                            tint = statusColor,
-                            modifier = Modifier.size(19.dp)
-                        )
-                    }
+                    IosLiquidGlassIconBadge(
+                        icon = Icons.Default.AutoAwesome,
+                        contentDescription = AppStrings.smartForecastTitle(appLanguage),
+                        size = 40.dp,
+                        iconSize = 20.dp,
+                        tintColor = statusColor,
+                        shape = CircleShape
+                    )
 
                     Spacer(modifier = Modifier.width(10.dp))
 
@@ -178,14 +171,14 @@ fun SmartDataForecastingCard(
 
             // 2. Prominent Warning / Status Banner Container
             val bannerBg = when (forecast.status) {
-                ForecastStatus.CRITICAL_DEPLETION, ForecastStatus.EXHAUSTED -> RedAlert.copy(alpha = 0.12f)
-                ForecastStatus.EARLY_DEPLETION -> AmberAlert.copy(alpha = 0.12f)
+                ForecastStatus.CRITICAL_DEPLETION, ForecastStatus.EXHAUSTED -> glassStyle.statusDanger.copy(alpha = 0.12f)
+                ForecastStatus.EARLY_DEPLETION -> glassStyle.statusWarning.copy(alpha = 0.12f)
                 ForecastStatus.SUSTAINABLE -> glassStyle.accentPrimary.copy(alpha = 0.10f)
             }
 
             val bannerBorder = when (forecast.status) {
-                ForecastStatus.CRITICAL_DEPLETION, ForecastStatus.EXHAUSTED -> RedAlert.copy(alpha = 0.45f)
-                ForecastStatus.EARLY_DEPLETION -> AmberAlert.copy(alpha = 0.45f)
+                ForecastStatus.CRITICAL_DEPLETION, ForecastStatus.EXHAUSTED -> glassStyle.statusDanger.copy(alpha = 0.45f)
+                ForecastStatus.EARLY_DEPLETION -> glassStyle.statusWarning.copy(alpha = 0.45f)
                 ForecastStatus.SUSTAINABLE -> glassStyle.accentPrimary.copy(alpha = 0.35f)
             }
 
@@ -253,7 +246,7 @@ fun SmartDataForecastingCard(
                     value = FormatUtils.formatBytes(forecast.dailyBurnRateBytes),
                     unit = if (appLanguage == AppLanguage.ARABIC) "/يوم" else "/day",
                     icon = Icons.Default.LocalFireDepartment,
-                    accentColor = AmberAlert,
+                    accentColor = glassStyle.statusWarning,
                     modifier = Modifier.weight(1f)
                 )
 
@@ -279,7 +272,7 @@ fun SmartDataForecastingCard(
                     value = endProjectionFormatted,
                     unit = "",
                     icon = if (forecast.isSurplus) Icons.Default.TrendingDown else Icons.Default.TrendingUp,
-                    accentColor = if (forecast.isSurplus) EmeraldSafe else RedAlert,
+                    accentColor = if (forecast.isSurplus) glassStyle.statusSafe else glassStyle.statusDanger,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -311,7 +304,7 @@ fun SmartDataForecastingCard(
                     }
                     Text(
                         text = deltaText,
-                        color = if (forecast.isSurplus) EmeraldSafe else RedAlert,
+                        color = if (forecast.isSurplus) glassStyle.statusSafe else glassStyle.statusDanger,
                         fontSize = 11.5.sp,
                         fontWeight = FontWeight.Bold
                     )
@@ -324,7 +317,7 @@ fun SmartDataForecastingCard(
                         .fillMaxWidth()
                         .height(8.dp)
                         .clip(RoundedCornerShape(4.dp))
-                        .background(if (glassStyle.isDark) Color(0xFF0F172A) else Color(0xFFE2E8F0))
+                        .background(glassStyle.progressTrackBg)
                 ) {
                     // Projected track (semi-transparent extension)
                     if (projectedFraction > currentUsedFraction) {
@@ -359,22 +352,30 @@ fun SmartDataForecastingCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Footer link to adjust monthly plan cap
+            // Footer CTA link to adjust monthly plan cap
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(8.dp))
-                    .clickable { onConfigurePlanClick() }
-                    .padding(vertical = 4.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "${AppStrings.editCap(appLanguage)} (${forecast.planLimitGB.toInt()} GB) →",
-                    color = glassStyle.accentPrimary,
-                    fontSize = 11.5.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
+                Box(
+                    modifier = Modifier
+                        .tactileSpringPress(pressedScale = 0.94f, onClick = onConfigurePlanClick)
+                        .iosLiquidGlassSurface(
+                            shape = RoundedCornerShape(12.dp),
+                            tintColor = glassStyle.accentPrimary,
+                            isFilledAccent = false,
+                            elevation = 2.dp
+                        )
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = "${AppStrings.editCap(appLanguage)} (${forecast.planLimitGB.toInt()} GB) →",
+                        color = glassStyle.accentPrimary,
+                        fontSize = 11.5.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
         }
     }

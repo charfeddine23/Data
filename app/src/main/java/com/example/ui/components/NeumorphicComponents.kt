@@ -323,22 +323,35 @@ fun NeumorphicButton(
                 surfaceColor = effectiveSurfaceColor,
                 blurDp = 10.dp
             )
-            .clip(shape)
-            .background(buttonBrush)
-            .border(
-                width = 1.dp,
-                brush = when {
-                    buttonColor != null -> Brush.linearGradient(
-                        listOf(Color.White.copy(alpha = 0.45f), buttonColor.copy(alpha = 0.85f))
+            .then(
+                if (glassStyle.iosLiquidGlassEnabled) {
+                    Modifier.iosLiquidGlassSurface(
+                        shape = shape,
+                        tintColor = buttonColor ?: effectiveAccent,
+                        isFilledAccent = buttonColor != null,
+                        isPressed = isPressed,
+                        elevation = 0.dp
                     )
-                    isPressed -> Brush.linearGradient(
-                        listOf(effectiveAccent.copy(alpha = 0.8f), glassStyle.neumorphicBorderDark)
-                    )
-                    else -> Brush.linearGradient(
-                        listOf(glassStyle.neumorphicBorderLight, effectiveAccent.copy(alpha = 0.35f))
-                    )
-                },
-                shape = shape
+                } else {
+                    Modifier
+                        .clip(shape)
+                        .background(buttonBrush)
+                        .border(
+                            width = 1.dp,
+                            brush = when {
+                                buttonColor != null -> Brush.linearGradient(
+                                    listOf(Color.White.copy(alpha = 0.45f), buttonColor.copy(alpha = 0.85f))
+                                )
+                                isPressed -> Brush.linearGradient(
+                                    listOf(effectiveAccent.copy(alpha = 0.8f), glassStyle.neumorphicBorderDark)
+                                )
+                                else -> Brush.linearGradient(
+                                    listOf(glassStyle.neumorphicBorderLight, effectiveAccent.copy(alpha = 0.35f))
+                                )
+                            },
+                            shape = shape
+                        )
+                }
             )
             .clickable(
                 interactionSource = interactionSource,
@@ -400,18 +413,31 @@ fun NeumorphicIconButton(
                 surfaceColor = if (glassStyle.isNeumorphic) glassStyle.neumorphicSurface else Color.Unspecified,
                 blurDp = 8.dp
             )
-            .clip(shape)
-            .background(
-                if (isPressed || isHighlighted) {
-                    Brush.linearGradient(listOf(glassStyle.cardSubtleBg, glassStyle.neumorphicSurface))
+            .then(
+                if (glassStyle.iosLiquidGlassEnabled) {
+                    Modifier.iosLiquidGlassSurface(
+                        shape = shape,
+                        tintColor = tint ?: glassStyle.accentPrimary,
+                        isFilledAccent = false,
+                        isPressed = isPressed || isHighlighted,
+                        elevation = 0.dp
+                    )
                 } else {
-                    Brush.linearGradient(listOf(glassStyle.neumorphicSurface, glassStyle.neumorphicBase))
+                    Modifier
+                        .clip(shape)
+                        .background(
+                            if (isPressed || isHighlighted) {
+                                Brush.linearGradient(listOf(glassStyle.cardSubtleBg, glassStyle.neumorphicSurface))
+                            } else {
+                                Brush.linearGradient(listOf(glassStyle.neumorphicSurface, glassStyle.neumorphicBase))
+                            }
+                        )
+                        .border(
+                            1.dp,
+                            if (isHighlighted) glassStyle.accentPrimary.copy(alpha = 0.5f) else glassStyle.neumorphicBorderLight,
+                            shape
+                        )
                 }
-            )
-            .border(
-                1.dp,
-                if (isHighlighted) glassStyle.accentPrimary.copy(alpha = 0.5f) else glassStyle.neumorphicBorderLight,
-                shape
             )
             .clickable(
                 interactionSource = interactionSource,
@@ -459,32 +485,45 @@ fun NeumorphicSegmentedPill(
                 surfaceColor = if (glassStyle.isNeumorphic && !isSelected) glassStyle.neumorphicSurface else Color.Unspecified,
                 blurDp = 6.dp
             )
-            .clip(shape)
-            .background(
-                if (isSelected) {
-                    Brush.linearGradient(
-                        listOf(
-                            glassStyle.cardSubtleBg,
-                            effectiveAccent.copy(alpha = if (glassStyle.isNeumorphic) 0.14f else 0.16f)
-                        )
+            .then(
+                if (glassStyle.iosLiquidGlassEnabled) {
+                    Modifier.iosLiquidGlassSurface(
+                        shape = shape,
+                        tintColor = effectiveAccent,
+                        isFilledAccent = false,
+                        isPressed = isSelected,
+                        elevation = 0.dp
                     )
                 } else {
-                    Brush.linearGradient(
-                        listOf(
-                            glassStyle.neumorphicSurface,
-                            glassStyle.neumorphicBase
+                    Modifier
+                        .clip(shape)
+                        .background(
+                            if (isSelected) {
+                                Brush.linearGradient(
+                                    listOf(
+                                        glassStyle.cardSubtleBg,
+                                        effectiveAccent.copy(alpha = if (glassStyle.isNeumorphic) 0.14f else 0.16f)
+                                    )
+                                )
+                            } else {
+                                Brush.linearGradient(
+                                    listOf(
+                                        glassStyle.neumorphicSurface,
+                                        glassStyle.neumorphicBase
+                                    )
+                                )
+                            }
                         )
-                    )
+                        .border(
+                            width = 1.dp,
+                            brush = if (isSelected) {
+                                Brush.linearGradient(listOf(effectiveAccent.copy(alpha = 0.8f), glassStyle.neumorphicBorderDark))
+                            } else {
+                                Brush.linearGradient(listOf(glassStyle.neumorphicBorderLight, glassStyle.neumorphicBorderDark))
+                            },
+                            shape = shape
+                        )
                 }
-            )
-            .border(
-                width = 1.dp,
-                brush = if (isSelected) {
-                    Brush.linearGradient(listOf(effectiveAccent.copy(alpha = 0.8f), glassStyle.neumorphicBorderDark))
-                } else {
-                    Brush.linearGradient(listOf(glassStyle.neumorphicBorderLight, glassStyle.neumorphicBorderDark))
-                },
-                shape = shape
             )
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 8.dp),

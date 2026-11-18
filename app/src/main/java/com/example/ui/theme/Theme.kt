@@ -12,6 +12,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
@@ -22,6 +23,14 @@ import androidx.core.view.WindowCompat
 import com.example.model.AppLanguage
 import com.example.model.AppThemeMode
 import com.example.model.ThemeMode
+
+/**
+ * Computes a high-contrast foreground color (deep ink vs pure crisp white)
+ * for any filled button, badge, or pill background color.
+ */
+fun contrastOnColor(background: Color): Color {
+    return if (background.luminance() > 0.42f) Color(0xFF0A1018) else Color(0xFFFFFFFF)
+}
 
 @Immutable
 data class LiquidGlassStyle(
@@ -45,7 +54,14 @@ data class LiquidGlassStyle(
     val neumorphicHighlight: Color = Color(0x384E699A),
     val neumorphicShadow: Color = Color(0xE603050B),
     val neumorphicBorderLight: Color = Color(0x2BFFFFFF),
-    val neumorphicBorderDark: Color = Color(0x66000000)
+    val neumorphicBorderDark: Color = Color(0x66000000),
+    val iosLiquidGlassEnabled: Boolean = true,
+    val onAccentPrimary: Color = contrastOnColor(accentPrimary),
+    val onAccentSecondary: Color = contrastOnColor(accentSecondary),
+    val statusSafe: Color = if (isDark) Color(0xFF10E88A) else Color(0xFF059669),
+    val statusWarning: Color = if (isDark) Color(0xFFFFB74D) else Color(0xFFD97706),
+    val statusDanger: Color = if (isDark) Color(0xFFFF5252) else Color(0xFFDC2626),
+    val progressTrackBg: Color = if (isDark) Color(0x3394A3B8) else Color(0x2264748B)
 )
 
 val LocalLiquidGlass = staticCompositionLocalOf {
@@ -64,15 +80,15 @@ fun createAppColorScheme(mode: AppThemeMode, isSystemDark: Boolean = false): Col
 
     AppThemeMode.LIGHT_MODE -> lightColorScheme(
         primary = PearlPlatinumPrimary,
-        onPrimary = Color.White,
+        onPrimary = contrastOnColor(PearlPlatinumPrimary),
         primaryContainer = Color(0xFFDBEAFE),
         onPrimaryContainer = Color(0xFF1E3A8A),
         secondary = PearlPlatinumAccent,
-        onSecondary = Color.White,
+        onSecondary = contrastOnColor(PearlPlatinumAccent),
         secondaryContainer = Color(0xFFEDE9FE),
         onSecondaryContainer = Color(0xFF4C1D95),
         tertiary = LightPulseOceanCyan,
-        onTertiary = Color.White,
+        onTertiary = contrastOnColor(LightPulseOceanCyan),
         background = PearlPlatinumLightBase,
         onBackground = PearlPlatinumTextPrimary,
         surface = PearlPlatinumSurface,
@@ -81,21 +97,21 @@ fun createAppColorScheme(mode: AppThemeMode, isSystemDark: Boolean = false): Col
         onSurfaceVariant = PearlPlatinumTextSecondary,
         outline = PearlPlatinumBorder,
         outlineVariant = PearlPlatinumBorderSubtle,
-        error = RedAlert,
+        error = LightPulseCoralRed,
         onError = Color.White
     )
 
     AppThemeMode.NEUMORPHISM -> lightColorScheme(
         primary = NeumorphicColors.AccentBlue,
-        onPrimary = Color.White,
+        onPrimary = contrastOnColor(NeumorphicColors.AccentBlue),
         primaryContainer = Color(0xFFDBEAFE),
         onPrimaryContainer = Color(0xFF1E3A8A),
         secondary = NeumorphicColors.AccentMint,
-        onSecondary = Color.White,
+        onSecondary = contrastOnColor(NeumorphicColors.AccentMint),
         secondaryContainer = Color(0xFFD1FAE5),
         onSecondaryContainer = Color(0xFF065F46),
         tertiary = NeumorphicColors.AccentBlue,
-        onTertiary = Color.White,
+        onTertiary = contrastOnColor(NeumorphicColors.AccentBlue),
         background = NeumorphicColors.Background,
         onBackground = NeumorphicColors.TextPrimary,
         surface = NeumorphicColors.Surface,
@@ -110,15 +126,15 @@ fun createAppColorScheme(mode: AppThemeMode, isSystemDark: Boolean = false): Col
 
     AppThemeMode.NEUMORPHISM_DARK -> darkColorScheme(
         primary = NeumorphicDarkColors.AccentBlue,
-        onPrimary = Color.White,
+        onPrimary = contrastOnColor(NeumorphicDarkColors.AccentBlue),
         primaryContainer = Color(0xFF1E3A8A),
         onPrimaryContainer = Color(0xFFDBEAFE),
         secondary = NeumorphicDarkColors.AccentMint,
-        onSecondary = Color.White,
+        onSecondary = contrastOnColor(NeumorphicDarkColors.AccentMint),
         secondaryContainer = Color(0xFF064E3B),
         onSecondaryContainer = Color(0xFFD1FAE5),
         tertiary = NeumorphicDarkColors.AccentBlue,
-        onTertiary = Color.White,
+        onTertiary = contrastOnColor(NeumorphicDarkColors.AccentBlue),
         background = NeumorphicDarkColors.Background,
         onBackground = NeumorphicDarkColors.TextPrimary,
         surface = NeumorphicDarkColors.Surface,
@@ -133,15 +149,15 @@ fun createAppColorScheme(mode: AppThemeMode, isSystemDark: Boolean = false): Col
 
     AppThemeMode.LIQUID_GLASS_DEFAULT -> darkColorScheme(
         primary = LiquidGlassDefaultPrimary,
-        onPrimary = Color.White,
-        primaryContainer = Color(0xFF003080),
-        onPrimaryContainer = Color(0xFFCCE0FF),
+        onPrimary = contrastOnColor(LiquidGlassDefaultPrimary),
+        primaryContainer = Color(0xFF003B4A),
+        onPrimaryContainer = Color(0xFFB3F7FF),
         secondary = LiquidGlassDefaultAccent,
-        onSecondary = Color.White,
-        secondaryContainer = Color(0xFF381480),
-        onSecondaryContainer = Color(0xFFEADBFF),
+        onSecondary = contrastOnColor(LiquidGlassDefaultAccent),
+        secondaryContainer = Color(0xFF004528),
+        onSecondaryContainer = Color(0xFFB9FCD8),
         tertiary = ElectricBlue,
-        onTertiary = Color.White,
+        onTertiary = contrastOnColor(ElectricBlue),
         background = LiquidGlassDefaultBackground,
         onBackground = TextPrimary,
         surface = LiquidGlassDefaultSurface,
@@ -150,20 +166,20 @@ fun createAppColorScheme(mode: AppThemeMode, isSystemDark: Boolean = false): Col
         onSurfaceVariant = TextSecondary,
         outline = Color(0x4094A3B8),
         error = RedAlert,
-        onError = TextPrimary
+        onError = Color.White
     )
 
     AppThemeMode.LIQUID_NEON_CYAN -> darkColorScheme(
         primary = LiquidNeonCyanPrimary,
-        onPrimary = Color(0xFF00363D),
+        onPrimary = contrastOnColor(LiquidNeonCyanPrimary),
         primaryContainer = Color(0xFF004F59),
         onPrimaryContainer = LiquidNeonCyanPrimary,
         secondary = LiquidNeonCyanAccent,
-        onSecondary = Color(0xFF003920),
+        onSecondary = contrastOnColor(LiquidNeonCyanAccent),
         secondaryContainer = Color(0xFF005330),
         onSecondaryContainer = LiquidNeonCyanAccent,
         tertiary = CyanPulse,
-        onTertiary = Color(0xFF00382E),
+        onTertiary = contrastOnColor(CyanPulse),
         background = LiquidNeonCyanBackground,
         onBackground = TextPrimary,
         surface = LiquidNeonCyanSurface,
@@ -172,20 +188,20 @@ fun createAppColorScheme(mode: AppThemeMode, isSystemDark: Boolean = false): Col
         onSurfaceVariant = TextSecondary,
         outline = Color(0x4000E5FF),
         error = RedAlert,
-        onError = TextPrimary
+        onError = Color.White
     )
 
     AppThemeMode.AMOLED_PITCH_BLACK -> darkColorScheme(
         primary = AmoledPitchBlackPrimary,
-        onPrimary = Color.White,
+        onPrimary = contrastOnColor(AmoledPitchBlackPrimary),
         primaryContainer = Color(0xFF1E3A8A),
         onPrimaryContainer = Color(0xFFDBEAFE),
         secondary = AmoledPitchBlackAccent,
-        onSecondary = Color(0xFF083344),
+        onSecondary = contrastOnColor(AmoledPitchBlackAccent),
         secondaryContainer = Color(0xFF155E75),
         onSecondaryContainer = Color(0xFFCFFAFE),
         tertiary = ElectricBlue,
-        onTertiary = Color.White,
+        onTertiary = contrastOnColor(ElectricBlue),
         background = AmoledPitchBlackBackground,
         onBackground = TextPrimary,
         surface = AmoledPitchBlackSurface,
@@ -194,7 +210,7 @@ fun createAppColorScheme(mode: AppThemeMode, isSystemDark: Boolean = false): Col
         onSurfaceVariant = TextSecondary,
         outline = Color(0x33FFFFFF),
         error = RedAlert,
-        onError = TextPrimary
+        onError = Color.White
     )
 
     else -> createExtendedColorScheme(getExtendedPaletteSpec(mode))
@@ -203,10 +219,14 @@ fun createAppColorScheme(mode: AppThemeMode, isSystemDark: Boolean = false): Col
 /**
  * Creates custom LiquidGlassStyle tokens corresponding to each AppThemeMode
  */
-fun createLiquidGlassStyle(mode: AppThemeMode, isSystemDark: Boolean = false): LiquidGlassStyle = when (mode) {
+fun createLiquidGlassStyle(
+    mode: AppThemeMode,
+    isSystemDark: Boolean = false,
+    iosLiquidGlassEnabled: Boolean = true
+): LiquidGlassStyle = when (mode) {
     AppThemeMode.SYSTEM -> {
-        if (isSystemDark) createLiquidGlassStyle(AppThemeMode.LIQUID_GLASS_DEFAULT, true)
-        else createLiquidGlassStyle(AppThemeMode.LIGHT_MODE, false)
+        if (isSystemDark) createLiquidGlassStyle(AppThemeMode.LIQUID_GLASS_DEFAULT, true, iosLiquidGlassEnabled)
+        else createLiquidGlassStyle(AppThemeMode.LIGHT_MODE, false, iosLiquidGlassEnabled)
     }
 
     AppThemeMode.LIGHT_MODE -> LiquidGlassStyle(
@@ -222,9 +242,9 @@ fun createLiquidGlassStyle(mode: AppThemeMode, isSystemDark: Boolean = false): L
         cardSubtleBg = PearlPlatinumCardSubtleBg,
         rimLightBrush = Brush.linearGradient(
             listOf(
-                Color(0x80FFFFFF),
-                Color(0x1F0066FF),
-                Color(0x40FFFFFF)
+                Color(0x99FFFFFF),
+                Color(0x240066FF),
+                Color(0x55FFFFFF)
             )
         ),
         backdropBrush = Brush.verticalGradient(
@@ -241,7 +261,14 @@ fun createLiquidGlassStyle(mode: AppThemeMode, isSystemDark: Boolean = false): L
         neumorphicHighlight = Color(0xCCFFFFFF),
         neumorphicShadow = Color(0x0F0F172A),
         neumorphicBorderLight = Color(0x80FFFFFF),
-        neumorphicBorderDark = Color(0x0D0F172A)
+        neumorphicBorderDark = Color(0x0D0F172A),
+        iosLiquidGlassEnabled = iosLiquidGlassEnabled,
+        onAccentPrimary = contrastOnColor(PearlPlatinumPrimary),
+        onAccentSecondary = contrastOnColor(PearlPlatinumAccent),
+        statusSafe = Color(0xFF059669),
+        statusWarning = Color(0xFFD97706),
+        statusDanger = Color(0xFFDC2626),
+        progressTrackBg = Color(0x1F0F172A)
     )
 
     AppThemeMode.NEUMORPHISM -> LiquidGlassStyle(
@@ -275,7 +302,14 @@ fun createLiquidGlassStyle(mode: AppThemeMode, isSystemDark: Boolean = false): L
         neumorphicHighlight = NeumorphicColors.Highlight,
         neumorphicShadow = NeumorphicColors.DarkShadow,
         neumorphicBorderLight = NeumorphicColors.BorderLight,
-        neumorphicBorderDark = NeumorphicColors.BorderDark
+        neumorphicBorderDark = NeumorphicColors.BorderDark,
+        iosLiquidGlassEnabled = iosLiquidGlassEnabled,
+        onAccentPrimary = contrastOnColor(NeumorphicColors.AccentBlue),
+        onAccentSecondary = contrastOnColor(NeumorphicColors.AccentMint),
+        statusSafe = Color(0xFF059669),
+        statusWarning = Color(0xFFD97706),
+        statusDanger = NeumorphicColors.AccentRed,
+        progressTrackBg = Color(0x45B8C4D4)
     )
 
     AppThemeMode.NEUMORPHISM_DARK -> LiquidGlassStyle(
@@ -309,7 +343,14 @@ fun createLiquidGlassStyle(mode: AppThemeMode, isSystemDark: Boolean = false): L
         neumorphicHighlight = NeumorphicDarkColors.Highlight,
         neumorphicShadow = NeumorphicDarkColors.DarkShadow,
         neumorphicBorderLight = NeumorphicDarkColors.BorderLight,
-        neumorphicBorderDark = NeumorphicDarkColors.BorderDark
+        neumorphicBorderDark = NeumorphicDarkColors.BorderDark,
+        iosLiquidGlassEnabled = iosLiquidGlassEnabled,
+        onAccentPrimary = contrastOnColor(NeumorphicDarkColors.AccentBlue),
+        onAccentSecondary = contrastOnColor(NeumorphicDarkColors.AccentMint),
+        statusSafe = Color(0xFF10E88A),
+        statusWarning = Color(0xFFFBBF24),
+        statusDanger = NeumorphicDarkColors.AccentRed,
+        progressTrackBg = Color(0x450E1116)
     )
 
     AppThemeMode.LIQUID_GLASS_DEFAULT -> LiquidGlassStyle(
@@ -324,7 +365,7 @@ fun createLiquidGlassStyle(mode: AppThemeMode, isSystemDark: Boolean = false): L
         cardBackground = LiquidGlassDefaultCardBg,
         cardSubtleBg = LiquidGlassDefaultCardSubtleBg,
         rimLightBrush = Brush.linearGradient(
-            listOf(Color(0x5900E5FF), Color(0x22FFFFFF), Color(0x4D00E676))
+            listOf(Color(0x6600E5FF), Color(0x28FFFFFF), Color(0x5200E676))
         ),
         backdropBrush = Brush.verticalGradient(
             listOf(ObsidianVoidTop, ObsidianVoidBottom, Color(0xFF0A0E14))
@@ -336,7 +377,14 @@ fun createLiquidGlassStyle(mode: AppThemeMode, isSystemDark: Boolean = false): L
         neumorphicHighlight = NeumorphicSlateHighlight,
         neumorphicShadow = NeumorphicSlateShadow,
         neumorphicBorderLight = NeumorphicBorderHighlight,
-        neumorphicBorderDark = NeumorphicBorderShadow
+        neumorphicBorderDark = NeumorphicBorderShadow,
+        iosLiquidGlassEnabled = iosLiquidGlassEnabled,
+        onAccentPrimary = contrastOnColor(LiquidGlassDefaultPrimary),
+        onAccentSecondary = contrastOnColor(LiquidGlassDefaultAccent),
+        statusSafe = Color(0xFF00E676),
+        statusWarning = Color(0xFFFBBF24),
+        statusDanger = Color(0xFFFF5252),
+        progressTrackBg = Color(0x3D1E293B)
     )
 
     AppThemeMode.LIQUID_NEON_CYAN -> LiquidGlassStyle(
@@ -351,7 +399,7 @@ fun createLiquidGlassStyle(mode: AppThemeMode, isSystemDark: Boolean = false): L
         cardBackground = LiquidNeonCyanCardBg,
         cardSubtleBg = LiquidNeonCyanCardSubtleBg,
         rimLightBrush = Brush.linearGradient(
-            listOf(Color(0x4D00E5FF), Color(0x1A00FFA3), Color(0x4D00E5FF))
+            listOf(Color(0x5900E5FF), Color(0x2200FFA3), Color(0x5900E5FF))
         ),
         backdropBrush = Brush.verticalGradient(
             listOf(Color(0xFF0D1527), Color(0xFF080D1A))
@@ -363,7 +411,14 @@ fun createLiquidGlassStyle(mode: AppThemeMode, isSystemDark: Boolean = false): L
         neumorphicHighlight = Color(0x3300E5FF),
         neumorphicShadow = Color(0xCC03060C),
         neumorphicBorderLight = Color(0x2E00E5FF),
-        neumorphicBorderDark = Color(0x66000000)
+        neumorphicBorderDark = Color(0x66000000),
+        iosLiquidGlassEnabled = iosLiquidGlassEnabled,
+        onAccentPrimary = contrastOnColor(LiquidNeonCyanPrimary),
+        onAccentSecondary = contrastOnColor(LiquidNeonCyanAccent),
+        statusSafe = Color(0xFF00E676),
+        statusWarning = Color(0xFFFBBF24),
+        statusDanger = Color(0xFFFF5252),
+        progressTrackBg = Color(0x45162440)
     )
 
     AppThemeMode.AMOLED_PITCH_BLACK -> LiquidGlassStyle(
@@ -378,10 +433,10 @@ fun createLiquidGlassStyle(mode: AppThemeMode, isSystemDark: Boolean = false): L
         cardBackground = AmoledPitchBlackCardBg,
         cardSubtleBg = AmoledPitchBlackCardSubtleBg,
         rimLightBrush = Brush.linearGradient(
-            listOf(Color(0x4D3B82F6), Color(0x1AFFFFFF), Color(0x4D06B6D4))
+            listOf(Color(0x523B82F6), Color(0x22FFFFFF), Color(0x5200E5FF))
         ),
         backdropBrush = Brush.verticalGradient(
-            listOf(Color(0xFF111116), Color(0xFF000000))
+            listOf(Color(0xFF0B0B0E), Color(0xFF000000))
         ),
         blurRadius = 8.dp,
         isDark = true,
@@ -390,10 +445,17 @@ fun createLiquidGlassStyle(mode: AppThemeMode, isSystemDark: Boolean = false): L
         neumorphicHighlight = Color(0x263B82F6),
         neumorphicShadow = Color(0xE6000000),
         neumorphicBorderLight = Color(0x1FFFFFFF),
-        neumorphicBorderDark = Color(0x80000000)
+        neumorphicBorderDark = Color(0x80000000),
+        iosLiquidGlassEnabled = iosLiquidGlassEnabled,
+        onAccentPrimary = contrastOnColor(AmoledPitchBlackPrimary),
+        onAccentSecondary = contrastOnColor(AmoledPitchBlackAccent),
+        statusSafe = Color(0xFF00E676),
+        statusWarning = Color(0xFFFBBF24),
+        statusDanger = Color(0xFFFF5252),
+        progressTrackBg = Color(0x521F2430)
     )
 
-    else -> createExtendedLiquidGlassStyle(getExtendedPaletteSpec(mode))
+    else -> createExtendedLiquidGlassStyle(getExtendedPaletteSpec(mode), iosLiquidGlassEnabled)
 }
 
 /**
@@ -440,18 +502,24 @@ fun resolveEffectiveThemeMode(
 }
 
 /**
- * Production-ready Theme Wrapper Composable that dynamically applies the selected AppThemeMode.
+ * Production-ready Theme Wrapper Composable that dynamically applies the selected AppThemeMode
+ * and Apple iOS Liquid Glass button/icon rendering preference.
  */
 @Composable
 fun DataPulseTheme(
     appThemeMode: AppThemeMode = AppThemeMode.LIQUID_GLASS_DEFAULT,
     themeMode: ThemeMode? = null,
+    iosLiquidGlassEnabled: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val isSystemDark = androidx.compose.foundation.isSystemInDarkTheme()
     val effectiveMode = resolveEffectiveThemeMode(appThemeMode, themeMode, isSystemDark)
     val colorScheme = createAppColorScheme(effectiveMode, isSystemDark)
-    val liquidGlassStyle = createLiquidGlassStyle(effectiveMode, isSystemDark)
+    val liquidGlassStyle = createLiquidGlassStyle(
+        mode = effectiveMode,
+        isSystemDark = isSystemDark,
+        iosLiquidGlassEnabled = iosLiquidGlassEnabled
+    )
 
     val view = LocalView.current
     if (!view.isInEditMode) {

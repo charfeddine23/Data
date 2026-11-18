@@ -29,16 +29,12 @@ import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.SimCard
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.Wifi
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -86,15 +82,12 @@ import com.example.ui.MainViewModel
 import com.example.ui.components.CircularQuotaProgressGauge
 import com.example.ui.components.ElasticFlamePullToRefreshBox
 import com.example.ui.components.GlassContainer
-import com.example.ui.components.LiveSpeedCard
-import com.example.ui.components.QuotaProgressGauge
+import com.example.ui.components.IosLiquidGlassButton
+import com.example.ui.components.IosLiquidGlassIconBadge
+import com.example.ui.components.IosLiquidGlassIconButton
 import com.example.ui.components.UsagePermissionCard
-import com.example.ui.theme.CyanPulse
-import com.example.ui.theme.ElectricBlue
-import com.example.ui.theme.NeonPurple
-import com.example.ui.theme.TextPrimary
-import com.example.ui.theme.TextSecondary
-import com.example.ui.theme.TextTertiary
+import com.example.ui.components.iosLiquidGlassSurface
+import com.example.ui.theme.contrastOnColor
 
 @Composable
 fun DashboardScreen(
@@ -437,8 +430,8 @@ fun LiquidGlassDualSimSlider(
                     .background(
                         Brush.radialGradient(
                             colors = listOf(
-                                CyanPulse.copy(alpha = glowAlpha * 0.35f),
-                                ElectricBlue.copy(alpha = glowAlpha * 0.20f),
+                                glassStyle.accentPrimary.copy(alpha = glowAlpha * 0.35f),
+                                glassStyle.accentSecondary.copy(alpha = glowAlpha * 0.20f),
                                 Color.Transparent
                             )
                         ),
@@ -455,25 +448,38 @@ fun LiquidGlassDualSimSlider(
                         scaleX = stretchX
                         scaleY = squashY
                     }
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(
-                        Brush.linearGradient(
-                            colors = listOf(
-                                CyanPulse.copy(alpha = if (glassStyle.isDark) 0.28f else 0.20f),
-                                ElectricBlue.copy(alpha = if (glassStyle.isDark) 0.18f else 0.12f)
+                    .then(
+                        if (glassStyle.iosLiquidGlassEnabled) {
+                            Modifier.iosLiquidGlassSurface(
+                                shape = RoundedCornerShape(18.dp),
+                                tintColor = glassStyle.accentPrimary,
+                                isFilledAccent = false,
+                                isPressed = isDragging,
+                                elevation = 4.dp
                             )
-                        )
-                    )
-                    .border(
-                        1.5.dp,
-                        Brush.horizontalGradient(
-                            colors = listOf(
-                                CyanPulse.copy(alpha = 0.85f),
-                                ElectricBlue.copy(alpha = 0.65f),
-                                CyanPulse.copy(alpha = 0.45f)
-                            )
-                        ),
-                        RoundedCornerShape(18.dp)
+                        } else {
+                            Modifier
+                                .clip(RoundedCornerShape(18.dp))
+                                .background(
+                                    Brush.linearGradient(
+                                        colors = listOf(
+                                            glassStyle.accentPrimary.copy(alpha = if (glassStyle.isDark) 0.28f else 0.20f),
+                                            glassStyle.accentSecondary.copy(alpha = if (glassStyle.isDark) 0.18f else 0.12f)
+                                        )
+                                    )
+                                )
+                                .border(
+                                    1.5.dp,
+                                    Brush.horizontalGradient(
+                                        colors = listOf(
+                                            glassStyle.accentPrimary.copy(alpha = 0.85f),
+                                            glassStyle.accentSecondary.copy(alpha = 0.65f),
+                                            glassStyle.accentPrimary.copy(alpha = 0.45f)
+                                        )
+                                    ),
+                                    RoundedCornerShape(18.dp)
+                                )
+                        }
                     )
             )
 
@@ -509,7 +515,7 @@ private fun SimSlotItem(
     modifier: Modifier = Modifier
 ) {
     val glassStyle = com.example.ui.theme.LocalLiquidGlass.current
-    val activeColor = CyanPulse
+    val activeColor = glassStyle.accentPrimary
     val inactiveColor = glassStyle.textSecondary
     val iconTint = if (proximity > 0.5f) activeColor else glassStyle.textTertiary
 
@@ -521,33 +527,14 @@ private fun SimSlotItem(
         horizontalArrangement = Arrangement.Center
     ) {
         // SIM Card Chip Icon
-        Box(
-            modifier = Modifier
-                .size(32.dp)
-                .clip(CircleShape)
-                .background(
-                    if (proximity > 0.5f)
-                        activeColor.copy(alpha = 0.18f * proximity)
-                    else
-                        glassStyle.cardSubtleBg
-                )
-                .border(
-                    1.dp,
-                    if (proximity > 0.5f)
-                        activeColor.copy(alpha = 0.45f * proximity)
-                    else
-                        glassStyle.borderColor.copy(alpha = 0.2f),
-                    CircleShape
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.SimCard,
-                contentDescription = sim.displayName,
-                tint = iconTint,
-                modifier = Modifier.size(16.dp)
-            )
-        }
+        IosLiquidGlassIconBadge(
+            icon = Icons.Default.SimCard,
+            contentDescription = sim.displayName,
+            size = 32.dp,
+            iconSize = 16.dp,
+            tintColor = iconTint,
+            shape = CircleShape
+        )
 
         Spacer(modifier = Modifier.width(8.dp))
 
@@ -568,14 +555,14 @@ private fun SimSlotItem(
                         modifier = Modifier
                             .size(6.dp)
                             .clip(CircleShape)
-                            .background(CyanPulse)
+                            .background(activeColor)
                     )
                 }
             }
 
             Text(
                 text = sim.carrierName,
-                color = if (proximity > 0.5f) CyanPulse else glassStyle.textTertiary,
+                color = if (proximity > 0.5f) activeColor else glassStyle.textTertiary,
                 fontSize = 10.5.sp,
                 fontWeight = if (proximity > 0.5f) FontWeight.SemiBold else FontWeight.Normal,
                 maxLines = 1
@@ -625,7 +612,7 @@ fun DataBreakdownGrid(
                 title = com.example.model.AppStrings.todayWifi(appLanguage),
                 value = FormatUtils.formatBytes(usageSummary.wifiTodayBytes),
                 icon = Icons.Default.Wifi,
-                tint = ElectricBlue,
+                tint = glassStyle.accentSecondary,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -638,7 +625,7 @@ fun DataBreakdownGrid(
                 title = com.example.model.AppStrings.monthlyCellular(appLanguage),
                 value = FormatUtils.formatBytes(usageSummary.mobileMonthBytes),
                 icon = Icons.Default.CellTower,
-                tint = glassStyle.accentSecondary,
+                tint = glassStyle.statusSafe,
                 modifier = Modifier.weight(1f)
             )
             BreakdownMetricCard(
@@ -672,11 +659,13 @@ fun BreakdownMetricCard(
     ) {
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = icon,
+                IosLiquidGlassIconBadge(
+                    icon = icon,
                     contentDescription = title,
-                    tint = tint,
-                    modifier = Modifier.size(16.dp)
+                    size = 24.dp,
+                    iconSize = 14.dp,
+                    tintColor = tint,
+                    shape = RoundedCornerShape(7.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
@@ -748,20 +737,14 @@ fun EditDataCapDialog(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(32.dp)
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(glassStyle.accentPrimary.copy(alpha = if (glassStyle.isDark) 0.20f else 0.12f)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.PieChart,
-                                        contentDescription = "Edit Cap",
-                                        tint = glassStyle.accentPrimary,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                }
+                                IosLiquidGlassIconBadge(
+                                    icon = Icons.Default.PieChart,
+                                    contentDescription = "Edit Cap",
+                                    size = 34.dp,
+                                    iconSize = 18.dp,
+                                    tintColor = glassStyle.accentPrimary,
+                                    shape = RoundedCornerShape(10.dp)
+                                )
                                 Spacer(modifier = Modifier.width(10.dp))
                                 Column {
                                     Text(
@@ -778,17 +761,15 @@ fun EditDataCapDialog(
                                 }
                             }
 
-                            IconButton(
+                            IosLiquidGlassIconButton(
                                 onClick = onDismiss,
-                                modifier = Modifier.size(32.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = "Close",
-                                    tint = glassStyle.textTertiary,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
+                                icon = Icons.Default.Close,
+                                contentDescription = "Close",
+                                visualSize = 36.dp,
+                                iconSize = 18.dp,
+                                tintColor = glassStyle.textTertiary,
+                                shape = CircleShape
+                            )
                         }
 
                         Spacer(modifier = Modifier.height(14.dp))
@@ -890,7 +871,7 @@ fun EditDataCapDialog(
                             colors = SliderDefaults.colors(
                                 thumbColor = glassStyle.accentPrimary,
                                 activeTrackColor = glassStyle.accentPrimary,
-                                inactiveTrackColor = if (glassStyle.isDark) Color(0xFF162238) else Color(0xFFE2E8F0)
+                                inactiveTrackColor = glassStyle.progressTrackBg
                             ),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -909,24 +890,23 @@ fun EditDataCapDialog(
                                 Box(
                                     modifier = Modifier
                                         .weight(1f)
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(if (isSelected) glassStyle.accentPrimary else glassStyle.cardBackground)
-                                        .border(
-                                            0.8.dp,
-                                            if (isSelected) glassStyle.accentPrimary else glassStyle.borderColor,
-                                            RoundedCornerShape(8.dp)
+                                        .iosLiquidGlassSurface(
+                                            shape = RoundedCornerShape(9.dp),
+                                            tintColor = if (isSelected) glassStyle.accentPrimary else glassStyle.cardSubtleBg,
+                                            isFilledAccent = isSelected,
+                                            elevation = if (isSelected) 3.dp else 0.dp
                                         )
                                         .clickable {
                                             appHaptics.performSegmentSwitch()
                                             limitValue = preset
                                             textInput = preset.toInt().toString()
                                         }
-                                        .padding(vertical = 7.dp),
+                                        .padding(vertical = 8.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
                                         text = "${preset.toInt()}G",
-                                        color = if (isSelected) (if (glassStyle.isDark && !glassStyle.isNeumorphic) Color.Black else Color.White) else glassStyle.textSecondary,
+                                        color = if (isSelected) glassStyle.onAccentPrimary else glassStyle.textSecondary,
                                         fontSize = 10.sp,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -941,12 +921,13 @@ fun EditDataCapDialog(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            TextButton(
+                            IosLiquidGlassButton(
                                 onClick = onDismiss,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(44.dp),
-                                shape = RoundedCornerShape(10.dp)
+                                containerColor = glassStyle.cardSubtleBg,
+                                contentColor = glassStyle.textSecondary,
+                                isFilledAccent = false,
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier.weight(1f)
                             ) {
                                 Text(
                                     text = if (appLanguage == com.example.model.AppLanguage.ARABIC) "إلغاء" else "Cancel",
@@ -956,28 +937,28 @@ fun EditDataCapDialog(
                                 )
                             }
 
-                            Button(
+                            IosLiquidGlassButton(
                                 onClick = {
                                     appHaptics.performConfirm()
                                     val parsed = textInput.toFloatOrNull() ?: limitValue
                                     onSaveLimit(parsed.coerceIn(0.1f, 10000f))
                                 },
-                                colors = ButtonDefaults.buttonColors(containerColor = glassStyle.accentPrimary),
-                                shape = RoundedCornerShape(10.dp),
-                                modifier = Modifier
-                                    .weight(1.4f)
-                                    .height(44.dp)
+                                containerColor = glassStyle.accentPrimary,
+                                contentColor = glassStyle.onAccentPrimary,
+                                isFilledAccent = true,
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier.weight(1.4f)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Check,
                                     contentDescription = null,
-                                    tint = if (glassStyle.isDark && !glassStyle.isNeumorphic) Color.Black else Color.White,
+                                    tint = glassStyle.onAccentPrimary,
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     text = if (appLanguage == com.example.model.AppLanguage.ARABIC) "حفظ السقف" else "Save Cap",
-                                    color = if (glassStyle.isDark && !glassStyle.isNeumorphic) Color.Black else Color.White,
+                                    color = glassStyle.onAccentPrimary,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold
                                 )

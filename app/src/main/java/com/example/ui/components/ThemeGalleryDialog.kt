@@ -155,9 +155,7 @@ fun ThemeSwatchCard(
 
             Text(
                 text = themeMode.titleEn,
-                color = if (isSelected) {
-                    if (glassStyle.isDark) Color.White else glassStyle.textPrimary
-                } else glassStyle.textPrimary,
+                color = glassStyle.textPrimary,
                 fontSize = 11.5.sp,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
                 maxLines = 1,
@@ -233,20 +231,14 @@ fun ThemeGalleryDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(glassStyle.accentPrimary.copy(alpha = 0.16f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Palette,
-                                contentDescription = null,
-                                tint = glassStyle.accentPrimary,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
+                        IosLiquidGlassIconBadge(
+                            icon = Icons.Default.Palette,
+                            contentDescription = null,
+                            size = 36.dp,
+                            iconSize = 18.dp,
+                            tintColor = glassStyle.accentPrimary,
+                            shape = RoundedCornerShape(10.dp)
+                        )
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text(
@@ -267,16 +259,14 @@ fun ThemeGalleryDialog(
                         }
                     }
 
-                    IconButton(
+                    IosLiquidGlassIconButton(
                         onClick = onDismiss,
-                        modifier = Modifier.size(48.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Close",
-                            tint = glassStyle.textSecondary
-                        )
-                    }
+                        icon = Icons.Default.Close,
+                        contentDescription = "Close",
+                        visualSize = 36.dp,
+                        iconSize = 18.dp,
+                        tintColor = glassStyle.textSecondary
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(10.dp))
@@ -389,27 +379,23 @@ private fun GalleryFilterChip(
     onClick: () -> Unit
 ) {
     val glassStyle = LocalLiquidGlass.current
-    val shape = RoundedCornerShape(10.dp)
+    val shape = RoundedCornerShape(12.dp)
 
     Box(
         modifier = Modifier
-            .clip(shape)
-            .background(
-                if (isSelected) glassStyle.accentPrimary.copy(alpha = if (glassStyle.isDark) 0.24f else 0.14f)
-                else glassStyle.cardSubtleBg
-            )
-            .border(
-                width = if (isSelected) 1.dp else 0.7.dp,
-                color = if (isSelected) glassStyle.accentPrimary else glassStyle.borderColor,
-                shape = shape
+            .iosLiquidGlassSurface(
+                shape = shape,
+                tintColor = if (isSelected) glassStyle.accentPrimary else glassStyle.textSecondary,
+                isFilledAccent = isSelected,
+                elevation = if (isSelected && glassStyle.iosLiquidGlassEnabled) 3.dp else 0.dp
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = 10.dp, vertical = 6.dp),
+            .padding(horizontal = 12.dp, vertical = 7.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = label,
-            color = if (isSelected) glassStyle.accentPrimary else glassStyle.textSecondary,
+            color = if (isSelected) glassStyle.onAccentPrimary else glassStyle.textSecondary,
             fontSize = 11.sp,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
             maxLines = 1

@@ -54,14 +54,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.model.FormatUtils
 import com.example.ui.MainViewModel
 import com.example.ui.components.GlassContainer
-import com.example.ui.components.SpeedSparkline
+import com.example.ui.components.IosLiquidGlassIconBadge
+import com.example.ui.components.iosLiquidGlassSurface
 import com.example.ui.components.neumorphicDepth
-import com.example.ui.theme.CyanPulse
-import com.example.ui.theme.ElectricBlue
-import com.example.ui.theme.NeonPurple
-import com.example.ui.theme.TextPrimary
-import com.example.ui.theme.TextSecondary
-import com.example.ui.theme.TextTertiary
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -269,11 +264,13 @@ fun NetworkDiagnosticsCard(
     GlassContainer(modifier = modifier.fillMaxWidth()) {
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = Icons.Default.NetworkCheck,
+                IosLiquidGlassIconBadge(
+                    icon = Icons.Default.NetworkCheck,
                     contentDescription = com.example.model.AppStrings.networkDiagnostics(appLanguage),
-                    tint = glassStyle.accentPrimary,
-                    modifier = Modifier.size(18.dp)
+                    size = 28.dp,
+                    iconSize = 15.dp,
+                    tintColor = glassStyle.accentPrimary,
+                    shape = RoundedCornerShape(8.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
@@ -336,7 +333,7 @@ fun SpeedometerDial(
 
             // Background Track Arc (240 degrees, from 150 to 390)
             drawArc(
-                color = if (glassStyle.isDark) Color(0xFF131D30) else Color(0xFFE2E8F0),
+                color = glassStyle.progressTrackBg,
                 startAngle = 150f,
                 sweepAngle = 240f,
                 useCenter = false,
@@ -374,7 +371,7 @@ fun SpeedometerDial(
             )
         }
 
-        // Center Speed Readout sitting on soft Neumorphic circular well - clickable to launch speed test
+        // Center Speed Readout sitting on soft Neumorphic / iOS Liquid Glass circular well
         val speedTestLabel = if (appLanguage == com.example.model.AppLanguage.ARABIC) "قياس سرعة الإنترنت" else "Test Internet Speed"
         Box(
             modifier = Modifier
@@ -385,23 +382,35 @@ fun SpeedometerDial(
                     darkColor = glassStyle.neumorphicShadow,
                     offsetDp = 4.dp
                 )
-                .clip(CircleShape)
+                .then(
+                    if (glassStyle.iosLiquidGlassEnabled) {
+                        Modifier.iosLiquidGlassSurface(
+                            shape = CircleShape,
+                            tintColor = glassStyle.accentPrimary,
+                            isFilledAccent = false,
+                            elevation = 4.dp
+                        )
+                    } else {
+                        Modifier
+                            .clip(CircleShape)
+                            .background(
+                                Brush.linearGradient(
+                                    listOf(glassStyle.neumorphicSurface, glassStyle.neumorphicBase)
+                                )
+                            )
+                            .border(
+                                1.dp,
+                                Brush.linearGradient(listOf(glassStyle.neumorphicBorderLight, glassStyle.neumorphicBorderDark)),
+                                CircleShape
+                            )
+                    }
+                )
                 .clickable(
                     role = Role.Button,
                     onClickLabel = speedTestLabel,
                     onClick = onOpenSpeedTest
                 )
-                .testTag("speedometer_open_speed_test")
-                .background(
-                    Brush.linearGradient(
-                        listOf(glassStyle.neumorphicSurface, glassStyle.neumorphicBase)
-                    )
-                )
-                .border(
-                    1.dp,
-                    Brush.linearGradient(listOf(glassStyle.neumorphicBorderLight, glassStyle.neumorphicBorderDark)),
-                    CircleShape
-                ),
+                .testTag("speedometer_open_speed_test"),
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -479,20 +488,14 @@ fun SpeedTelemetryCard(
     ) {
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(26.dp)
-                        .clip(CircleShape)
-                        .background(accentColor.copy(alpha = 0.15f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = title,
-                        tint = accentColor,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
+                IosLiquidGlassIconBadge(
+                    icon = icon,
+                    contentDescription = title,
+                    size = 28.dp,
+                    iconSize = 15.dp,
+                    tintColor = accentColor,
+                    shape = CircleShape
+                )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = title,

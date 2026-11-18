@@ -114,6 +114,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             initialValue = com.example.model.AppThemeMode.LIQUID_GLASS_DEFAULT
         )
 
+    // Observable Apple iOS Liquid Glass styling toggle for buttons & icons
+    val iosLiquidGlassEnabled: StateFlow<Boolean> = themePreferences.iosLiquidGlassEnabledFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = true
+        )
+
     private val _themeMode = MutableStateFlow(
         try {
             com.example.model.ThemeMode.valueOf(preferences.themeMode)
@@ -493,6 +501,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
             preferences.themeMode = appearance.name
             _themeMode.value = appearance
+        }
+    }
+
+    fun toggleIosLiquidGlass(enabled: Boolean) {
+        viewModelScope.launch {
+            themePreferences.setIosLiquidGlassEnabled(enabled)
         }
     }
 

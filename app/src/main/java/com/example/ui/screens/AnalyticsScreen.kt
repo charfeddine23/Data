@@ -47,7 +47,6 @@ import androidx.compose.material.icons.filled.Today
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -60,7 +59,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
@@ -78,17 +76,13 @@ import com.example.model.InterfaceFilter
 import com.example.model.TimeRange
 import com.example.ui.MainViewModel
 import com.example.ui.components.GlassContainer
+import com.example.ui.components.IosLiquidGlassIconBadge
+import com.example.ui.components.IosLiquidGlassIconButton
 import com.example.ui.components.PerAppCustomLimitDialog
 import com.example.ui.components.UsagePermissionCard
+import com.example.ui.components.iosLiquidGlassSurface
 import com.example.ui.components.rememberAppHaptics
 import com.example.ui.components.tactileSpringPress
-import com.example.ui.theme.CyanPulse
-import com.example.ui.theme.ElectricBlue
-import com.example.ui.theme.EmeraldSafe
-import com.example.ui.theme.NeonPurple
-import com.example.ui.theme.TextPrimary
-import com.example.ui.theme.TextSecondary
-import com.example.ui.theme.TextTertiary
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -174,14 +168,15 @@ fun AnalyticsScreen(
             },
             trailingIcon = {
                 if (searchQuery.isNotEmpty()) {
-                    IconButton(onClick = { viewModel.setSearchQuery("") }) {
-                        Icon(
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = "Clear",
-                            tint = glassStyle.textTertiary,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
+                    IosLiquidGlassIconButton(
+                        onClick = { viewModel.setSearchQuery("") },
+                        icon = Icons.Default.Clear,
+                        contentDescription = "Clear",
+                        visualSize = 32.dp,
+                        iconSize = 16.dp,
+                        tintColor = glassStyle.textTertiary,
+                        shape = CircleShape
+                    )
                 }
             },
             singleLine = true,
@@ -357,24 +352,11 @@ fun CyclingTimeRangeButton(
         modifier = modifier
             .height(48.dp)
             .tactileSpringPress(pressedScale = 0.955f, onClick = onCycle)
-            .clip(shape)
-            .background(
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        glassStyle.cardBackground,
-                        glassStyle.accentPrimary.copy(alpha = if (glassStyle.isDark) 0.14f else 0.08f)
-                    )
-                )
-            )
-            .border(
-                width = 1.dp,
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        glassStyle.accentPrimary.copy(alpha = 0.65f),
-                        glassStyle.borderColor
-                    )
-                ),
-                shape = shape
+            .iosLiquidGlassSurface(
+                shape = shape,
+                tintColor = glassStyle.accentPrimary,
+                isFilledAccent = false,
+                elevation = if (glassStyle.iosLiquidGlassEnabled) 4.dp else 0.dp
             )
             .padding(horizontal = 10.dp)
             .testTag("cycle_time_range_button"),
@@ -389,20 +371,14 @@ fun CyclingTimeRangeButton(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.weight(1f)
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .clip(RoundedCornerShape(9.dp))
-                        .background(glassStyle.accentPrimary.copy(alpha = if (glassStyle.isDark) 0.20f else 0.14f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = label,
-                        tint = glassStyle.accentPrimary,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
+                IosLiquidGlassIconBadge(
+                    icon = icon,
+                    contentDescription = label,
+                    size = 28.dp,
+                    iconSize = 16.dp,
+                    tintColor = glassStyle.accentPrimary,
+                    shape = RoundedCornerShape(9.dp)
+                )
 
                 Spacer(modifier = Modifier.width(8.dp))
 
@@ -474,8 +450,8 @@ fun CyclingInterfaceFilterButton(
 
     val targetTint = when (currentFilter) {
         InterfaceFilter.ALL -> glassStyle.accentSecondary
-        InterfaceFilter.MOBILE -> ElectricBlue
-        InterfaceFilter.WIFI -> EmeraldSafe
+        InterfaceFilter.MOBILE -> glassStyle.accentPrimary
+        InterfaceFilter.WIFI -> glassStyle.statusSafe
     }
 
     val animatedTint by animateColorAsState(
@@ -494,24 +470,11 @@ fun CyclingInterfaceFilterButton(
         modifier = modifier
             .height(48.dp)
             .tactileSpringPress(pressedScale = 0.955f, onClick = onCycle)
-            .clip(shape)
-            .background(
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        glassStyle.cardBackground,
-                        animatedTint.copy(alpha = if (glassStyle.isDark) 0.14f else 0.08f)
-                    )
-                )
-            )
-            .border(
-                width = 1.dp,
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        animatedTint.copy(alpha = 0.65f),
-                        glassStyle.borderColor
-                    )
-                ),
-                shape = shape
+            .iosLiquidGlassSurface(
+                shape = shape,
+                tintColor = animatedTint,
+                isFilledAccent = false,
+                elevation = if (glassStyle.iosLiquidGlassEnabled) 4.dp else 0.dp
             )
             .padding(horizontal = 10.dp)
             .testTag("cycle_interface_filter_button"),
@@ -526,20 +489,14 @@ fun CyclingInterfaceFilterButton(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.weight(1f)
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .clip(RoundedCornerShape(9.dp))
-                        .background(animatedTint.copy(alpha = if (glassStyle.isDark) 0.20f else 0.14f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = label,
-                        tint = animatedTint,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
+                IosLiquidGlassIconBadge(
+                    icon = icon,
+                    contentDescription = label,
+                    size = 28.dp,
+                    iconSize = 16.dp,
+                    tintColor = animatedTint,
+                    shape = RoundedCornerShape(9.dp)
+                )
 
                 Spacer(modifier = Modifier.width(8.dp))
 
@@ -716,7 +673,7 @@ fun AppUsageCard(
                     Icon(
                         imageVector = Icons.Default.Wifi,
                         contentDescription = com.example.model.AppStrings.filterWifi(appLanguage),
-                        tint = ElectricBlue,
+                        tint = glassStyle.accentPrimary,
                         modifier = Modifier.size(13.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
@@ -737,13 +694,7 @@ fun AppUsageCard(
                     .fillMaxWidth()
                     .height(5.dp)
                     .clip(RoundedCornerShape(3.dp))
-                    .background(
-                        when {
-                            glassStyle.isNeumorphic -> glassStyle.cardSubtleBg
-                            glassStyle.isDark -> Color(0xFF0B111E)
-                            else -> Color(0xFFE2E8F0)
-                        }
-                    )
+                    .background(glassStyle.progressTrackBg)
             ) {
                 Box(
                     modifier = Modifier
