@@ -194,7 +194,7 @@ fun DataPulseApp(
                         title = when (currentDestination) {
                             NavDestination.USAGE -> "Usage"
                             NavDestination.SETTINGS -> AppStrings.navSettings(appLanguage)
-                            else -> "Data Pulse"
+                            else -> "HyperNet"
                         },
                         onUsageTipClick = if (currentDestination == NavDestination.USAGE) {
                             { showUsageTipPopup = true }

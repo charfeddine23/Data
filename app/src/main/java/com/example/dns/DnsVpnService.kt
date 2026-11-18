@@ -108,7 +108,7 @@ class DnsVpnService : VpnService() {
             )
 
             val builder = Builder()
-                .setSession("Data Pulse DNS ($displayHost)")
+                .setSession("HyperNet DNS ($displayHost)")
                 .setConfigureIntent(configurePending)
                 .setMtu(1500)
                 .addAddress(VIRTUAL_TUN_ADDRESS, 32)

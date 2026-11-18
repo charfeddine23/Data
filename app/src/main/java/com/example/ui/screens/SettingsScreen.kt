@@ -1037,14 +1037,14 @@ fun SettingsScreen(
                     ) {
                         Image(
                             painter = painterResource(id = R.drawable.ic_brand_logo),
-                            contentDescription = "Data Pulse",
+                            contentDescription = "HyperNet",
                             modifier = Modifier.size(dimensions.headerIconSize)
                         )
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(
-                            text = "Data Pulse",
+                            text = "HyperNet",
                             color = glassStyle.textPrimary,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold

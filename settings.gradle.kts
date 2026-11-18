@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "Data Pulse"
+rootProject.name = "HyperNet"
 
 include(":app")

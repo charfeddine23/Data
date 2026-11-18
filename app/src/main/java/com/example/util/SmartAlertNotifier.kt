@@ -42,7 +42,7 @@ class SmartAlertNotifier(private val context: Context) {
             // 1. Data Cap & Quota Threshold Alerts (High Importance / Heads-up)
             val quotaChannel = NotificationChannel(
                 CHANNEL_DATA_CAP_ALERTS,
-                "Data Pulse: Quota & Limit Alerts",
+                "HyperNet: Quota & Limit Alerts",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "Critical heads-up alerts when data limit thresholds (80%, 95%) are reached"
@@ -56,7 +56,7 @@ class SmartAlertNotifier(private val context: Context) {
             // 2. Smart Forecast & Burn Rate Depletion Alerts (High Importance / Heads-up)
             val forecastChannel = NotificationChannel(
                 CHANNEL_FORECAST_ALERTS,
-                "Data Pulse: Smart Depletion Forecasts",
+                "HyperNet: Smart Depletion Forecasts",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "Proactive warnings when daily burn rate will deplete your monthly cap early"
@@ -70,7 +70,7 @@ class SmartAlertNotifier(private val context: Context) {
             // 3. Network Status & Telemetry Alerts
             val networkChannel = NotificationChannel(
                 CHANNEL_NETWORK_ALERTS,
-                "Data Pulse: Network & Connectivity",
+                "HyperNet: Network & Connectivity",
                 NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
                 description = "Updates on cellular & Wi-Fi connectivity and high-speed telemetry events"
@@ -162,7 +162,7 @@ class SmartAlertNotifier(private val context: Context) {
         } else {
             when (status) {
                 QuotaStatus.WARNING ->
-                    "⚠️ Data Pulse Alert: 80% Data Used" to
+                    "⚠️ HyperNet Alert: 80% Data Used" to
                     "You have used $formattedUsed of your $formattedLimit cap ($percentStr%). Consider saving bandwidth."
                 QuotaStatus.CRITICAL ->
                     "🚨 Critical Alert: 95% Data Limit Reached!" to
@@ -309,7 +309,7 @@ class SmartAlertNotifier(private val context: Context) {
     fun sendTestHeadsUpNotification(isArabic: Boolean = false) {
         if (!hasNotificationPermission()) return
 
-        val title = if (isArabic) "⚡ نبض البيانات: إشعار عائم تجريبي" else "⚡ Data Pulse: Heads-Up Alert Test"
+        val title = if (isArabic) "⚡ HyperNet: إشعار عائم تجريبي" else "⚡ HyperNet: Heads-Up Alert Test"
         val message = if (isArabic) {
             "تم تفعيل الإشعارات العائمة (Heads-Up) بنجاح. ستتلقى تنبيهات فورية عند وصول الباقة لحدود الخطر أو تسارع معدل الحرق."
         } else {

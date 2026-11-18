@@ -68,7 +68,7 @@ class AppUpdateManager(private val context: Context) {
         val request = Request.Builder()
             .url(GITHUB_LATEST_RELEASE_API)
             .header("Accept", "application/vnd.github+json")
-            .header("User-Agent", "DataPulse-Android/${BuildConfig.VERSION_NAME}")
+            .header("User-Agent", "HyperNet-Android/${BuildConfig.VERSION_NAME}")
             .build()
 
         client.newCall(request).execute().use { response ->
@@ -82,7 +82,7 @@ class AppUpdateManager(private val context: Context) {
             val assets = json.optJSONArray("assets") ?: return@withContext null
 
             var apkUrl: String? = null
-            var apkFileName = "Data.Pulse.$tagName.apk"
+            var apkFileName = "HyperNet.$tagName.apk"
             var apkSize = 0L
             var shaUrl: String? = null
 
@@ -111,7 +111,7 @@ class AppUpdateManager(private val context: Context) {
             AppUpdateInfo(
                 versionName = "${remoteVersion.first}.${remoteVersion.second}.${remoteVersion.third}",
                 tagName = tagName.ifBlank { "v${remoteVersion.first}.${remoteVersion.second}.${remoteVersion.third}" },
-                releaseTitle = releaseName.ifBlank { "Data Pulse ${remoteVersion.first}.${remoteVersion.second}.${remoteVersion.third}" },
+                releaseTitle = releaseName.ifBlank { "HyperNet ${remoteVersion.first}.${remoteVersion.second}.${remoteVersion.third}" },
                 releaseNotes = cleanReleaseNotes(bodyMarkdown),
                 apkDownloadUrl = apkUrl,
                 apkFileName = apkFileName,
@@ -140,7 +140,7 @@ class AppUpdateManager(private val context: Context) {
 
         val request = Request.Builder()
             .url(info.apkDownloadUrl)
-            .header("User-Agent", "DataPulse-Android/${BuildConfig.VERSION_NAME}")
+            .header("User-Agent", "HyperNet-Android/${BuildConfig.VERSION_NAME}")
             .build()
 
         client.newCall(request).execute().use { response ->
@@ -205,7 +205,7 @@ class AppUpdateManager(private val context: Context) {
         return try {
             val req = Request.Builder()
                 .url(shaUrl)
-                .header("User-Agent", "DataPulse-Android/${BuildConfig.VERSION_NAME}")
+                .header("User-Agent", "HyperNet-Android/${BuildConfig.VERSION_NAME}")
                 .build()
             client.newCall(req).execute().use { resp ->
                 if (!resp.isSuccessful) return null

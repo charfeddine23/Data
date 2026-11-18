@@ -109,7 +109,7 @@ jobs:
               f.write(gradle_text)
 
           # Extract app name from res/values/strings.xml
-          app_name = "Data Pulse"
+          app_name = "HyperNet"
           strings_path = "app/src/main/res/values/strings.xml"
           if os.path.exists(strings_path):
               with open(strings_path, "r", encoding="utf-8") as sf:

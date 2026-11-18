@@ -282,7 +282,7 @@ private fun Modifier.drawBehindCompat(
 
 /**
  * Sticky, frosted Liquid Glass Top App Bar anchored at the top across all screens.
- * Displays the app icon, "Data Pulse" branding, live connection status pill, and Settings button.
+ * Displays the app icon, "HyperNet" branding, live connection status pill, and Settings button.
  */
 @Composable
 fun PersistentTopAppBar(
@@ -292,7 +292,7 @@ fun PersistentTopAppBar(
     onOpenSettings: () -> Unit,
     isForecastActive: Boolean = false,
     onOpenForecast: () -> Unit = {},
-    title: String = "Data Pulse",
+    title: String = "HyperNet",
     onUsageTipClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
@@ -387,7 +387,7 @@ fun DashboardHeader(
     isSettingsActive: Boolean = false,
     isForecastActive: Boolean = false,
     onOpenForecast: () -> Unit = {},
-    title: String = "Data Pulse",
+    title: String = "HyperNet",
     onUsageTipClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
@@ -411,14 +411,14 @@ fun DashboardHeader(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.weight(1f, fill = false)
             ) {
-                // Minimalist transparent-background Data Pulse brand logo
+                // Minimalist transparent-background HyperNet brand logo
                 Box(
                     modifier = Modifier.size(dimensions.headerIconBoxSize),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.ic_brand_logo),
-                        contentDescription = "Data Pulse",
+                        contentDescription = "HyperNet",
                         modifier = Modifier.size(dimensions.headerIconSize)
                     )
                 }

@@ -1,6 +1,6 @@
 {
-  "name": "Data Pulse",
-  "description": "Modern network data tracking & live speed meter with liquid glass aesthetics, per-app analytics, dual SIM support, and smart quota alerts. Developed by Charfeddine Ka.",
+  "name": "HyperNet",
+  "description": "HyperNet — Modern network data tracking, private DNS shield, and live speed meter with liquid glass & neumorphic aesthetics, per-app analytics, dual SIM support, and smart quota alerts. Developed by Charfeddine Ka.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
