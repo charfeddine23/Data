@@ -65,90 +65,90 @@ val LightModeTextSecondary = PearlPlatinumTextSecondary
 val LightModeTextTertiary = PearlPlatinumTextTertiary
 
 // =========================================================================
-// 1. DARK LIQUID GLASS & NEUMORPHIC DEPTH PALETTE (#090C10 -> #0D1117)
-// Deep Obsidian Background: #090C10 to #0D1117
-// Frosted Translucent Card Surface: #111722
-// Primary: Electric Cyan (#00E5FF)
-// Secondary / Safe: Emerald Mint (#00E676) & Royal Violet (#7C4DFF)
+// 1. APPLE SPATIAL LIQUID GLASS PALETTE (Deep Midnight Sapphire -> Ice Azure)
+// Deep Midnight Indigo-Obsidian Background: #050B16 to #0A1528
+// Frosted Translucent Glass Surface: #0E192E
+// Primary: Apple Spatial Sky Azure (#38BDF8)
+// Secondary: Iridescent Frosted Teal-Mint (#2DD4BF)
 // =========================================================================
-val ObsidianVoidTop = Color(0xFF090C10)
-val ObsidianVoidBottom = Color(0xFF0D1117)
-val ObsidianGlassSurface = Color(0xFF111722)
-val ObsidianGlassElevated = Color(0xFF161F2E)
-val ElectricCyan = Color(0xFF00E5FF)
-val EmeraldMint = Color(0xFF00E676)
+val ObsidianVoidTop = Color(0xFF050B16)
+val ObsidianVoidBottom = Color(0xFF0A1528)
+val ObsidianGlassSurface = Color(0xFF0E192E)
+val ObsidianGlassElevated = Color(0xFF152440)
+val ElectricCyan = Color(0xFF38BDF8)
+val EmeraldMint = Color(0xFF2DD4BF)
 
 val NeumorphicSlateBase = ObsidianVoidTop
 val NeumorphicSlateSurface = ObsidianGlassSurface
-val NeumorphicSlateSurfaceSubtle = Color(0xFF0D131D)
-val NeumorphicSlateHighlight = Color(0x3300E5FF) // Specular Electric Cyan top-left rim glow
-val NeumorphicSlateShadow = Color(0xEC020408)    // Deep bottom-right ambient shadow
-val NeumorphicBorderHighlight = Color(0x30FFFFFF)
+val NeumorphicSlateSurfaceSubtle = Color(0xFF091223)
+val NeumorphicSlateHighlight = Color(0x3038BDF8) // Subtle Sky Azure top-left rim glow
+val NeumorphicSlateShadow = Color(0xEC02050D)    // Deep bottom-right ambient shadow
+val NeumorphicBorderHighlight = Color(0x2EFFFFFF)
 val NeumorphicBorderShadow = Color(0x73000000)
 
 val LiquidGlassDefaultBackground = ObsidianVoidTop
 val LiquidGlassDefaultSurface = ObsidianGlassSurface
-val LiquidGlassDefaultSurfaceTranslucent = Color(0xDB111722)
+val LiquidGlassDefaultSurfaceTranslucent = Color(0xCC0E192E)
 val LiquidGlassDefaultPrimary = ElectricCyan
 val LiquidGlassDefaultAccent = EmeraldMint
-val LiquidGlassDefaultBorder = Color(0x3800E5FF)
+val LiquidGlassDefaultBorder = Color(0x36FFFFFF)
 val LiquidGlassDefaultCardBg = ObsidianGlassSurface
-val LiquidGlassDefaultCardSubtleBg = Color(0xFF0D131D)
+val LiquidGlassDefaultCardSubtleBg = Color(0xFF091223)
 
 // =========================================================================
-// 2. LIQUID_NEON_CYAN Palette (Neumorphic Dark Cyan)
-// Background: Deep dark slate background (#080D1A)
-// Surface: Soft dark slate surface (#0D1527)
-// Primary: Bright cyan (#00E5FF)
-// Accent: Neon green / teal (#00E676)
+// 2. LIQUID_NEON_CYAN Palette (Deep Lagoon Glass & Aqua Crystal)
+// Background: Deep ocean slate background (#050D1A)
+// Surface: Frosted lagoon surface (#0C192E)
+// Primary: Luminous Aqua Cyan (#22D3EE)
+// Accent: Glacial Sky Blue (#60A5FA)
 // =========================================================================
-val LiquidNeonCyanBackground = Color(0xFF080D1A)
-val LiquidNeonCyanSurface = Color(0xFF0D1527)
-val LiquidNeonCyanSurfaceTranslucent = Color(0xD90D1527)
-val LiquidNeonCyanPrimary = Color(0xFF00E5FF)
-val LiquidNeonCyanAccent = Color(0xFF00E676)
-val LiquidNeonCyanBorder = Color(0x3800E5FF)
-val LiquidNeonCyanCardBg = Color(0xFF0D1527)
-val LiquidNeonCyanCardSubtleBg = Color(0xFF080D19)
+val LiquidNeonCyanBackground = Color(0xFF050D1A)
+val LiquidNeonCyanSurface = Color(0xFF0C192E)
+val LiquidNeonCyanSurfaceTranslucent = Color(0xCC0C192E)
+val LiquidNeonCyanPrimary = Color(0xFF22D3EE)
+val LiquidNeonCyanAccent = Color(0xFF60A5FA)
+val LiquidNeonCyanBorder = Color(0x3622D3EE)
+val LiquidNeonCyanCardBg = Color(0xFF0C192E)
+val LiquidNeonCyanCardSubtleBg = Color(0xFF081222)
 
 // =========================================================================
 // 3. AMOLED_PITCH_BLACK Palette (Neumorphic OLED Soft Dark)
 // Background: Pure pitch-black (#000000) for OLED battery saving
 // Surface: Soft tactile deep dark surface (#111116)
-// Primary: Electric Cyan (#00E5FF)
-// Accent: Emerald Mint (#00E676)
+// Primary: Electric Azure (#3B82F6)
+// Accent: Ice Cyan (#38BDF8)
 // =========================================================================
 val AmoledPitchBlackBackground = Color(0xFF000000)
 val AmoledPitchBlackSurface = Color(0xFF111116)
 val AmoledPitchBlackSurfaceTranslucent = Color(0xD9111116)
 val AmoledPitchBlackPrimary = Color(0xFF3B82F6)
-val AmoledPitchBlackAccent = Color(0xFF00E5FF)
+val AmoledPitchBlackAccent = Color(0xFF38BDF8)
 val AmoledPitchBlackBorder = Color(0x2E3B82F6)
 val AmoledPitchBlackCardBg = Color(0xFF111116)
 val AmoledPitchBlackCardSubtleBg = Color(0xFF0A0A0E)
 
 // Shared Common Colors & Status Alerts
 val CyanPulse = ElectricCyan
-val ElectricBlue = Color(0xFF00B4D8)
-val NeonPurple = Color(0xFFA855F7)
+val ElectricBlue = Color(0xFF60A5FA)
+val NeonPurple = Color(0xFFA78BFA)
 val DeepViolet = Color(0xFF7C3AED)
 val AmberAlert = Color(0xFFF59E0B)
 val RedAlert = Color(0xFFEF4444)
-val EmeraldSafe = EmeraldMint
+val EmeraldSafe = Color(0xFF10B981)
 
 val TextPrimary = Color(0xFFF8FAFC)
-val TextSecondary = Color(0xFF94A3B8)
-val TextTertiary = Color(0xFF64748B)
+val TextSecondary = Color(0xFFB4C2D6)
+val TextTertiary = Color(0xFF7C8EA6)
 
 // Preserved aliases for existing references
-val VoidBlack = Color(0xFF050811)
+val VoidBlack = Color(0xFF040812)
 val DeepObsidian = LiquidGlassDefaultBackground
 val GlassSurfaceDark = LiquidGlassDefaultSurface
 val GlassSurfaceTranslucent = LiquidGlassDefaultSurfaceTranslucent
-val GlassSurfaceUltraLight = Color(0x33FFFFFF)
+val GlassSurfaceUltraLight = Color(0x29FFFFFF)
 val GlassCardBorder = LiquidGlassDefaultBorder
-val GlassBorderSubtle = Color(0x1FFFFFFF)
-val GlassRimHighlight = Color(0x55FFFFFF)
+val GlassBorderSubtle = Color(0x1EFFFFFF)
+val GlassRimHighlight = Color(0x47FFFFFF)
 
 val PrimaryDark = LiquidGlassDefaultPrimary
 val OnPrimaryDark = Color(0xFFFFFFFF)
@@ -160,7 +160,7 @@ val BackgroundDark = LiquidGlassDefaultBackground
 val OnBackgroundDark = TextPrimary
 val SurfaceDark = LiquidGlassDefaultSurface
 val OnSurfaceDark = TextPrimary
-val SurfaceVariantDark = Color(0xFF131D31)
+val SurfaceVariantDark = Color(0xFF132038)
 val OnSurfaceVariantDark = TextSecondary
 val OutlineDark = Color(0x4094A3B8)
 
@@ -168,16 +168,16 @@ val OutlineDark = Color(0x4094A3B8)
 object LiquidGradients {
     val glassCardBackdrop = Brush.verticalGradient(
         colors = listOf(
-            Color(0xEE121C30),
-            Color(0xCC0C1424)
+            Color(0xE00E192E),
+            Color(0xC208101E)
         )
     )
 
     val glassRimLight = Brush.linearGradient(
         colors = listOf(
-            Color(0x4D00F5D4),
-            Color(0x1AFFFFFF),
-            Color(0x4DA855F7)
+            Color(0x4238BDF8),
+            Color(0x26FFFFFF),
+            Color(0x3D2DD4BF)
         )
     )
 
@@ -185,7 +185,7 @@ object LiquidGradients {
         colors = listOf(
             Color(0x33FFFFFF),
             Color(0x0DFFFFFF),
-            Color(0x264FD1C5)
+            Color(0x2638BDF8)
         )
     )
 

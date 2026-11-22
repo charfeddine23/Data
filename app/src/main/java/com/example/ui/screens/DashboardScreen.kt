@@ -516,28 +516,7 @@ fun LiquidGlassDualSimSlider(
             val currentProgress = progressAnim.value
             val thumbOffsetXPx = (currentProgress * thumbWidthPx)
 
-            // Ambient plasma glow under moving thumb
-            Box(
-                modifier = Modifier
-                    .offset { IntOffset(thumbOffsetXPx.roundToInt(), 0) }
-                    .size(width = thumbWidthDp, height = thumbHeightDp)
-                    .graphicsLayer {
-                        scaleX = stretchX
-                        scaleY = squashY
-                    }
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(
-                                glassStyle.accentPrimary.copy(alpha = glowAlpha * 0.34f),
-                                glassStyle.accentSecondary.copy(alpha = glowAlpha * 0.18f),
-                                Color.Transparent
-                            )
-                        ),
-                        thumbShape
-                    )
-            )
-
-            // Optical Liquid Glass Thumb Droplet
+            // Clean Optical Liquid Glass Thumb Droplet (zero glowing smear behind SIM text)
             Box(
                 modifier = Modifier
                     .offset { IntOffset(thumbOffsetXPx.roundToInt(), 0) }
@@ -551,7 +530,9 @@ fun LiquidGlassDualSimSlider(
                         tintColor = glassStyle.accentPrimary,
                         isFilledAccent = false,
                         isPressed = isDragging,
-                        elevation = if (glassStyle.iosLiquidGlassEnabled) 4.dp else 0.dp
+                        elevation = 0.dp,
+                        bodyAlphaOverride = if (glassStyle.isDark) 0.08f else 0.22f,
+                        useInteriorShadow = false
                     )
             )
 

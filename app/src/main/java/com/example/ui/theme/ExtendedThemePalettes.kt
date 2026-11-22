@@ -311,152 +311,152 @@ fun getExtendedPaletteSpec(mode: AppThemeMode): ThemePaletteSpec = when (mode) {
         isDark = true
     )
 
-    // --- 20 Luxury Liquid Glass Themes ---
+    // --- 20 Luxury Liquid Glass Themes (Cohesive Spatial Jewel & Frosted Palettes) ---
     AppThemeMode.OBSIDIAN_LIQUID_GLASS -> ThemePaletteSpec(
-        bgTop = Color(0xFF080B11), bgBottom = Color(0xFF04060A),
-        surface = Color(0xFF101723), cardSubtle = Color(0xFF0B1019),
-        primary = Color(0xFF00E5FF), secondary = Color(0xFF7C4DFF),
-        textPrimary = Color(0xFFF8FAFC), textSecondary = Color(0xFFA0AEC0), textTertiary = Color(0xFF7B8A9E),
-        isDark = true, blurDp = 22
+        bgTop = Color(0xFF060A13), bgBottom = Color(0xFF0A1222),
+        surface = Color(0xFF101B30), cardSubtle = Color(0xFF0B1324),
+        primary = Color(0xFF38BDF8), secondary = Color(0xFF818CF8),
+        textPrimary = Color(0xFFF8FAFC), textSecondary = Color(0xFFB3C2D6), textTertiary = Color(0xFF7D8FA8),
+        isDark = true, blurDp = 24
     )
     AppThemeMode.FROSTED_ARCTIC_GLASS -> ThemePaletteSpec(
-        bgTop = Color(0xFFEBF5FD), bgBottom = Color(0xFFDCEBF9),
-        surface = Color(0xFFF7FBFF), cardSubtle = Color(0xFFE3EFFA),
-        primary = Color(0xFF0284C7), secondary = Color(0xFF0369A1),
+        bgTop = Color(0xFFF0F7FF), bgBottom = Color(0xFFE0EEFC),
+        surface = Color(0xFFFAFDFF), cardSubtle = Color(0xFFE8F2FC),
+        primary = Color(0xFF0284C7), secondary = Color(0xFF0D9488),
         textPrimary = Color(0xFF0F172A), textSecondary = Color(0xFF475569), textTertiary = Color(0xFF64748B),
         isDark = false, blurDp = 24
     )
     AppThemeMode.CYBER_NEON_LIQUID -> ThemePaletteSpec(
-        bgTop = Color(0xFF090814), bgBottom = Color(0xFF05040B),
-        surface = Color(0xFF141229), cardSubtle = Color(0xFF0E0C1D),
-        primary = Color(0xFF00FFAA), secondary = Color(0xFFFF2E93),
-        textPrimary = Color(0xFFF8FAFC), textSecondary = Color(0xFFB5C2FF), textTertiary = Color(0xFF8B96D8),
-        isDark = true, blurDp = 20
-    )
-    AppThemeMode.SMOKED_QUARTZ_GLASS -> ThemePaletteSpec(
-        bgTop = Color(0xFF141216), bgBottom = Color(0xFF0D0B0E),
-        surface = Color(0xFF211E25), cardSubtle = Color(0xFF18151B),
-        primary = Color(0xFFE5C158), secondary = Color(0xFFB8B2AE),
-        textPrimary = Color(0xFFFAF8F5), textSecondary = Color(0xFFD6D3D1), textTertiary = Color(0xFF9E9893),
-        isDark = true, blurDp = 18
-    )
-    AppThemeMode.MIDNIGHT_VELVET_GLASS -> ThemePaletteSpec(
-        bgTop = Color(0xFF110B1E), bgBottom = Color(0xFF080511),
-        surface = Color(0xFF1C1332), cardSubtle = Color(0xFF140D25),
-        primary = Color(0xFFC084FC), secondary = Color(0xFFF472B6),
-        textPrimary = Color(0xFFFAF5FF), textSecondary = Color(0xFFDEC5FE), textTertiary = Color(0xFFA98FD0),
-        isDark = true, blurDp = 20
-    )
-    AppThemeMode.AURORA_BOREALIS_GLASS -> ThemePaletteSpec(
-        bgTop = Color(0xFF06161B), bgBottom = Color(0xFF030D11),
-        surface = Color(0xFF0E262E), cardSubtle = Color(0xFF091B21),
-        primary = Color(0xFF34D399), secondary = Color(0xFF38BDF8),
-        textPrimary = Color(0xFFECFDF5), textSecondary = Color(0xFFA7E9D1), textTertiary = Color(0xFF72B5A2),
+        bgTop = Color(0xFF080716), bgBottom = Color(0xFF110D28),
+        surface = Color(0xFF171333), cardSubtle = Color(0xFF100C24),
+        primary = Color(0xFF2DD4BF), secondary = Color(0xFFF472B6),
+        textPrimary = Color(0xFFF8FAFC), textSecondary = Color(0xFFC4CEF5), textTertiary = Color(0xFF8F9BC9),
         isDark = true, blurDp = 22
     )
+    AppThemeMode.SMOKED_QUARTZ_GLASS -> ThemePaletteSpec(
+        bgTop = Color(0xFF121015), bgBottom = Color(0xFF1A161E),
+        surface = Color(0xFF231F29), cardSubtle = Color(0xFF19151D),
+        primary = Color(0xFFEAB308), secondary = Color(0xFFD6D3D1),
+        textPrimary = Color(0xFFFAF8F5), textSecondary = Color(0xFFD6D3D1), textTertiary = Color(0xFF9F9893),
+        isDark = true, blurDp = 20
+    )
+    AppThemeMode.MIDNIGHT_VELVET_GLASS -> ThemePaletteSpec(
+        bgTop = Color(0xFF0F091D), bgBottom = Color(0xFF180F2D),
+        surface = Color(0xFF20153B), cardSubtle = Color(0xFF150E27),
+        primary = Color(0xFFC084FC), secondary = Color(0xFFF472B6),
+        textPrimary = Color(0xFFFAF5FF), textSecondary = Color(0xFFDCC9FC), textTertiary = Color(0xFFA58DCE),
+        isDark = true, blurDp = 22
+    )
+    AppThemeMode.AURORA_BOREALIS_GLASS -> ThemePaletteSpec(
+        bgTop = Color(0xFF051319), bgBottom = Color(0xFF0A2029),
+        surface = Color(0xFF0E2934), cardSubtle = Color(0xFF081B23),
+        primary = Color(0xFF34D399), secondary = Color(0xFF38BDF8),
+        textPrimary = Color(0xFFECFDF5), textSecondary = Color(0xFFB0EAD7), textTertiary = Color(0xFF76B8A7),
+        isDark = true, blurDp = 24
+    )
     AppThemeMode.CRYSTAL_PRISM_LIQUID -> ThemePaletteSpec(
-        bgTop = Color(0xFFF5F7FF), bgBottom = Color(0xFFE8ECFF),
-        surface = Color(0xFFFFFFFF), cardSubtle = Color(0xFFEEF0FF),
-        primary = Color(0xFF4F46E5), secondary = Color(0xFFDB2777),
-        textPrimary = Color(0xFF1E1B4B), textSecondary = Color(0xFF474B7A), textTertiary = Color(0xFF676C99),
+        bgTop = Color(0xFFF6F7FF), bgBottom = Color(0xFFEAEFFF),
+        surface = Color(0xFFFFFFFF), cardSubtle = Color(0xFFEEF1FF),
+        primary = Color(0xFF4F46E5), secondary = Color(0xFF0EA5E9),
+        textPrimary = Color(0xFF1E1B4B), textSecondary = Color(0xFF474B7A), textTertiary = Color(0xFF686D99),
         isDark = false, blurDp = 24
     )
     AppThemeMode.DEEP_OCEAN_GLASS -> ThemePaletteSpec(
-        bgTop = Color(0xFF041526), bgBottom = Color(0xFF020C17),
-        surface = Color(0xFF0A243E), cardSubtle = Color(0xFF061A2E),
-        primary = Color(0xFF00D2FF), secondary = Color(0xFF38BDF8),
-        textPrimary = Color(0xFFF0F9FF), textSecondary = Color(0xFFBAE6FD), textTertiary = Color(0xFF74ABD1),
-        isDark = true, blurDp = 20
+        bgTop = Color(0xFF041222), bgBottom = Color(0xFF081E38),
+        surface = Color(0xFF0B2746), cardSubtle = Color(0xFF061A31),
+        primary = Color(0xFF22D3EE), secondary = Color(0xFF60A5FA),
+        textPrimary = Color(0xFFF0F9FF), textSecondary = Color(0xFFBAE6FD), textTertiary = Color(0xFF78ACC9),
+        isDark = true, blurDp = 22
     )
     AppThemeMode.AMBER_MERCURY_GLASS -> ThemePaletteSpec(
-        bgTop = Color(0xFF17110A), bgBottom = Color(0xFF0E0A05),
-        surface = Color(0xFF261C10), cardSubtle = Color(0xFF1B140B),
-        primary = Color(0xFFF59E0B), secondary = Color(0xFFFBBF24),
-        textPrimary = Color(0xFFFFFBEB), textSecondary = Color(0xFFFDE68A), textTertiary = Color(0xFFC2A06E),
-        isDark = true, blurDp = 18
+        bgTop = Color(0xFF140F09), bgBottom = Color(0xFF1F160C),
+        surface = Color(0xFF281D11), cardSubtle = Color(0xFF1C140B),
+        primary = Color(0xFFF59E0B), secondary = Color(0xFFFCD34D),
+        textPrimary = Color(0xFFFFFBEB), textSecondary = Color(0xFFF3DE9B), textTertiary = Color(0xFFC2A06E),
+        isDark = true, blurDp = 20
     )
     AppThemeMode.TITANIUM_MIST_GLASS -> ThemePaletteSpec(
-        bgTop = Color(0xFFEEF2F6), bgBottom = Color(0xFFE2E8F0),
-        surface = Color(0xFFF8FAFC), cardSubtle = Color(0xFFE5EBF2),
+        bgTop = Color(0xFFF2F5F9), bgBottom = Color(0xFFE6ECF3),
+        surface = Color(0xFFFBFCFE), cardSubtle = Color(0xFFE9EFF6),
         primary = Color(0xFF0284C7), secondary = Color(0xFF475569),
         textPrimary = Color(0xFF0F172A), textSecondary = Color(0xFF475569), textTertiary = Color(0xFF64748B),
-        isDark = false, blurDp = 22
+        isDark = false, blurDp = 24
     )
     AppThemeMode.HOLOGRAPHIC_LIQUID_GLASS -> ThemePaletteSpec(
-        bgTop = Color(0xFF0D1021), bgBottom = Color(0xFF070915),
-        surface = Color(0xFF181C38), cardSubtle = Color(0xFF101329),
-        primary = Color(0xFF22D3EE), secondary = Color(0xFFE879F9),
-        textPrimary = Color(0xFFF8FAFC), textSecondary = Color(0xFFC9BEFD), textTertiary = Color(0xFF939BF0),
-        isDark = true, blurDp = 22
+        bgTop = Color(0xFF0B0E1E), bgBottom = Color(0xFF131733),
+        surface = Color(0xFF1A1F3F), cardSubtle = Color(0xFF11152C),
+        primary = Color(0xFF38BDF8), secondary = Color(0xFFE879F9),
+        textPrimary = Color(0xFFF8FAFC), textSecondary = Color(0xFFC8C2F8), textTertiary = Color(0xFF939AE6),
+        isDark = true, blurDp = 24
     )
     AppThemeMode.CARBON_BLUR_GLASS -> ThemePaletteSpec(
-        bgTop = Color(0xFF111315), bgBottom = Color(0xFF0A0B0D),
-        surface = Color(0xFF1C2024), cardSubtle = Color(0xFF14171A),
-        primary = Color(0xFF38BDF8), secondary = Color(0xFF94A3B8),
-        textPrimary = Color(0xFFF1F5F9), textSecondary = Color(0xFFA2B0C2), textTertiary = Color(0xFF7B8898),
-        isDark = true, blurDp = 20
+        bgTop = Color(0xFF0F1115), bgBottom = Color(0xFF16191F),
+        surface = Color(0xFF1E222A), cardSubtle = Color(0xFF15181E),
+        primary = Color(0xFF60A5FA), secondary = Color(0xFF94A3B8),
+        textPrimary = Color(0xFFF1F5F9), textSecondary = Color(0xFFACB8C8), textTertiary = Color(0xFF7D8A9B),
+        isDark = true, blurDp = 22
     )
     AppThemeMode.EMERALD_TRANSLUCENT_GLASS -> ThemePaletteSpec(
-        bgTop = Color(0xFF061812), bgBottom = Color(0xFF030F0B),
-        surface = Color(0xFF0C291F), cardSubtle = Color(0xFF081F17),
-        primary = Color(0xFF10B981), secondary = Color(0xFF34D399),
-        textPrimary = Color(0xFFECFDF5), textSecondary = Color(0xFFA7E8D0), textTertiary = Color(0xFF73B59C),
-        isDark = true, blurDp = 20
+        bgTop = Color(0xFF051510), bgBottom = Color(0xFF09221A),
+        surface = Color(0xFF0D2D23), cardSubtle = Color(0xFF082018),
+        primary = Color(0xFF10B981), secondary = Color(0xFF38BDF8),
+        textPrimary = Color(0xFFECFDF5), textSecondary = Color(0xFFAFE8D4), textTertiary = Color(0xFF74B39D),
+        isDark = true, blurDp = 22
     )
     AppThemeMode.ULTRAVIOLET_FROST_GLASS -> ThemePaletteSpec(
-        bgTop = Color(0xFF120A24), bgBottom = Color(0xFF0A0516),
-        surface = Color(0xFF1F123B), cardSubtle = Color(0xFF150C2A),
+        bgTop = Color(0xFF100921), bgBottom = Color(0xFF190E34),
+        surface = Color(0xFF221444), cardSubtle = Color(0xFF170D2F),
         primary = Color(0xFFA855F7), secondary = Color(0xFF38BDF8),
-        textPrimary = Color(0xFFFAF5FF), textSecondary = Color(0xFFD8B4FE), textTertiary = Color(0xFFA48AC4),
-        isDark = true, blurDp = 22
+        textPrimary = Color(0xFFFAF5FF), textSecondary = Color(0xFFD9C0FC), textTertiary = Color(0xFFA28BC4),
+        isDark = true, blurDp = 24
     )
     AppThemeMode.SAPPHIRE_LIQUID_GLASS -> ThemePaletteSpec(
-        bgTop = Color(0xFF061128), bgBottom = Color(0xFF030A1A),
-        surface = Color(0xFF0E1F45), cardSubtle = Color(0xFF091633),
-        primary = Color(0xFF3B82F6), secondary = Color(0xFF06B6D4),
-        textPrimary = Color(0xFFEFF6FF), textSecondary = Color(0xFFBFDBFE), textTertiary = Color(0xFF8AAAD9),
-        isDark = true, blurDp = 20
+        bgTop = Color(0xFF061026), bgBottom = Color(0xFF0B1C3F),
+        surface = Color(0xFF10244D), cardSubtle = Color(0xFF091736),
+        primary = Color(0xFF60A5FA), secondary = Color(0xFF22D3EE),
+        textPrimary = Color(0xFFEFF6FF), textSecondary = Color(0xFFC2DCFC), textTertiary = Color(0xFF8AA9D8),
+        isDark = true, blurDp = 22
     )
     AppThemeMode.PEARLESCENT_DARK_GLASS -> ThemePaletteSpec(
-        bgTop = Color(0xFF15171E), bgBottom = Color(0xFF0D0F14),
-        surface = Color(0xFF20242F), cardSubtle = Color(0xFF181B23),
+        bgTop = Color(0xFF13161E), bgBottom = Color(0xFF1B1F2A),
+        surface = Color(0xFF232836), cardSubtle = Color(0xFF181C26),
         primary = Color(0xFFE2E8F0), secondary = Color(0xFF7DD3FC),
-        textPrimary = Color(0xFFF8FAFC), textSecondary = Color(0xFFCBD5E1), textTertiary = Color(0xFF8A98AA),
-        isDark = true, blurDp = 20
+        textPrimary = Color(0xFFF8FAFC), textSecondary = Color(0xFFCBD5E1), textTertiary = Color(0xFF8C99AC),
+        isDark = true, blurDp = 22
     )
     AppThemeMode.RUBY_REFRACTIVE_GLASS -> ThemePaletteSpec(
-        bgTop = Color(0xFF1D080E), bgBottom = Color(0xFF120408),
-        surface = Color(0xFF2E0D17), cardSubtle = Color(0xFF210910),
-        primary = Color(0xFFF43F5E), secondary = Color(0xFFFB7185),
+        bgTop = Color(0xFF1A080E), bgBottom = Color(0xFF280C15),
+        surface = Color(0xFF32101B), cardSubtle = Color(0xFF220A12),
+        primary = Color(0xFFFB7185), secondary = Color(0xFFFDA4AF),
         textPrimary = Color(0xFFFFF1F2), textSecondary = Color(0xFFFECDD3), textTertiary = Color(0xFFC58A99),
-        isDark = true, blurDp = 20
+        isDark = true, blurDp = 22
     )
     AppThemeMode.CHROMATIC_ABERRATION_GLASS -> ThemePaletteSpec(
-        bgTop = Color(0xFF0C0B14), bgBottom = Color(0xFF06050A),
-        surface = Color(0xFF181626), cardSubtle = Color(0xFF100F1B),
-        primary = Color(0xFFFF2A85), secondary = Color(0xFF00E5FF),
-        textPrimary = Color(0xFFF8FAFC), textSecondary = Color(0xFFC4B5FD), textTertiary = Color(0xFF939BF0),
-        isDark = true, blurDp = 22
+        bgTop = Color(0xFF0A0A14), bgBottom = Color(0xFF121124),
+        surface = Color(0xFF191830), cardSubtle = Color(0xFF111021),
+        primary = Color(0xFFF43F5E), secondary = Color(0xFF38BDF8),
+        textPrimary = Color(0xFFF8FAFC), textSecondary = Color(0xFFC9C4F8), textTertiary = Color(0xFF939AE6),
+        isDark = true, blurDp = 24
     )
     AppThemeMode.LIQUID_MERCURY_DARK -> ThemePaletteSpec(
-        bgTop = Color(0xFF16191D), bgBottom = Color(0xFF0E1013),
-        surface = Color(0xFF22272E), cardSubtle = Color(0xFF191C21),
+        bgTop = Color(0xFF13161B), bgBottom = Color(0xFF1B1F26),
+        surface = Color(0xFF242933), cardSubtle = Color(0xFF181C23),
         primary = Color(0xFFCBD5E1), secondary = Color(0xFF38BDF8),
-        textPrimary = Color(0xFFF8FAFC), textSecondary = Color(0xFFA0AEC0), textTertiary = Color(0xFF7E8C9E),
-        isDark = true, blurDp = 18
+        textPrimary = Color(0xFFF8FAFC), textSecondary = Color(0xFFB0BCCB), textTertiary = Color(0xFF808D9F),
+        isDark = true, blurDp = 20
     )
     AppThemeMode.BIOLUMINESCENT_GLASS -> ThemePaletteSpec(
-        bgTop = Color(0xFF031618), bgBottom = Color(0xFF010C0E),
-        surface = Color(0xFF08262A), cardSubtle = Color(0xFF051A1E),
-        primary = Color(0xFF00F5D4), secondary = Color(0xFF00BBF9),
-        textPrimary = Color(0xFFECFEFF), textSecondary = Color(0xFFA5F3FC), textTertiary = Color(0xFF72B5BE),
-        isDark = true, blurDp = 22
+        bgTop = Color(0xFF031418), bgBottom = Color(0xFF062128),
+        surface = Color(0xFF0A2C35), cardSubtle = Color(0xFF051C22),
+        primary = Color(0xFF2DD4BF), secondary = Color(0xFF38BDF8),
+        textPrimary = Color(0xFFECFEFF), textSecondary = Color(0xFFB2EEF7), textTertiary = Color(0xFF74B3BE),
+        isDark = true, blurDp = 24
     )
 
     // Fallback for core entries if queried via helper
     else -> ThemePaletteSpec(
         bgTop = ObsidianVoidTop, bgBottom = ObsidianVoidBottom,
-        surface = ObsidianGlassSurface, cardSubtle = Color(0xFF0D131D),
+        surface = ObsidianGlassSurface, cardSubtle = Color(0xFF091223),
         primary = ElectricCyan, secondary = EmeraldMint,
         textPrimary = TextPrimary, textSecondary = TextSecondary, textTertiary = TextTertiary,
         isDark = true
@@ -468,7 +468,7 @@ fun createExtendedColorScheme(spec: ThemePaletteSpec): ColorScheme =
         darkColorScheme(
             primary = spec.primary,
             onPrimary = contrastOnColor(spec.primary),
-            primaryContainer = spec.primary.copy(alpha = 0.25f),
+            primaryContainer = spec.primary.copy(alpha = 0.24f),
             onPrimaryContainer = spec.textPrimary,
             secondary = spec.secondary,
             onSecondary = contrastOnColor(spec.secondary),
@@ -482,7 +482,7 @@ fun createExtendedColorScheme(spec: ThemePaletteSpec): ColorScheme =
             onSurface = spec.textPrimary,
             surfaceVariant = spec.cardSubtle,
             onSurfaceVariant = spec.textSecondary,
-            outline = spec.primary.copy(alpha = 0.35f),
+            outline = spec.primary.copy(alpha = 0.32f),
             error = RedAlert,
             onError = Color.White
         )
@@ -515,14 +515,14 @@ fun createExtendedLiquidGlassStyle(
     iosLiquidGlassEnabled: Boolean = true
 ): LiquidGlassStyle {
     val borderColor = if (spec.isDark) {
-        spec.primary.copy(alpha = 0.28f)
+        spec.primary.copy(alpha = 0.24f)
     } else {
-        spec.primary.copy(alpha = 0.20f)
+        spec.primary.copy(alpha = 0.18f)
     }
 
-    val safeStatus = if (spec.isDark) Color(0xFF10E88A) else Color(0xFF059669)
+    val safeStatus = if (spec.isDark) Color(0xFF10B981) else Color(0xFF059669)
     val warnStatus = if (spec.isDark) Color(0xFFFBBF24) else Color(0xFFD97706)
-    val dangerStatus = if (spec.isDark) Color(0xFFFF5252) else Color(0xFFDC2626)
+    val dangerStatus = if (spec.isDark) Color(0xFFFB7185) else Color(0xFFDC2626)
     val trackColor = if (spec.isDark) {
         spec.textPrimary.copy(alpha = 0.14f)
     } else {
@@ -531,7 +531,7 @@ fun createExtendedLiquidGlassStyle(
 
     return LiquidGlassStyle(
         surfaceColor = spec.surface,
-        surfaceTranslucent = spec.surface.copy(alpha = if (spec.isDark) 0.88f else 0.96f),
+        surfaceTranslucent = spec.surface.copy(alpha = if (spec.isDark) 0.84f else 0.94f),
         borderColor = borderColor,
         textPrimary = spec.textPrimary,
         textSecondary = spec.textSecondary,
@@ -542,9 +542,9 @@ fun createExtendedLiquidGlassStyle(
         cardSubtleBg = spec.cardSubtle,
         rimLightBrush = Brush.linearGradient(
             listOf(
-                spec.primary.copy(alpha = if (spec.isDark) 0.44f else 0.28f),
-                Color.White.copy(alpha = if (spec.isDark) 0.18f else 0.72f),
-                spec.secondary.copy(alpha = if (spec.isDark) 0.38f else 0.22f)
+                spec.primary.copy(alpha = if (spec.isDark) 0.38f else 0.24f),
+                Color.White.copy(alpha = if (spec.isDark) 0.24f else 0.72f),
+                spec.secondary.copy(alpha = if (spec.isDark) 0.34f else 0.20f)
             )
         ),
         backdropBrush = Brush.verticalGradient(
@@ -555,7 +555,7 @@ fun createExtendedLiquidGlassStyle(
         isNeumorphic = false,
         neumorphicBase = spec.bgTop,
         neumorphicSurface = spec.surface,
-        neumorphicHighlight = if (spec.isDark) spec.primary.copy(alpha = 0.22f) else Color(0xCCFFFFFF),
+        neumorphicHighlight = if (spec.isDark) spec.primary.copy(alpha = 0.20f) else Color(0xCCFFFFFF),
         neumorphicShadow = if (spec.isDark) Color(0xE6020408) else Color(0x140F172A),
         neumorphicBorderLight = if (spec.isDark) Color(0x2BFFFFFF) else Color(0x80FFFFFF),
         neumorphicBorderDark = if (spec.isDark) Color(0x66000000) else Color(0x0D0F172A),

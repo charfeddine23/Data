@@ -106,7 +106,9 @@ fun Modifier.iosLiquidGlassSurface(
     isPressed: Boolean = false,
     cornerRadius: Dp = 18.dp,
     enabled: Boolean = true,
-    elevation: Dp = 6.dp
+    elevation: Dp = 6.dp,
+    bodyAlphaOverride: Float? = null,
+    useInteriorShadow: Boolean = true
 ): Modifier = composed {
     val glassStyle = LocalLiquidGlass.current
     val active = enabled && glassStyle.iosLiquidGlassEnabled
@@ -140,47 +142,58 @@ fun Modifier.iosLiquidGlassSurface(
                 }
             }
     } else {
-        val lensBase = if (isFilledAccent) {
-            resolvedTint.copy(alpha = if (glassStyle.isDark) 0.90f else 0.96f)
-        } else {
-            resolvedTint
+        val isUltraSheer = bodyAlphaOverride != null && bodyAlphaOverride <= 0.12f
+        val lensBase = when {
+            isFilledAccent -> resolvedTint.copy(alpha = if (glassStyle.isDark) 0.90f else 0.96f)
+            bodyAlphaOverride != null -> resolvedTint
+                .copy(alpha = 0.28f)
+                .compositeOver(glassStyle.surfaceTranslucent)
+                .copy(alpha = bodyAlphaOverride)
+            else -> resolvedTint
                 .copy(alpha = if (glassStyle.isDark) 0.16f else 0.11f)
                 .compositeOver(glassStyle.surfaceTranslucent.copy(alpha = if (glassStyle.isDark) 0.68f else 0.84f))
         }
 
-        val lensMid = if (isFilledAccent) {
-            resolvedTint.copy(alpha = if (glassStyle.isDark) 0.84f else 0.92f)
-        } else {
-            glassStyle.surfaceColor.copy(alpha = if (glassStyle.isDark) 0.62f else 0.78f)
+        val lensMid = when {
+            isFilledAccent -> resolvedTint.copy(alpha = if (glassStyle.isDark) 0.84f else 0.92f)
+            bodyAlphaOverride != null -> glassStyle.surfaceColor.copy(alpha = bodyAlphaOverride)
+            else -> glassStyle.surfaceColor.copy(alpha = if (glassStyle.isDark) 0.62f else 0.78f)
         }
 
-        val lensBottom = if (isFilledAccent) {
-            resolvedTint
+        val lensBottom = when {
+            isFilledAccent -> resolvedTint
                 .copy(alpha = 0.76f)
                 .compositeOver(if (glassStyle.isDark) Color(0xFF040814) else Color(0xFF0F172A))
-        } else {
-            glassStyle.cardSubtleBg.copy(alpha = if (glassStyle.isDark) 0.76f else 0.90f)
+            bodyAlphaOverride != null -> glassStyle.cardSubtleBg.copy(alpha = bodyAlphaOverride)
+            else -> glassStyle.cardSubtleBg.copy(alpha = if (glassStyle.isDark) 0.76f else 0.90f)
         }
 
-        val specularTopAlpha = ((if (isFilledAccent) 0.48f else if (glassStyle.isDark) 0.30f else 0.82f) + pressBoost)
-            .coerceAtMost(0.95f)
-        val specularMidAlpha = if (isFilledAccent) 0.10f else if (glassStyle.isDark) 0.06f else 0.18f
-        val bottomBounceAlpha = (if (isFilledAccent) 0.28f else 0.18f) + pressBoost * 0.5f
+        val specularTopAlpha = when {
+            isUltraSheer -> ((if (glassStyle.isDark) 0.16f else 0.36f) + pressBoost).coerceAtMost(0.60f)
+            else -> ((if (isFilledAccent) 0.48f else if (glassStyle.isDark) 0.30f else 0.82f) + pressBoost).coerceAtMost(0.95f)
+        }
+        val specularMidAlpha = when {
+            isUltraSheer -> if (glassStyle.isDark) 0.02f else 0.05f
+            isFilledAccent -> 0.10f
+            glassStyle.isDark -> 0.06f
+            else -> 0.18f
+        }
+        val bottomBounceAlpha = (if (isUltraSheer) 0.10f else if (isFilledAccent) 0.28f else 0.18f) + pressBoost * 0.5f
 
         val prismaticSecondary = glassStyle.accentSecondary.copy(alpha = if (isFilledAccent) 0.55f else 0.38f)
         val rimStrokeBrush = Brush.linearGradient(
             colors = listOf(
-                Color.White.copy(alpha = if (glassStyle.isDark) 0.86f else 0.98f),
-                Color.White.copy(alpha = if (glassStyle.isDark) 0.22f else 0.52f),
-                resolvedTint.copy(alpha = if (isFilledAccent) 0.78f else 0.52f),
+                Color.White.copy(alpha = if (glassStyle.isDark) 0.82f else 0.96f),
+                Color.White.copy(alpha = if (glassStyle.isDark) 0.20f else 0.48f),
+                resolvedTint.copy(alpha = if (isFilledAccent) 0.78f else 0.48f),
                 prismaticSecondary,
-                Color.White.copy(alpha = if (glassStyle.isDark) 0.52f else 0.76f)
+                Color.White.copy(alpha = if (glassStyle.isDark) 0.48f else 0.74f)
             ),
             start = Offset.Zero,
             end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
         )
 
-        val shadowModifier = if (elevation > 0.dp && !glassStyle.isNeumorphic) {
+        val shadowModifier = if (useInteriorShadow && elevation > 0.dp && !glassStyle.isNeumorphic) {
             Modifier.shadow(
                 elevation = elevation,
                 shape = shape,
@@ -198,9 +211,7 @@ fun Modifier.iosLiquidGlassSurface(
                 brush = Brush.verticalGradient(listOf(lensBase, lensMid, lensBottom)),
                 shape = shape
             )
-            .drawWithContent {
-                drawContent()
-
+            .drawBehind {
                 val outline = shape.createOutline(size, layoutDirection, this)
                 val clipShapePath = Path().apply {
                     when (outline) {
@@ -210,49 +221,24 @@ fun Modifier.iosLiquidGlassSurface(
                     }
                 }
 
+                // Crisp top rim pinpoint catchlight strictly on the upper border edge (never behind words)
                 clipPath(clipShapePath) {
-                    // 1. Curved Apple iOS 26 specular meniscus dome
-                    drawRect(
-                        brush = Brush.verticalGradient(
-                            colorStops = arrayOf(
-                                0.00f to Color.White.copy(alpha = specularTopAlpha),
-                                0.18f to Color.White.copy(alpha = specularMidAlpha * 1.4f),
-                                0.48f to Color.Transparent
-                            ),
-                            startY = 0f,
-                            endY = size.height
-                        )
-                    )
-
-                    // 2. Crisp top optical glint streak
                     drawLine(
                         brush = Brush.horizontalGradient(
                             colors = listOf(
                                 Color.Transparent,
-                                Color.White.copy(alpha = (specularTopAlpha * 0.9f).coerceAtMost(0.95f)),
+                                Color.White.copy(alpha = (specularTopAlpha * 0.85f).coerceAtMost(0.80f)),
                                 Color.Transparent
                             )
                         ),
-                        start = Offset(size.width * 0.10f, 1.dp.toPx()),
-                        end = Offset(size.width * 0.90f, 1.dp.toPx()),
-                        strokeWidth = 1.dp.toPx()
-                    )
-
-                    // 3. Lower optical internal refraction bounce glow
-                    drawRect(
-                        brush = Brush.verticalGradient(
-                            colorStops = arrayOf(
-                                0.66f to Color.Transparent,
-                                1.00f to (if (isFilledAccent) Color.White else resolvedTint).copy(alpha = bottomBounceAlpha)
-                            ),
-                            startY = 0f,
-                            endY = size.height
-                        )
+                        start = Offset(size.width * 0.12f, 0.9.dp.toPx()),
+                        end = Offset(size.width * 0.88f, 0.9.dp.toPx()),
+                        strokeWidth = 0.9.dp.toPx()
                     )
                 }
 
-                // 4. Prismatic chromatic glass bevel border
-                val strokePx = 1.2.dp.toPx()
+                // Prismatic chromatic glass bevel border
+                val strokePx = 1.15.dp.toPx()
                 drawOutline(
                     outline = outline,
                     brush = rimStrokeBrush,
@@ -580,7 +566,7 @@ fun IosLiquidGlassSegmentedControl(
             val slotWidthDp = with(density) { slotWidthPx.toDp() }
             val currentOffsetPx = thumbIndexAnim.value * slotWidthPx
 
-            // Fluid sliding optical droplet thumb
+            // Fluid sliding optical thumb outline (no murky highlight behind words)
             Box(
                 modifier = Modifier
                     .offset { IntOffset(currentOffsetPx.roundToInt(), 0) }
@@ -590,7 +576,9 @@ fun IosLiquidGlassSegmentedControl(
                         shape = thumbShape,
                         tintColor = glassStyle.accentPrimary,
                         isFilledAccent = false,
-                        elevation = if (glassStyle.iosLiquidGlassEnabled) 4.dp else 0.dp
+                        elevation = 0.dp,
+                        bodyAlphaOverride = if (glassStyle.isDark) 0.10f else 0.30f,
+                        useInteriorShadow = false
                     )
             )
 

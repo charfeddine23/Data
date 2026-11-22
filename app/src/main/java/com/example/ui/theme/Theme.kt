@@ -365,12 +365,12 @@ fun createLiquidGlassStyle(
         cardBackground = LiquidGlassDefaultCardBg,
         cardSubtleBg = LiquidGlassDefaultCardSubtleBg,
         rimLightBrush = Brush.linearGradient(
-            listOf(Color(0x6600E5FF), Color(0x28FFFFFF), Color(0x5200E676))
+            listOf(Color(0x5238BDF8), Color(0x33FFFFFF), Color(0x422DD4BF))
         ),
         backdropBrush = Brush.verticalGradient(
-            listOf(ObsidianVoidTop, ObsidianVoidBottom, Color(0xFF0A0E14))
+            listOf(ObsidianVoidTop, ObsidianVoidBottom, Color(0xFF060E1E))
         ),
-        blurRadius = 18.dp,
+        blurRadius = 22.dp,
         isDark = true,
         neumorphicBase = NeumorphicSlateBase,
         neumorphicSurface = NeumorphicSlateSurface,
@@ -381,10 +381,10 @@ fun createLiquidGlassStyle(
         iosLiquidGlassEnabled = iosLiquidGlassEnabled,
         onAccentPrimary = contrastOnColor(LiquidGlassDefaultPrimary),
         onAccentSecondary = contrastOnColor(LiquidGlassDefaultAccent),
-        statusSafe = Color(0xFF00E676),
+        statusSafe = Color(0xFF10B981),
         statusWarning = Color(0xFFFBBF24),
-        statusDanger = Color(0xFFFF5252),
-        progressTrackBg = Color(0x3D1E293B)
+        statusDanger = Color(0xFFFB7185),
+        progressTrackBg = Color(0x381E293B)
     )
 
     AppThemeMode.LIQUID_NEON_CYAN -> LiquidGlassStyle(
@@ -399,26 +399,26 @@ fun createLiquidGlassStyle(
         cardBackground = LiquidNeonCyanCardBg,
         cardSubtleBg = LiquidNeonCyanCardSubtleBg,
         rimLightBrush = Brush.linearGradient(
-            listOf(Color(0x5900E5FF), Color(0x2200FFA3), Color(0x5900E5FF))
+            listOf(Color(0x4D22D3EE), Color(0x2EFFFFFF), Color(0x4D60A5FA))
         ),
         backdropBrush = Brush.verticalGradient(
-            listOf(Color(0xFF0D1527), Color(0xFF080D1A))
+            listOf(LiquidNeonCyanBackground, Color(0xFF0A192F), Color(0xFF061020))
         ),
-        blurRadius = 16.dp,
+        blurRadius = 20.dp,
         isDark = true,
         neumorphicBase = LiquidNeonCyanBackground,
         neumorphicSurface = LiquidNeonCyanSurface,
-        neumorphicHighlight = Color(0x3300E5FF),
+        neumorphicHighlight = Color(0x2E22D3EE),
         neumorphicShadow = Color(0xCC03060C),
-        neumorphicBorderLight = Color(0x2E00E5FF),
+        neumorphicBorderLight = Color(0x2E22D3EE),
         neumorphicBorderDark = Color(0x66000000),
         iosLiquidGlassEnabled = iosLiquidGlassEnabled,
         onAccentPrimary = contrastOnColor(LiquidNeonCyanPrimary),
         onAccentSecondary = contrastOnColor(LiquidNeonCyanAccent),
-        statusSafe = Color(0xFF00E676),
+        statusSafe = Color(0xFF10B981),
         statusWarning = Color(0xFFFBBF24),
-        statusDanger = Color(0xFFFF5252),
-        progressTrackBg = Color(0x45162440)
+        statusDanger = Color(0xFFFB7185),
+        progressTrackBg = Color(0x3D162440)
     )
 
     AppThemeMode.AMOLED_PITCH_BLACK -> LiquidGlassStyle(

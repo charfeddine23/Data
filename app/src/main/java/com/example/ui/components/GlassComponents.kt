@@ -213,28 +213,18 @@ fun GlassContainer(
                 .then(
                     if (useIosOpticalGlass) {
                         Modifier.drawBehind {
-                            // Subtle top-half liquid glass dome sheen
-                            drawRect(
-                                brush = Brush.verticalGradient(
-                                    colorStops = arrayOf(
-                                        0.0f to Color.White.copy(alpha = if (glassStyle.isDark) 0.09f else 0.55f),
-                                        0.24f to Color.White.copy(alpha = if (glassStyle.isDark) 0.03f else 0.14f),
-                                        0.55f to Color.Transparent
-                                    )
-                                )
-                            )
-                            // Optical top edge shimmer
+                            // Crisp top edge optical shimmer strictly along the 1dp rim
                             drawLine(
                                 brush = Brush.horizontalGradient(
                                     listOf(
                                         Color.Transparent,
-                                        Color.White.copy(alpha = if (glassStyle.isDark) 0.42f else 0.85f),
+                                        Color.White.copy(alpha = if (glassStyle.isDark) 0.34f else 0.72f),
                                         Color.Transparent
                                     )
                                 ),
-                                start = Offset(size.width * 0.08f, 1.dp.toPx()),
-                                end = Offset(size.width * 0.92f, 1.dp.toPx()),
-                                strokeWidth = 1.dp.toPx()
+                                start = Offset(size.width * 0.10f, 1.dp.toPx()),
+                                end = Offset(size.width * 0.90f, 1.dp.toPx()),
+                                strokeWidth = 0.9.dp.toPx()
                             )
                         }
                     } else Modifier
@@ -321,34 +311,11 @@ fun PersistentTopAppBar(
     onUsageTipClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
-    val glassStyle = LocalLiquidGlass.current
     val dimensions = LocalAppDimensions.current
-    val useGlass = glassStyle.iosLiquidGlassEnabled && !glassStyle.isNeumorphic
 
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(
-                brush = when {
-                    glassStyle.isNeumorphic -> Brush.verticalGradient(
-                        colors = listOf(glassStyle.surfaceColor, glassStyle.neumorphicBase.copy(alpha = 0.94f))
-                    )
-                    glassStyle.isDark -> Brush.verticalGradient(
-                        colors = listOf(
-                            glassStyle.surfaceColor.copy(alpha = if (useGlass) 0.84f else 0.96f),
-                            glassStyle.surfaceTranslucent.copy(alpha = if (useGlass) 0.72f else 0.92f),
-                            Color.Transparent
-                        )
-                    )
-                    else -> Brush.verticalGradient(
-                        colors = listOf(
-                            glassStyle.surfaceColor.copy(alpha = if (useGlass) 0.88f else 0.96f),
-                            glassStyle.cardSubtleBg.copy(alpha = if (useGlass) 0.74f else 0.92f),
-                            Color.Transparent
-                        )
-                    )
-                }
-            )
             .statusBarsPadding()
     ) {
         Box(

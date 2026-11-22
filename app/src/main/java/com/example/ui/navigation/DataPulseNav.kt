@@ -1,5 +1,6 @@
 package com.example.ui.navigation
 
+import android.os.Build
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
@@ -56,6 +57,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
@@ -71,6 +73,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -268,6 +271,14 @@ fun DataPulseApp(
                 }
             }
 
+            // Edge-to-edge top & bottom progressive Fade-to-Blur atmospheric veils
+            EdgeToEdgeFadeToBlurOverlay(
+                topHeightDp = topPaddingDp + 36.dp,
+                bottomHeightDp = bottomPaddingDp + 40.dp,
+                glassStyle = glassStyle,
+                modifier = Modifier.fillMaxSize()
+            )
+
             // Floating Top App Bar
             PersistentTopAppBar(
                 speedSample = speedSample,
@@ -399,6 +410,113 @@ private fun AmbientLiquidBackdrop(glassStyle: LiquidGlassStyle) {
 }
 
 /**
+ * Edge-to-edge progressive Fade-to-Blur veil anchored behind the floating Top Bar
+ * and ultra-sheer 5% Bottom Dock so scrolling content dissolves into a soft frosted mist.
+ */
+@Composable
+private fun EdgeToEdgeFadeToBlurOverlay(
+    topHeightDp: Dp,
+    bottomHeightDp: Dp,
+    glassStyle: LiquidGlassStyle,
+    modifier: Modifier = Modifier
+) {
+    val useApiBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !glassStyle.isNeumorphic
+    val topMistBase = if (glassStyle.isNeumorphic) glassStyle.neumorphicBase else glassStyle.surfaceTranslucent
+    val topMistDeep = glassStyle.surfaceColor
+    val botMistBase = if (glassStyle.isNeumorphic) glassStyle.neumorphicBase else glassStyle.surfaceTranslucent
+    val botMistDeep = glassStyle.surfaceColor
+
+    Box(modifier = modifier) {
+        // 1. Top Edge-to-Edge Fade-to-Blur (status bar -> below floating top bar)
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .height(topHeightDp)
+        ) {
+            if (useApiBlur) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(topHeightDp * 0.88f)
+                        .blur(26.dp)
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colorStops = arrayOf(
+                                    0.00f to topMistDeep.copy(alpha = if (glassStyle.isDark) 0.72f else 0.78f),
+                                    0.45f to topMistBase.copy(alpha = if (glassStyle.isDark) 0.42f else 0.46f),
+                                    0.85f to topMistBase.copy(alpha = 0.08f),
+                                    1.00f to Color.Transparent
+                                )
+                            )
+                        )
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colorStops = arrayOf(
+                                0.00f to topMistBase.copy(alpha = if (glassStyle.isNeumorphic) 0.96f else 0.92f),
+                                0.28f to topMistBase.copy(alpha = if (glassStyle.isNeumorphic) 0.86f else 0.76f),
+                                0.54f to topMistDeep.copy(alpha = 0.48f),
+                                0.76f to topMistDeep.copy(alpha = 0.18f),
+                                0.90f to topMistDeep.copy(alpha = 0.05f),
+                                1.00f to Color.Transparent
+                            )
+                        )
+                    )
+            )
+        }
+
+        // 2. Bottom Edge-to-Edge Fade-to-Blur (above floating dock -> bottom navigation bar edge)
+        Box(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .height(bottomHeightDp)
+        ) {
+            if (useApiBlur) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .height(bottomHeightDp * 0.90f)
+                        .blur(28.dp)
+                        .background(
+                            brush = Brush.verticalGradient(
+                                colorStops = arrayOf(
+                                    0.00f to Color.Transparent,
+                                    0.18f to botMistBase.copy(alpha = 0.08f),
+                                    0.55f to botMistBase.copy(alpha = if (glassStyle.isDark) 0.44f else 0.48f),
+                                    1.00f to botMistDeep.copy(alpha = if (glassStyle.isDark) 0.78f else 0.82f)
+                                )
+                            )
+                        )
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colorStops = arrayOf(
+                                0.00f to Color.Transparent,
+                                0.12f to botMistDeep.copy(alpha = 0.05f),
+                                0.30f to botMistDeep.copy(alpha = 0.22f),
+                                0.56f to botMistBase.copy(alpha = 0.56f),
+                                0.80f to botMistBase.copy(alpha = if (glassStyle.isNeumorphic) 0.90f else 0.84f),
+                                1.00f to botMistBase.copy(alpha = if (glassStyle.isNeumorphic) 0.98f else 0.94f)
+                            )
+                        )
+                    )
+            )
+        }
+    }
+}
+
+/**
  * Iconic Apple iOS 26 Floating Liquid Glass Capsule Dock with fluid spring-gliding
  * active droplet indicator across the 5 navigation destinations.
  */
@@ -479,7 +597,9 @@ fun LiquidGlassBottomNav(
                                 shape = dockShape,
                                 tintColor = glassStyle.accentPrimary,
                                 isFilledAccent = false,
-                                elevation = 14.dp
+                                elevation = 0.dp,
+                                bodyAlphaOverride = 0.05f,
+                                useInteriorShadow = false
                             )
                         else -> Modifier
                             .shadow(elevation = 8.dp, shape = dockShape)
@@ -499,39 +619,6 @@ fun LiquidGlassBottomNav(
                     val slotWidthPx = with(density) { maxWidth.toPx() } / navigationItems.size.toFloat()
                     val slotWidthDp = with(density) { slotWidthPx.toDp() }
 
-                    // Fluid Sliding iOS 26 Optical Droplet Indicator
-                    if (selectedIndex >= 0) {
-                        val offsetX = (thumbProgressAnim.value * slotWidthPx).roundToInt()
-                        Box(
-                            modifier = Modifier
-                                .offset { IntOffset(offsetX, 0) }
-                                .width(slotWidthDp)
-                                .fillMaxHeight()
-                                .padding(horizontal = 2.dp)
-                                .then(
-                                    if (glassStyle.isNeumorphic) {
-                                        Modifier
-                                            .neumorphicDepth(
-                                                shape = pillShape,
-                                                lightColor = glassStyle.neumorphicHighlight,
-                                                darkColor = glassStyle.neumorphicShadow,
-                                                offsetDp = 2.dp,
-                                                isPressed = true
-                                            )
-                                            .clip(pillShape)
-                                            .background(glassStyle.cardSubtleBg)
-                                    } else {
-                                        Modifier.iosLiquidGlassSurface(
-                                            shape = pillShape,
-                                            tintColor = glassStyle.accentPrimary,
-                                            isFilledAccent = false,
-                                            elevation = if (glassStyle.iosLiquidGlassEnabled) 4.dp else 0.dp
-                                        )
-                                    }
-                                )
-                        )
-                    }
-
                     Row(
                         modifier = Modifier.fillMaxSize(),
                         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -542,7 +629,7 @@ fun LiquidGlassBottomNav(
                             val destLabel = destination.getLabel(appLanguage)
 
                             val iconScale by animateFloatAsState(
-                                targetValue = if (isSelected) 1.12f else 0.95f,
+                                targetValue = if (isSelected) 1.14f else 0.96f,
                                 animationSpec = spring(dampingRatio = 0.62f, stiffness = Spring.StiffnessMedium),
                                 label = "nav_icon_scale"
                             )
@@ -552,7 +639,7 @@ fun LiquidGlassBottomNav(
                                 label = "nav_icon_tint"
                             )
                             val labelColor by animateColorAsState(
-                                targetValue = if (isSelected) glassStyle.textPrimary else glassStyle.textTertiary,
+                                targetValue = if (isSelected) glassStyle.accentPrimary else glassStyle.textTertiary,
                                 animationSpec = tween(180),
                                 label = "nav_label_color"
                             )
@@ -596,6 +683,27 @@ fun LiquidGlassBottomNav(
                                 )
                             }
                         }
+                    }
+
+                    // Slim spring-gliding optical micro-indicator along bottom rim (strictly below text, never behind words)
+                    if (selectedIndex >= 0) {
+                        val indicatorWidthDp = 22.dp
+                        val indicatorWidthPx = with(density) { indicatorWidthDp.toPx() }
+                        val offsetX = (thumbProgressAnim.value * slotWidthPx + (slotWidthPx - indicatorWidthPx) / 2f).roundToInt()
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomStart)
+                                .offset { IntOffset(offsetX, 0) }
+                                .padding(bottom = 2.dp)
+                                .width(indicatorWidthDp)
+                                .height(2.5.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    Brush.horizontalGradient(
+                                        listOf(glassStyle.accentPrimary, glassStyle.accentSecondary)
+                                    )
+                                )
+                        )
                     }
                 }
             }
