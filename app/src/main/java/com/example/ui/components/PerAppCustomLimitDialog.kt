@@ -6,22 +6,23 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,19 +33,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.example.model.AppLanguage
 import com.example.model.AppUsageItem
 import com.example.ui.screens.AppIconImage
+import com.example.ui.theme.HyperMonoFontFamily
 import com.example.ui.theme.LocalLiquidGlass
 
 /**
- * Modern Neumorphic (Soft UI) Dialog for customizing per-app daily limit and alert settings on long-press.
+ * Harmonious Apple iOS 26 Liquid Glass (with automatic Neumorphism parity) Dialog
+ * for customizing per-app daily limit and alert settings on long-press.
  */
 @Composable
 fun PerAppCustomLimitDialog(
@@ -56,39 +59,22 @@ fun PerAppCustomLimitDialog(
     onSave: (dailyLimitGB: Float, alertEnabled: Boolean) -> Unit
 ) {
     val glassStyle = LocalLiquidGlass.current
-    val dialogShape = RoundedCornerShape(26.dp)
+    val haptics = rememberAppHaptics()
 
     var dailyLimit by remember(initialDailyLimitGB) { mutableStateOf(initialDailyLimitGB) }
     var alertEnabled by remember(initialAlertEnabled) { mutableStateOf(initialAlertEnabled) }
 
-    Dialog(onDismissRequest = onDismiss) {
-        Box(
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        GlassContainer(
             modifier = Modifier
-                .fillMaxWidth()
-                .neumorphicDepth(
-                    shape = dialogShape,
-                    lightColor = glassStyle.neumorphicHighlight,
-                    darkColor = glassStyle.neumorphicShadow,
-                    offsetDp = 6.dp
-                )
-                .clip(dialogShape)
-                .background(
-                    Brush.linearGradient(
-                        colors = listOf(glassStyle.neumorphicSurface, glassStyle.neumorphicBase)
-                    )
-                )
-                .border(
-                    width = 1.dp,
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            glassStyle.neumorphicBorderLight,
-                            glassStyle.accentPrimary.copy(alpha = 0.4f),
-                            glassStyle.neumorphicBorderDark
-                        )
-                    ),
-                    shape = dialogShape
-                )
-                .padding(22.dp)
+                .fillMaxWidth(0.92f)
+                .widthIn(max = 420.dp),
+            shape = RoundedCornerShape(30.dp),
+            borderColor = glassStyle.accentPrimary.copy(alpha = 0.50f),
+            contentPadding = PaddingValues(20.dp)
         ) {
             Column {
                 // Header with App Icon and Close button
@@ -103,52 +89,45 @@ fun PerAppCustomLimitDialog(
                     ) {
                         AppIconImage(drawable = appItem.icon, appName = appItem.appName)
                         Spacer(modifier = Modifier.width(12.dp))
-                        Column {
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = appItem.appName,
                                 color = glassStyle.textPrimary,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
-                                maxLines = 1
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                             Text(
                                 text = appItem.packageName,
                                 color = glassStyle.textTertiary,
                                 fontSize = 10.sp,
-                                maxLines = 1
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }
 
-                    NeumorphicIconButton(
+                    IosLiquidGlassIconButton(
+                        onClick = onDismiss,
                         icon = Icons.Default.Close,
                         contentDescription = "Close",
-                        onClick = onDismiss,
-                        sizeDp = 32.dp
+                        visualSize = 36.dp,
+                        iconSize = 18.dp,
+                        tintColor = glassStyle.textSecondary
                     )
                 }
 
-                Spacer(modifier = Modifier.height(18.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                // Custom Daily Limit Section in an indented neumorphic card
+                // Custom Daily Limit Frosted Well
                 val sectionShape = RoundedCornerShape(18.dp)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .neumorphicDepth(
-                            shape = sectionShape,
-                            lightColor = Color.Transparent,
-                            darkColor = glassStyle.neumorphicShadow,
-                            offsetDp = 3.dp,
-                            isPressed = true
-                        )
                         .clip(sectionShape)
-                        .background(
-                            Brush.linearGradient(
-                                listOf(glassStyle.cardSubtleBg, glassStyle.neumorphicSurface)
-                            )
-                        )
-                        .border(1.dp, glassStyle.neumorphicBorderDark, sectionShape)
+                        .background(glassStyle.cardSubtleBg)
+                        .border(0.9.dp, glassStyle.borderColor.copy(alpha = 0.55f), sectionShape)
                         .padding(14.dp)
                 ) {
                     Column {
@@ -165,78 +144,93 @@ fun PerAppCustomLimitDialog(
                             )
 
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                NeumorphicIconButton(
+                                IosLiquidGlassIconButton(
+                                    onClick = {
+                                        haptics.performSegmentSwitch()
+                                        dailyLimit = (dailyLimit - 0.5f).coerceAtLeast(0.5f)
+                                    },
                                     icon = Icons.Default.Remove,
                                     contentDescription = "Decrease",
-                                    onClick = { dailyLimit = (dailyLimit - 0.5f).coerceAtLeast(0.5f) },
-                                    tint = glassStyle.accentPrimary,
-                                    sizeDp = 32.dp
+                                    visualSize = 34.dp,
+                                    iconSize = 17.dp,
+                                    tintColor = glassStyle.accentPrimary
                                 )
 
-                                Spacer(modifier = Modifier.width(12.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
 
                                 val formattedLimit = if (dailyLimit % 1f == 0f) "${dailyLimit.toInt()} GB" else "%.1f GB".format(dailyLimit)
                                 Text(
                                     text = formattedLimit,
+                                    fontFamily = HyperMonoFontFamily,
                                     color = glassStyle.accentPrimary,
                                     fontSize = 17.sp,
                                     fontWeight = FontWeight.ExtraBold
                                 )
 
-                                Spacer(modifier = Modifier.width(12.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
 
-                                NeumorphicIconButton(
+                                IosLiquidGlassIconButton(
+                                    onClick = {
+                                        haptics.performSegmentSwitch()
+                                        dailyLimit = (dailyLimit + 0.5f).coerceAtMost(50f)
+                                    },
                                     icon = Icons.Default.Add,
                                     contentDescription = "Increase",
-                                    onClick = { dailyLimit = (dailyLimit + 0.5f).coerceAtMost(50f) },
-                                    tint = glassStyle.accentPrimary,
-                                    sizeDp = 32.dp
+                                    visualSize = 34.dp,
+                                    iconSize = 17.dp,
+                                    tintColor = glassStyle.accentPrimary
                                 )
                             }
                         }
 
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        // Quick Presets
+                        // Quick Preset Capsules
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            horizontalArrangement = Arrangement.spacedBy(7.dp)
                         ) {
                             listOf(1.0f, 2.0f, 3.0f, 5.0f).forEach { preset ->
                                 val isSelected = (kotlin.math.abs(dailyLimit - preset) < 0.05f)
-                                NeumorphicSegmentedPill(
-                                    label = "${preset.toInt()} GB",
-                                    isSelected = isSelected,
-                                    onClick = { dailyLimit = preset },
-                                    accentColor = glassStyle.accentPrimary,
-                                    modifier = Modifier.weight(1f)
-                                )
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .defaultMinSize(minHeight = 38.dp)
+                                        .iosLiquidGlassSurface(
+                                            shape = RoundedCornerShape(12.dp),
+                                            tintColor = if (isSelected) glassStyle.accentPrimary else glassStyle.textSecondary,
+                                            isFilledAccent = isSelected,
+                                            elevation = if (isSelected && glassStyle.iosLiquidGlassEnabled) 3.dp else 0.dp
+                                        )
+                                        .clickable {
+                                            haptics.performSegmentSwitch()
+                                            dailyLimit = preset
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "${preset.toInt()} GB",
+                                        fontFamily = HyperMonoFontFamily,
+                                        color = if (isSelected) glassStyle.onAccentPrimary else glassStyle.textSecondary,
+                                        fontSize = 11.sp,
+                                        fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.SemiBold
+                                    )
+                                }
                             }
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(14.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                // Toggle Notification for this App (Indented Neumorphic Card with NeumorphicSwitch)
+                // Toggle Notification Card with IosLiquidGlassSwitch
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .neumorphicDepth(
-                            shape = sectionShape,
-                            lightColor = Color.Transparent,
-                            darkColor = glassStyle.neumorphicShadow,
-                            offsetDp = 3.dp,
-                            isPressed = true
-                        )
                         .clip(sectionShape)
-                        .background(
-                            Brush.linearGradient(
-                                listOf(glassStyle.cardSubtleBg, glassStyle.neumorphicSurface)
-                            )
-                        )
-                        .border(1.dp, glassStyle.neumorphicBorderDark, sectionShape)
-                        .padding(14.dp)
+                        .background(glassStyle.cardSubtleBg)
+                        .border(0.9.dp, glassStyle.borderColor.copy(alpha = 0.55f), sectionShape)
+                        .padding(horizontal = 14.dp, vertical = 12.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -256,62 +250,72 @@ fun PerAppCustomLimitDialog(
                                 else
                                     "Send instant alert when this app consumes custom quota",
                                 color = glassStyle.textTertiary,
-                                fontSize = 10.sp
+                                fontSize = 10.sp,
+                                lineHeight = 14.sp
                             )
                         }
 
-                        NeumorphicSwitch(
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        IosLiquidGlassSwitch(
                             checked = alertEnabled,
-                            onCheckedChange = { alertEnabled = it },
+                            onCheckedChange = {
+                                haptics.performSegmentSwitch()
+                                alertEnabled = it
+                            },
                             accentColor = glassStyle.accentPrimary
                         )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(18.dp))
 
-                // Action Buttons (Cancel / Save) using tactile NeumorphicButton
+                // Action Buttons (Cancel / Save)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    NeumorphicButton(
+                    IosLiquidGlassButton(
                         onClick = onDismiss,
-                        shape = RoundedCornerShape(14.dp),
+                        containerColor = glassStyle.cardSubtleBg,
+                        contentColor = glassStyle.textSecondary,
+                        isFilledAccent = false,
+                        shape = RoundedCornerShape(16.dp),
                         modifier = Modifier.weight(1f)
                     ) {
                         Text(
                             text = if (appLanguage == AppLanguage.ARABIC) "إلغاء" else "Cancel",
                             color = glassStyle.textSecondary,
                             fontSize = 13.sp,
-                            fontWeight = FontWeight.Medium
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
 
-                    NeumorphicButton(
+                    IosLiquidGlassButton(
                         onClick = {
+                            haptics.performConfirm()
                             onSave(dailyLimit, alertEnabled)
                             onDismiss()
                         },
-                        accentColor = glassStyle.accentPrimary,
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.weight(1f)
+                        containerColor = glassStyle.accentPrimary,
+                        contentColor = glassStyle.onAccentPrimary,
+                        isFilledAccent = true,
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.weight(1.3f)
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = null,
-                                tint = glassStyle.accentPrimary,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = if (appLanguage == AppLanguage.ARABIC) "حفظ التخصيص" else "Save Limit",
-                                color = glassStyle.accentPrimary,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 13.sp
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            tint = glassStyle.onAccentPrimary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = if (appLanguage == AppLanguage.ARABIC) "حفظ التخصيص" else "Save Limit",
+                            color = glassStyle.onAccentPrimary,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp
+                        )
                     }
                 }
             }

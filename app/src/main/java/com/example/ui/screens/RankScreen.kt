@@ -39,6 +39,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
@@ -46,6 +48,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -60,6 +63,8 @@ import com.example.ui.components.IosLiquidGlassIconBadge
 import com.example.ui.components.IosLiquidGlassIconButton
 import com.example.ui.components.UsagePermissionCard
 import com.example.ui.components.iosLiquidGlassSurface
+import com.example.ui.navigation.LocalFloatingChromePadding
+import com.example.ui.theme.HyperMonoFontFamily
 import com.example.ui.theme.LocalAppDimensions
 import com.example.ui.theme.LocalLiquidGlass
 
@@ -87,6 +92,7 @@ fun RankScreen(
 
     val glassStyle = LocalLiquidGlass.current
     val dimensions = LocalAppDimensions.current
+    val chromePadding = LocalFloatingChromePadding.current
 
     ElasticFlamePullToRefreshBox(
         isRefreshing = isRefreshing,
@@ -97,10 +103,12 @@ fun RankScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = dimensions.screenPaddingHorizontal),
-            contentPadding = PaddingValues(top = 8.dp),
+            contentPadding = PaddingValues(
+                top = chromePadding.calculateTopPadding() + 6.dp,
+                bottom = chromePadding.calculateBottomPadding()
+            ),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Header: Screen Title & All-Time Competition Banner
             item {
                 RankHeader(
                     appLanguage = appLanguage,
@@ -108,7 +116,6 @@ fun RankScreen(
                 )
             }
 
-            // Usage Permission Warning Card if not granted
             if (!hasUsagePerm) {
                 item {
                     UsagePermissionCard(
@@ -118,38 +125,36 @@ fun RankScreen(
                     )
                 }
             } else if (rankedApps.isEmpty()) {
-                // Empty / Initializing State
                 item {
                     GlassContainer(
                         modifier = Modifier.fillMaxWidth(),
                         borderColor = glassStyle.accentPrimary.copy(alpha = 0.45f),
                         enableBreathingGlow = true,
-                        glowColor = glassStyle.accentPrimary
+                        glowColor = glassStyle.accentPrimary,
+                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 32.dp)
                     ) {
                         Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 28.dp),
+                            modifier = Modifier.fillMaxWidth(),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
                             IosLiquidGlassIconBadge(
                                 icon = Icons.Default.EmojiEvents,
                                 contentDescription = null,
-                                size = 56.dp,
+                                size = 58.dp,
                                 iconSize = 30.dp,
                                 tintColor = if (glassStyle.isDark) GoldDark else GoldLight,
                                 shape = RoundedCornerShape(18.dp)
                             )
-                            Spacer(modifier = Modifier.height(12.dp))
+                            Spacer(modifier = Modifier.height(14.dp))
                             Text(
                                 text = if (appLanguage == AppLanguage.ARABIC) "جاري احتساب استهلاك التطبيقات على مر التاريخ..." else "Calculating all-time application consumption...",
                                 color = glassStyle.textPrimary,
-                                fontSize = 14.sp,
+                                fontSize = 14.5.sp,
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Center
                             )
-                            Spacer(modifier = Modifier.height(4.dp))
+                            Spacer(modifier = Modifier.height(5.dp))
                             Text(
                                 text = if (appLanguage == AppLanguage.ARABIC) "اسحب للأسفل للتحديث واحتساب النتائج فوراً" else "Pull down to refresh and compute rankings",
                                 color = glassStyle.textTertiary,
@@ -160,7 +165,7 @@ fun RankScreen(
                     }
                 }
             } else {
-                // 1. Top 3 Champions Podium (الرتبة الأولى، الثانية، الثالثة)
+                // 1. Optical iOS 26 3-Tier Champions Podium
                 item {
                     TopChampionsPodium(
                         apps = rankedApps.take(3),
@@ -168,11 +173,13 @@ fun RankScreen(
                     )
                 }
 
-                // 2. Leaderboard Title for Remaining Applications (وباقي التطبيقات اسفله)
+                // 2. Remaining Applications Leaderboard (#4+)
                 if (rankedApps.size > 3) {
                     item {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 4.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -180,10 +187,10 @@ fun RankScreen(
                                 IosLiquidGlassIconBadge(
                                     icon = Icons.Default.MilitaryTech,
                                     contentDescription = null,
-                                    size = 26.dp,
+                                    size = 28.dp,
                                     iconSize = 15.dp,
                                     tintColor = glassStyle.accentPrimary,
-                                    shape = RoundedCornerShape(8.dp)
+                                    shape = RoundedCornerShape(9.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
@@ -196,24 +203,24 @@ fun RankScreen(
                             Box(
                                 modifier = Modifier
                                     .iosLiquidGlassSurface(
-                                        shape = RoundedCornerShape(12.dp),
+                                        shape = CircleShape,
                                         tintColor = glassStyle.accentPrimary,
                                         isFilledAccent = false,
                                         elevation = 0.dp
                                     )
-                                    .padding(horizontal = 9.dp, vertical = 3.dp)
+                                    .padding(horizontal = 10.dp, vertical = 4.dp)
                             ) {
                                 Text(
                                     text = "${rankedApps.size - 3}",
+                                    fontFamily = HyperMonoFontFamily,
                                     color = glassStyle.accentPrimary,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold
+                                    fontSize = 11.5.sp,
+                                    fontWeight = FontWeight.ExtraBold
                                 )
                             }
                         }
                     }
 
-                    // Remaining apps starting from rank 4
                     val leaderBytes = rankedApps.first().totalBytes.coerceAtLeast(1L)
                     itemsIndexed(rankedApps.drop(3), key = { _, item -> item.packageName }) { index, item ->
                         val rankPosition = index + 4
@@ -225,11 +232,6 @@ fun RankScreen(
                         )
                     }
                 }
-            }
-
-            // Bottom padding
-            item {
-                Spacer(modifier = Modifier.height(28.dp))
             }
         }
     }
@@ -245,7 +247,9 @@ fun RankHeader(
 
     GlassContainer(
         modifier = Modifier.fillMaxWidth(),
-        borderColor = goldColor.copy(alpha = 0.40f)
+        shape = RoundedCornerShape(26.dp),
+        borderColor = goldColor.copy(alpha = 0.40f),
+        contentPadding = PaddingValues(16.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
@@ -260,10 +264,10 @@ fun RankHeader(
                     IosLiquidGlassIconBadge(
                         icon = Icons.Default.EmojiEvents,
                         contentDescription = "Trophy",
-                        size = 40.dp,
+                        size = 42.dp,
                         iconSize = 22.dp,
                         tintColor = goldColor,
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(13.dp)
                     )
 
                     Spacer(modifier = Modifier.width(12.dp))
@@ -279,10 +283,10 @@ fun RankHeader(
                             Spacer(modifier = Modifier.width(8.dp))
                             Box(
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(goldColor.copy(alpha = 0.18f))
-                                    .border(0.8.dp, goldColor.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
-                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                                    .clip(CircleShape)
+                                    .background(goldColor.copy(alpha = 0.16f))
+                                    .border(0.8.dp, goldColor.copy(alpha = 0.45f), CircleShape)
+                                    .padding(horizontal = 7.dp, vertical = 2.dp)
                             ) {
                                 Text(
                                     text = AppStrings.rankAllTimeBadge(appLanguage),
@@ -315,16 +319,15 @@ fun RankHeader(
                 )
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            // Metric explanation banner
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(10.dp))
+                    .clip(RoundedCornerShape(12.dp))
                     .background(glassStyle.cardSubtleBg)
-                    .border(0.8.dp, glassStyle.borderColor, RoundedCornerShape(10.dp))
-                    .padding(horizontal = 10.dp, vertical = 6.dp)
+                    .border(0.8.dp, glassStyle.borderColor.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                    .padding(horizontal = 12.dp, vertical = 7.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -332,17 +335,17 @@ fun RankHeader(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "🏆 " + AppStrings.rankTotalCombined(appLanguage),
+                        text = AppStrings.rankTotalCombined(appLanguage),
                         color = glassStyle.textSecondary,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Medium
                     )
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.SignalCellularAlt, null, tint = glassStyle.accentPrimary, modifier = Modifier.size(11.dp))
-                        Spacer(modifier = Modifier.width(2.dp))
+                        Icon(Icons.Default.SignalCellularAlt, null, tint = glassStyle.accentPrimary, modifier = Modifier.size(12.dp))
+                        Spacer(modifier = Modifier.width(3.dp))
                         Text("+", color = glassStyle.textTertiary, fontSize = 11.sp)
-                        Spacer(modifier = Modifier.width(2.dp))
-                        Icon(Icons.Default.Wifi, null, tint = glassStyle.accentSecondary, modifier = Modifier.size(11.dp))
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Icon(Icons.Default.Wifi, null, tint = glassStyle.accentSecondary, modifier = Modifier.size(12.dp))
                     }
                 }
             }
@@ -351,10 +354,10 @@ fun RankHeader(
 }
 
 /**
- * Top 3 Champions Podium Showcase:
- * - Center: Rank 1 (Gold 🥇)
- * - Left: Rank 2 (Silver 🥈)
- * - Right: Rank 3 (Bronze 🥉)
+ * Top 3 Champions Optical Glass Podium Showcase:
+ * - Center: Rank 1 (Elevated Gold)
+ * - Left: Rank 2 (Silver)
+ * - Right: Rank 3 (Bronze)
  */
 @Composable
 fun TopChampionsPodium(
@@ -369,7 +372,9 @@ fun TopChampionsPodium(
 
     GlassContainer(
         modifier = Modifier.fillMaxWidth(),
-        borderColor = goldColor.copy(alpha = 0.35f)
+        shape = RoundedCornerShape(28.dp),
+        borderColor = goldColor.copy(alpha = 0.35f),
+        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 18.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -384,35 +389,32 @@ fun TopChampionsPodium(
                     imageVector = Icons.Default.WorkspacePremium,
                     contentDescription = null,
                     tint = goldColor,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(17.dp)
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = AppStrings.rankPodiumTitle(appLanguage),
                     color = goldColor,
-                    fontSize = 13.sp,
+                    fontSize = 13.5.sp,
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = 0.5.sp
+                    letterSpacing = 0.4.sp
                 )
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // 3-Tier Podium Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.Bottom
             ) {
-                // Silver: Rank 2
                 if (apps.size >= 2) {
                     PodiumPillar(
                         rank = 2,
                         app = apps[1],
-                        pillarHeight = 130.dp,
+                        pillarHeight = 132.dp,
                         accentColor = silverColor,
                         gradientColor = SilverAccent,
-                        medalEmoji = "🥈",
                         rankLabel = AppStrings.rankSecond(appLanguage),
                         modifier = Modifier.weight(1f)
                     )
@@ -420,21 +422,18 @@ fun TopChampionsPodium(
                     Spacer(modifier = Modifier.weight(1f))
                 }
 
-                // Gold: Rank 1 (Elevated)
                 if (apps.isNotEmpty()) {
                     PodiumPillar(
                         rank = 1,
                         app = apps[0],
-                        pillarHeight = 158.dp,
+                        pillarHeight = 162.dp,
                         accentColor = goldColor,
                         gradientColor = GoldAccent,
-                        medalEmoji = "🥇",
                         rankLabel = AppStrings.rankFirst(appLanguage),
-                        modifier = Modifier.weight(1.15f)
+                        modifier = Modifier.weight(1.16f)
                     )
                 }
 
-                // Bronze: Rank 3
                 if (apps.size >= 3) {
                     PodiumPillar(
                         rank = 3,
@@ -442,7 +441,6 @@ fun TopChampionsPodium(
                         pillarHeight = 118.dp,
                         accentColor = bronzeColor,
                         gradientColor = BronzeAccent,
-                        medalEmoji = "🥉",
                         rankLabel = AppStrings.rankThird(appLanguage),
                         modifier = Modifier.weight(1f)
                     )
@@ -458,10 +456,9 @@ fun TopChampionsPodium(
 fun PodiumPillar(
     rank: Int,
     app: AppUsageItem,
-    pillarHeight: androidx.compose.ui.unit.Dp,
+    pillarHeight: Dp,
     accentColor: Color,
     gradientColor: Color,
-    medalEmoji: String,
     rankLabel: String,
     modifier: Modifier = Modifier
 ) {
@@ -471,104 +468,118 @@ fun PodiumPillar(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // App Icon with Champion Halo
+        // App Icon with Optical Champion Halo
         Box(
             modifier = Modifier
-                .size(if (rank == 1) 48.dp else 42.dp)
-                .clip(CircleShape)
-                .background(
-                    Brush.radialGradient(
-                        listOf(accentColor.copy(alpha = 0.35f), Color.Transparent)
-                    )
+                .size(if (rank == 1) 52.dp else 44.dp)
+                .iosLiquidGlassSurface(
+                    shape = CircleShape,
+                    tintColor = accentColor,
+                    isFilledAccent = false,
+                    elevation = if (glassStyle.iosLiquidGlassEnabled) 6.dp else 0.dp
                 )
-                .border(if (rank == 1) 2.dp else 1.5.dp, accentColor, CircleShape)
-                .padding(3.dp),
+                .padding(4.dp)
+                .clip(CircleShape),
             contentAlignment = Alignment.Center
         ) {
             AppIconBitmap(drawable = app.icon, appName = app.appName)
         }
 
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(6.dp))
 
-        // App Name
         Text(
             text = app.appName,
             color = glassStyle.textPrimary,
-            fontSize = if (rank == 1) 12.sp else 11.sp,
+            fontSize = if (rank == 1) 12.5.sp else 11.sp,
             fontWeight = FontWeight.Bold,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center
         )
 
-        // Total Combined Bytes (Cellular + Wi-Fi)
         Text(
             text = FormatUtils.formatBytes(app.totalBytes),
+            fontFamily = HyperMonoFontFamily,
             color = accentColor,
             fontSize = if (rank == 1) 12.sp else 10.5.sp,
             fontWeight = FontWeight.Black,
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(7.dp))
 
-        // Pedestal Block
+        // Optical Glass Pedestal Pillar with top glossy edge highlight
+        val pillarShape = RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp, bottomStart = 8.dp, bottomEnd = 8.dp)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(pillarHeight)
-                .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                .clip(pillarShape)
                 .background(
                     Brush.verticalGradient(
                         listOf(
-                            accentColor.copy(alpha = if (rank == 1) 0.30f else 0.20f),
-                            gradientColor.copy(alpha = 0.08f)
+                            accentColor.copy(alpha = if (rank == 1) 0.28f else 0.18f),
+                            gradientColor.copy(alpha = 0.06f)
                         )
                     )
                 )
+                .drawBehind {
+                    if (glassStyle.iosLiquidGlassEnabled) {
+                        drawLine(
+                            brush = Brush.horizontalGradient(
+                                listOf(Color.Transparent, Color.White.copy(alpha = 0.8f), Color.Transparent)
+                            ),
+                            start = Offset(size.width * 0.12f, 1.5.dp.toPx()),
+                            end = Offset(size.width * 0.88f, 1.5.dp.toPx()),
+                            strokeWidth = 1.4.dp.toPx()
+                        )
+                    }
+                }
                 .border(
                     1.dp,
                     accentColor.copy(alpha = if (rank == 1) 0.65f else 0.40f),
-                    RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+                    pillarShape
                 )
-                .padding(vertical = 8.dp, horizontal = 4.dp),
+                .padding(vertical = 10.dp, horizontal = 4.dp),
             contentAlignment = Alignment.TopCenter
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                // Medal Emoji & Rank Number
                 Text(
-                    text = "$medalEmoji #$rank",
+                    text = "#$rank",
+                    fontFamily = HyperMonoFontFamily,
                     color = accentColor,
-                    fontSize = if (rank == 1) 15.sp else 13.sp,
+                    fontSize = if (rank == 1) 17.sp else 14.sp,
                     fontWeight = FontWeight.ExtraBold
                 )
 
                 Text(
                     text = rankLabel,
                     color = glassStyle.textSecondary,
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Medium,
+                    fontSize = 9.5.sp,
+                    fontWeight = FontWeight.SemiBold,
                     textAlign = TextAlign.Center
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                // Breakdown pills at bottom of pedestal
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     Text(
-                        text = "📶 " + FormatUtils.formatBytes(app.mobileBytes),
-                        color = glassStyle.textTertiary,
+                        text = FormatUtils.formatBytes(app.mobileBytes),
+                        fontFamily = HyperMonoFontFamily,
+                        color = glassStyle.accentPrimary,
                         fontSize = 8.5.sp,
+                        fontWeight = FontWeight.SemiBold,
                         maxLines = 1
                     )
                     Text(
-                        text = "📡 " + FormatUtils.formatBytes(app.wifiBytes),
+                        text = FormatUtils.formatBytes(app.wifiBytes),
+                        fontFamily = HyperMonoFontFamily,
                         color = glassStyle.textTertiary,
                         fontSize = 8.5.sp,
                         maxLines = 1
@@ -579,9 +590,6 @@ fun PodiumPillar(
     }
 }
 
-/**
- * Row card for applications ranked #4 and beyond.
- */
 @Composable
 fun RankedAppRow(
     rank: Int,
@@ -590,23 +598,22 @@ fun RankedAppRow(
     appLanguage: AppLanguage
 ) {
     val glassStyle = LocalLiquidGlass.current
-    val dimensions = LocalAppDimensions.current
 
     GlassContainer(
         modifier = Modifier.fillMaxWidth(),
-        borderColor = glassStyle.borderColor
+        shape = RoundedCornerShape(22.dp),
+        contentPadding = PaddingValues(14.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Rank position badge
                 Box(
                     modifier = Modifier
-                        .size(32.dp)
+                        .size(34.dp)
                         .iosLiquidGlassSurface(
-                            shape = RoundedCornerShape(10.dp),
+                            shape = RoundedCornerShape(11.dp),
                             tintColor = glassStyle.accentPrimary,
                             isFilledAccent = false,
                             elevation = 0.dp
@@ -615,6 +622,7 @@ fun RankedAppRow(
                 ) {
                     Text(
                         text = "#$rank",
+                        fontFamily = HyperMonoFontFamily,
                         color = glassStyle.textSecondary,
                         fontSize = 11.5.sp,
                         fontWeight = FontWeight.Bold
@@ -623,11 +631,10 @@ fun RankedAppRow(
 
                 Spacer(modifier = Modifier.width(10.dp))
 
-                // App Icon
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
-                        .clip(RoundedCornerShape(10.dp)),
+                        .size(38.dp)
+                        .clip(RoundedCornerShape(11.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     AppIconBitmap(drawable = item.icon, appName = item.appName)
@@ -635,12 +642,11 @@ fun RankedAppRow(
 
                 Spacer(modifier = Modifier.width(10.dp))
 
-                // App Name and package
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = item.appName,
                         color = glassStyle.textPrimary,
-                        fontSize = 13.5.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -656,25 +662,25 @@ fun RankedAppRow(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                // Total combined data
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
                         text = FormatUtils.formatBytes(item.totalBytes),
+                        fontFamily = HyperMonoFontFamily,
                         color = glassStyle.accentPrimary,
                         fontSize = 13.5.sp,
                         fontWeight = FontWeight.Black
                     )
                     Text(
                         text = "%.1f%%".format(item.percentageOfTotal * 100f),
+                        fontFamily = HyperMonoFontFamily,
                         color = glassStyle.textTertiary,
                         fontSize = 10.sp
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
-            // Detailed Wi-Fi & Cellular breakdown pills
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -685,11 +691,12 @@ fun RankedAppRow(
                         imageVector = Icons.Default.CellTower,
                         contentDescription = null,
                         tint = glassStyle.accentPrimary,
-                        modifier = Modifier.size(11.dp)
+                        modifier = Modifier.size(12.dp)
                     )
-                    Spacer(modifier = Modifier.width(3.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "${AppStrings.filterCellular(appLanguage)}: ${FormatUtils.formatBytes(item.mobileBytes)}",
+                        fontFamily = HyperMonoFontFamily,
                         color = glassStyle.textSecondary,
                         fontSize = 10.sp
                     )
@@ -700,33 +707,33 @@ fun RankedAppRow(
                         imageVector = Icons.Default.Wifi,
                         contentDescription = null,
                         tint = glassStyle.accentSecondary,
-                        modifier = Modifier.size(11.dp)
+                        modifier = Modifier.size(12.dp)
                     )
-                    Spacer(modifier = Modifier.width(3.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "${AppStrings.filterWifi(appLanguage)}: ${FormatUtils.formatBytes(item.wifiBytes)}",
+                        fontFamily = HyperMonoFontFamily,
                         color = glassStyle.textSecondary,
                         fontSize = 10.sp
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(7.dp))
 
-            // Relative proportion bar compared to the #1 all-time champion app
             val relativeFraction = (item.totalBytes.toFloat() / leaderBytes.toFloat()).coerceIn(0.01f, 1f)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(4.dp)
-                    .clip(RoundedCornerShape(2.dp))
+                    .height(5.dp)
+                    .clip(CircleShape)
                     .background(glassStyle.progressTrackBg)
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(relativeFraction)
-                        .height(4.dp)
-                        .clip(RoundedCornerShape(2.dp))
+                        .height(5.dp)
+                        .clip(CircleShape)
                         .background(
                             Brush.horizontalGradient(
                                 listOf(glassStyle.accentSecondary, glassStyle.accentPrimary)

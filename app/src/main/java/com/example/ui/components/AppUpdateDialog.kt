@@ -70,6 +70,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.model.AppLanguage
 import com.example.model.FormatUtils
+import com.example.ui.theme.HyperMonoFontFamily
 import com.example.ui.theme.LocalLiquidGlass
 import com.example.update.AppUpdateInfo
 import com.example.update.AppUpdateUiState
@@ -198,6 +199,7 @@ fun AppUpdateDialog(
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
                                     text = "v${activeInfo.versionName}",
+                                    fontFamily = HyperMonoFontFamily,
                                     color = primaryAccent,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.ExtraBold

@@ -16,11 +16,11 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,10 +36,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.NotificationsActive
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.SwapVert
@@ -47,8 +45,6 @@ import androidx.compose.material.icons.filled.Today
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -77,12 +73,16 @@ import com.example.model.TimeRange
 import com.example.ui.MainViewModel
 import com.example.ui.components.GlassContainer
 import com.example.ui.components.IosLiquidGlassIconBadge
-import com.example.ui.components.IosLiquidGlassIconButton
+import com.example.ui.components.IosLiquidGlassSearchBar
 import com.example.ui.components.PerAppCustomLimitDialog
 import com.example.ui.components.UsagePermissionCard
 import com.example.ui.components.iosLiquidGlassSurface
 import com.example.ui.components.rememberAppHaptics
 import com.example.ui.components.tactileSpringPress
+import com.example.ui.navigation.LocalFloatingChromePadding
+import com.example.ui.theme.HyperMonoFontFamily
+import com.example.ui.theme.LocalAppDimensions
+import com.example.ui.theme.LocalLiquidGlass
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -101,20 +101,34 @@ fun AnalyticsScreen(
     val appLanguage by viewModel.appLanguage.collectAsStateWithLifecycle()
     val customAppLimits by viewModel.customAppLimits.collectAsStateWithLifecycle()
     val dailyAppQuotaGB by viewModel.dailyAppQuotaGB.collectAsStateWithLifecycle()
-    val glassStyle = com.example.ui.theme.LocalLiquidGlass.current
+
+    val glassStyle = LocalLiquidGlass.current
+    val dimensions = LocalAppDimensions.current
+    val chromePadding = LocalFloatingChromePadding.current
+    val haptics = rememberAppHaptics()
 
     var selectedAppForCustomization by remember { mutableStateOf<AppUsageItem?>(null) }
-    val dimensions = com.example.ui.theme.LocalAppDimensions.current
-    val haptics = rememberAppHaptics()
+
+    val totalFilteredBytes = remember(apps, interfaceFilter) {
+        apps.sumOf { item ->
+            when (interfaceFilter) {
+                InterfaceFilter.ALL -> item.totalBytes
+                InterfaceFilter.MOBILE -> item.mobileBytes
+                InterfaceFilter.WIFI -> item.wifiBytes
+            }
+        }
+    }
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = dimensions.screenPaddingHorizontal)
+            .padding(
+                start = dimensions.screenPaddingHorizontal,
+                end = dimensions.screenPaddingHorizontal,
+                top = chromePadding.calculateTopPadding() + 6.dp
+            )
     ) {
-        Spacer(modifier = Modifier.height(6.dp))
-
-        // Side-by-Side Single Cycling Filter Buttons (Time Range + Interface Traffic Filter)
+        // Side-by-Side Optical Glass Filter Capsules
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -153,48 +167,62 @@ fun AnalyticsScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        // Search Bar
-        OutlinedTextField(
-            value = searchQuery,
-            onValueChange = { viewModel.setSearchQuery(it) },
-            placeholder = { Text(com.example.model.AppStrings.searchApps(appLanguage), color = glassStyle.textTertiary, fontSize = 13.sp) },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = "Search",
-                    tint = glassStyle.textTertiary,
-                    modifier = Modifier.size(18.dp)
-                )
-            },
-            trailingIcon = {
-                if (searchQuery.isNotEmpty()) {
-                    IosLiquidGlassIconButton(
-                        onClick = { viewModel.setSearchQuery("") },
-                        icon = Icons.Default.Clear,
-                        contentDescription = "Clear",
-                        visualSize = 32.dp,
-                        iconSize = 16.dp,
-                        tintColor = glassStyle.textTertiary,
-                        shape = CircleShape
-                    )
-                }
-            },
-            singleLine = true,
-            shape = RoundedCornerShape(16.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = glassStyle.accentPrimary,
-                unfocusedBorderColor = glassStyle.borderColor,
-                focusedContainerColor = glassStyle.cardBackground,
-                unfocusedContainerColor = glassStyle.cardBackground,
-                focusedTextColor = glassStyle.textPrimary,
-                unfocusedTextColor = glassStyle.textPrimary
-            ),
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("app_search_field")
+        // Spotlight-style Apple iOS 26 Capsule Search Bar
+        IosLiquidGlassSearchBar(
+            query = searchQuery,
+            onQueryChange = { viewModel.setSearchQuery(it) },
+            placeholder = AppStrings.searchApps(appLanguage),
+            textFieldModifier = Modifier.testTag("app_search_field")
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // Live Summary Strip: Count + Filtered Total + Long-press Hint
+        if (!isRefreshing && apps.isNotEmpty()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = if (appLanguage == AppLanguage.ARABIC) {
+                        "${apps.size} تطبيق • اضغط مطولاً للتخصيص"
+                    } else {
+                        "${apps.size} apps • Long-press to limit"
+                    },
+                    color = glassStyle.textTertiary,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Box(
+                    modifier = Modifier
+                        .iosLiquidGlassSurface(
+                            shape = CircleShape,
+                            tintColor = glassStyle.accentPrimary,
+                            isFilledAccent = false,
+                            elevation = 0.dp
+                        )
+                        .padding(horizontal = 9.dp, vertical = 3.dp)
+                ) {
+                    Text(
+                        text = FormatUtils.formatBytes(totalFilteredBytes),
+                        fontFamily = HyperMonoFontFamily,
+                        color = glassStyle.accentPrimary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.ExtraBold
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+        }
 
         if (!hasUsagePerm) {
             UsagePermissionCard(
@@ -217,7 +245,7 @@ fun AnalyticsScreen(
                     CircularProgressIndicator(color = glassStyle.accentPrimary)
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = com.example.model.AppStrings.analyzingNetwork(appLanguage),
+                        text = AppStrings.analyzingNetwork(appLanguage),
                         color = glassStyle.textSecondary,
                         fontSize = dimensions.textBodyLarge
                     )
@@ -231,15 +259,17 @@ fun AnalyticsScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        imageVector = Icons.Default.Apps,
+                    IosLiquidGlassIconBadge(
+                        icon = Icons.Default.Apps,
                         contentDescription = "No apps",
-                        tint = glassStyle.textTertiary,
-                        modifier = Modifier.size(48.dp)
+                        size = 56.dp,
+                        iconSize = 28.dp,
+                        tintColor = glassStyle.textTertiary,
+                        shape = RoundedCornerShape(18.dp)
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = if (searchQuery.isNotEmpty()) com.example.model.AppStrings.noMatchingApps(appLanguage) else com.example.model.AppStrings.noAppTraffic(appLanguage),
+                        text = if (searchQuery.isNotEmpty()) AppStrings.noMatchingApps(appLanguage) else AppStrings.noAppTraffic(appLanguage),
                         color = glassStyle.textSecondary,
                         fontSize = dimensions.textBodyLarge
                     )
@@ -248,10 +278,10 @@ fun AnalyticsScreen(
         } else {
             LazyColumn(
                 modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(bottom = chromePadding.calculateBottomPadding()),
                 verticalArrangement = Arrangement.spacedBy(dimensions.gridSpacing)
             ) {
                 if (dimensions.isTablet) {
-                    // Adaptive 2-Column App Grid on Tablets & Foldables
                     items(apps.chunked(2), key = { chunk -> chunk.first().packageName }) { rowApps ->
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -275,7 +305,6 @@ fun AnalyticsScreen(
                         }
                     }
                 } else {
-                    // Phone 1-Column List
                     items(apps, key = { it.packageName }) { appItem ->
                         val sanitizedPkg = appItem.packageName.replace('.', '_')
                         val config = customAppLimits[sanitizedPkg]
@@ -288,15 +317,10 @@ fun AnalyticsScreen(
                         )
                     }
                 }
-
-                item {
-                    Spacer(modifier = Modifier.height(24.dp))
-                }
             }
         }
     }
 
-    // Custom Per-App Dialog triggered by long-press
     if (selectedAppForCustomization != null) {
         val targetApp = selectedAppForCustomization!!
         val sanitizedPkg = targetApp.packageName.replace('.', '_')
@@ -317,9 +341,6 @@ fun AnalyticsScreen(
     }
 }
 
-/**
- * Single merged cycling button for Time Range (Today -> This Week -> This Month).
- */
 @Composable
 fun CyclingTimeRangeButton(
     currentRange: TimeRange,
@@ -327,8 +348,8 @@ fun CyclingTimeRangeButton(
     onCycle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val glassStyle = com.example.ui.theme.LocalLiquidGlass.current
-    val shape = RoundedCornerShape(15.dp)
+    val glassStyle = LocalLiquidGlass.current
+    val shape = RoundedCornerShape(18.dp)
 
     val label = when (currentRange) {
         TimeRange.TODAY -> AppStrings.timeToday(appLanguage)
@@ -375,7 +396,7 @@ fun CyclingTimeRangeButton(
                     icon = icon,
                     contentDescription = label,
                     size = 28.dp,
-                    iconSize = 16.dp,
+                    iconSize = 15.dp,
                     tintColor = glassStyle.accentPrimary,
                     shape = RoundedCornerShape(9.dp)
                 )
@@ -401,7 +422,6 @@ fun CyclingTimeRangeButton(
                 }
             }
 
-            // 3-step pill indicator showing active filter index
             Row(
                 horizontalArrangement = Arrangement.spacedBy(3.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -423,9 +443,6 @@ fun CyclingTimeRangeButton(
     }
 }
 
-/**
- * Single merged cycling button for Interface Filter (All Traffic -> Mobile Data -> Wi-Fi).
- */
 @Composable
 fun CyclingInterfaceFilterButton(
     currentFilter: InterfaceFilter,
@@ -433,8 +450,8 @@ fun CyclingInterfaceFilterButton(
     onCycle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val glassStyle = com.example.ui.theme.LocalLiquidGlass.current
-    val shape = RoundedCornerShape(15.dp)
+    val glassStyle = LocalLiquidGlass.current
+    val shape = RoundedCornerShape(18.dp)
 
     val label = when (currentFilter) {
         InterfaceFilter.ALL -> AppStrings.filterAll(appLanguage)
@@ -493,7 +510,7 @@ fun CyclingInterfaceFilterButton(
                     icon = icon,
                     contentDescription = label,
                     size = 28.dp,
-                    iconSize = 16.dp,
+                    iconSize = 15.dp,
                     tintColor = animatedTint,
                     shape = RoundedCornerShape(9.dp)
                 )
@@ -519,7 +536,6 @@ fun CyclingInterfaceFilterButton(
                 }
             }
 
-            // 3-step pill indicator showing active filter index
             Row(
                 horizontalArrangement = Arrangement.spacedBy(3.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -546,32 +562,46 @@ fun CyclingInterfaceFilterButton(
 fun AppUsageCard(
     item: AppUsageItem,
     filter: InterfaceFilter,
-    appLanguage: com.example.model.AppLanguage,
+    appLanguage: AppLanguage,
     customConfig: AppCustomLimitConfig?,
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val glassStyle = com.example.ui.theme.LocalLiquidGlass.current
-    val dimensions = com.example.ui.theme.LocalAppDimensions.current
+    val glassStyle = LocalLiquidGlass.current
+    val dimensions = LocalAppDimensions.current
+    val haptics = rememberAppHaptics()
 
     GlassContainer(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(22.dp))
             .combinedClickable(
-                onClick = { /* Tap */ },
-                onLongClick = onLongClick
+                onClick = { },
+                onLongClick = {
+                    haptics.performConfirm()
+                    onLongClick()
+                }
             ),
-        backgroundColor = glassStyle.cardBackground,
-        borderColor = if (customConfig != null) glassStyle.accentPrimary.copy(alpha = 0.55f) else glassStyle.borderColor
+        shape = RoundedCornerShape(22.dp),
+        borderColor = if (customConfig != null) glassStyle.accentPrimary.copy(alpha = 0.55f) else glassStyle.borderColor,
+        contentPadding = PaddingValues(14.dp)
     ) {
         Column {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // App Icon
-                AppIconImage(drawable = item.icon, appName = item.appName)
+                // Frosted squircle framing around app launcher icon
+                Box(
+                    modifier = Modifier
+                        .size(dimensions.appItemIconSize + 6.dp)
+                        .clip(RoundedCornerShape(13.dp))
+                        .background(glassStyle.cardSubtleBg)
+                        .border(0.7.dp, glassStyle.borderColor.copy(alpha = 0.4f), RoundedCornerShape(13.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    AppIconImage(drawable = item.icon, appName = item.appName)
+                }
 
                 Spacer(modifier = Modifier.width(12.dp))
 
@@ -581,23 +611,25 @@ fun AppUsageCard(
                         color = glassStyle.textPrimary,
                         fontSize = dimensions.textTitleSmall,
                         fontWeight = FontWeight.Bold,
-                        maxLines = 1
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Text(
                         text = item.packageName,
                         color = glassStyle.textTertiary,
                         fontSize = dimensions.textMicro,
-                        maxLines = 1
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
 
                     if (customConfig != null) {
-                        Spacer(modifier = Modifier.height(3.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
+                                .clip(CircleShape)
                                 .background(glassStyle.accentPrimary.copy(alpha = 0.16f))
-                                .padding(horizontal = 6.dp, vertical = 2.dp)
+                                .padding(horizontal = 7.dp, vertical = 2.dp)
                         ) {
                             Icon(
                                 imageVector = if (customConfig.alertEnabled) Icons.Default.NotificationsActive else Icons.Default.Speed,
@@ -608,7 +640,7 @@ fun AppUsageCard(
                             Spacer(modifier = Modifier.width(3.dp))
                             val limitStr = if (customConfig.dailyLimitGB % 1f == 0f) "${customConfig.dailyLimitGB.toInt()} GB" else "%.1f GB".format(customConfig.dailyLimitGB)
                             Text(
-                                text = if (appLanguage == com.example.model.AppLanguage.ARABIC) "مخصص: $limitStr / يوم" else "Custom: $limitStr / day",
+                                text = if (appLanguage == AppLanguage.ARABIC) "مخصص: $limitStr / يوم" else "Custom: $limitStr / day",
                                 color = glassStyle.accentPrimary,
                                 fontSize = dimensions.textMicro,
                                 fontWeight = FontWeight.Bold
@@ -617,7 +649,8 @@ fun AppUsageCard(
                     }
                 }
 
-                // Total display
+                Spacer(modifier = Modifier.width(8.dp))
+
                 val primaryBytes = when (filter) {
                     InterfaceFilter.ALL -> item.totalBytes
                     InterfaceFilter.MOBILE -> item.mobileBytes
@@ -627,18 +660,20 @@ fun AppUsageCard(
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
                         text = FormatUtils.formatBytes(primaryBytes),
+                        fontFamily = HyperMonoFontFamily,
                         color = glassStyle.accentPrimary,
                         fontSize = dimensions.textMetricValue,
                         fontWeight = FontWeight.ExtraBold
                     )
                     if (item.percentageOfTotal > 0f) {
-                        val pctText = if (appLanguage == com.example.model.AppLanguage.ARABIC) {
+                        val pctText = if (appLanguage == AppLanguage.ARABIC) {
                             "%.1f%% من الإجمالي".format(item.percentageOfTotal * 100f)
                         } else {
                             "%.1f%% of total".format(item.percentageOfTotal * 100f)
                         }
                         Text(
                             text = pctText,
+                            fontFamily = HyperMonoFontFamily,
                             color = glassStyle.textTertiary,
                             fontSize = dimensions.textMicro
                         )
@@ -648,59 +683,74 @@ fun AppUsageCard(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Cellular vs Wi-Fi sub-breakdown pill
+            // Cellular vs Wi-Fi micro breakdown pills
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(glassStyle.cardSubtleBg)
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                ) {
                     Icon(
                         imageVector = Icons.Default.SignalCellularAlt,
-                        contentDescription = com.example.model.AppStrings.filterCellular(appLanguage),
+                        contentDescription = AppStrings.filterCellular(appLanguage),
                         tint = glassStyle.accentSecondary,
-                        modifier = Modifier.size(13.dp)
+                        modifier = Modifier.size(12.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "${com.example.model.AppStrings.filterCellular(appLanguage)}: ${FormatUtils.formatBytes(item.mobileBytes)}",
+                        text = FormatUtils.formatBytes(item.mobileBytes),
+                        fontFamily = HyperMonoFontFamily,
                         color = glassStyle.textSecondary,
-                        fontSize = dimensions.textCaption
+                        fontSize = dimensions.textCaption,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
 
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(glassStyle.cardSubtleBg)
+                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                ) {
                     Icon(
                         imageVector = Icons.Default.Wifi,
-                        contentDescription = com.example.model.AppStrings.filterWifi(appLanguage),
+                        contentDescription = AppStrings.filterWifi(appLanguage),
                         tint = glassStyle.accentPrimary,
-                        modifier = Modifier.size(13.dp)
+                        modifier = Modifier.size(12.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "${com.example.model.AppStrings.filterWifi(appLanguage)}: ${FormatUtils.formatBytes(item.wifiBytes)}",
+                        text = FormatUtils.formatBytes(item.wifiBytes),
+                        fontFamily = HyperMonoFontFamily,
                         color = glassStyle.textSecondary,
-                        fontSize = dimensions.textCaption
+                        fontSize = dimensions.textCaption,
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-            // Percentage track
             val barFraction = item.percentageOfTotal.coerceIn(0.01f, 1f)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(5.dp)
-                    .clip(RoundedCornerShape(3.dp))
+                    .height(5.5.dp)
+                    .clip(CircleShape)
                     .background(glassStyle.progressTrackBg)
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(barFraction)
-                        .height(5.dp)
-                        .clip(RoundedCornerShape(3.dp))
+                        .height(5.5.dp)
+                        .clip(CircleShape)
                         .background(
                             Brush.horizontalGradient(
                                 colors = listOf(glassStyle.accentSecondary, glassStyle.accentPrimary)
@@ -714,8 +764,8 @@ fun AppUsageCard(
 
 @Composable
 fun AppIconImage(drawable: Drawable?, appName: String) {
-    val glassStyle = com.example.ui.theme.LocalLiquidGlass.current
-    val dimensions = com.example.ui.theme.LocalAppDimensions.current
+    val glassStyle = LocalLiquidGlass.current
+    val dimensions = LocalAppDimensions.current
     val bitmap = remember(drawable) {
         drawableToBitmap(drawable)
     }

@@ -6,11 +6,11 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,9 +27,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.NetworkCheck
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Router
+import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -37,26 +38,39 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.model.AppLanguage
+import com.example.model.AppStrings
 import com.example.model.FormatUtils
+import com.example.model.LiveSpeedSample
+import com.example.model.NetworkType
 import com.example.ui.MainViewModel
+import com.example.ui.components.ContinuousThroughputGraph
 import com.example.ui.components.GlassContainer
 import com.example.ui.components.IosLiquidGlassIconBadge
+import com.example.ui.components.IosLiquidGlassInsetDivider
+import com.example.ui.components.IosLiquidGlassSectionHeader
 import com.example.ui.components.iosLiquidGlassSurface
-import com.example.ui.components.neumorphicDepth
+import com.example.ui.components.rememberAppHaptics
+import com.example.ui.components.tactileSpringPress
+import com.example.ui.navigation.LocalFloatingChromePadding
+import com.example.ui.theme.HyperMonoFontFamily
+import com.example.ui.theme.LocalAppDimensions
+import com.example.ui.theme.LocalLiquidGlass
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -68,12 +82,16 @@ fun SpeedMeterScreen(
     val speedSample by viewModel.speedSample.collectAsStateWithLifecycle()
     val speedHistory by viewModel.speedHistory.collectAsStateWithLifecycle()
     val appLanguage by viewModel.appLanguage.collectAsStateWithLifecycle()
+
     val scrollState = rememberScrollState()
-    val glassStyle = com.example.ui.theme.LocalLiquidGlass.current
-    val dimensions = com.example.ui.theme.LocalAppDimensions.current
+    val glassStyle = LocalLiquidGlass.current
+    val dimensions = LocalAppDimensions.current
+    val chromePadding = LocalFloatingChromePadding.current
     val context = LocalContext.current
+    val haptics = rememberAppHaptics()
 
     val openSpeedTest: () -> Unit = {
+        haptics.performConfirm()
         val speedTestUrl = "https://fast.com"
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(speedTestUrl)).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -90,8 +108,8 @@ fun SpeedMeterScreen(
         }
     }
 
-    val isOffline = (speedSample.connectionType == com.example.model.NetworkType.OFFLINE)
-    val peakPrefix = if (appLanguage == com.example.model.AppLanguage.ARABIC) "الذروة: " else "Peak: "
+    val isOffline = (speedSample.connectionType == NetworkType.OFFLINE)
+    val peakPrefix = if (appLanguage == AppLanguage.ARABIC) "الذروة: " else "Peak: "
 
     Column(
         modifier = modifier
@@ -100,32 +118,47 @@ fun SpeedMeterScreen(
             .padding(horizontal = dimensions.screenPaddingHorizontal),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(chromePadding.calculateTopPadding() + 6.dp))
 
-        Text(
-            text = com.example.model.AppStrings.speedMeterTitle(appLanguage),
-            color = glassStyle.textPrimary,
-            fontSize = dimensions.textTitleLarge,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.fillMaxWidth()
-        )
-        Text(
-            text = com.example.model.AppStrings.speedMeterSubtitle(appLanguage),
-            color = glassStyle.textSecondary,
-            fontSize = dimensions.textBodyMedium,
-            modifier = Modifier.fillMaxWidth()
-        )
+        // Editorial Screen Header
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IosLiquidGlassIconBadge(
+                icon = Icons.Default.Speed,
+                contentDescription = null,
+                size = dimensions.headerIconBoxSize,
+                iconSize = dimensions.headerIconSize * 0.56f,
+                tintColor = glassStyle.accentPrimary,
+                shape = RoundedCornerShape(14.dp)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = AppStrings.speedMeterTitle(appLanguage),
+                    color = glassStyle.textPrimary,
+                    fontSize = dimensions.textTitleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = AppStrings.speedMeterSubtitle(appLanguage),
+                    color = glassStyle.textSecondary,
+                    fontSize = dimensions.textCaption,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         if (dimensions.isTablet) {
-            // Adaptive Tablet 2-Column Section
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(dimensions.gridSpacing),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Left Column: Large Speedometer Dial
                 Box(
                     modifier = Modifier.weight(1f),
                     contentAlignment = Alignment.Center
@@ -139,7 +172,6 @@ fun SpeedMeterScreen(
                     )
                 }
 
-                // Right Column: Telemetry Cards & Diagnostics
                 Column(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(dimensions.gridSpacing)
@@ -149,7 +181,7 @@ fun SpeedMeterScreen(
                         horizontalArrangement = Arrangement.spacedBy(dimensions.gridSpacing)
                     ) {
                         SpeedTelemetryCard(
-                            title = com.example.model.AppStrings.currentDownload(appLanguage),
+                            title = AppStrings.currentDownload(appLanguage),
                             speed = speedSample.downloadFormatted,
                             peak = "$peakPrefix${FormatUtils.formatSpeed(speedSample.peakDownloadBps)}",
                             icon = Icons.Default.ArrowDownward,
@@ -158,7 +190,7 @@ fun SpeedMeterScreen(
                         )
 
                         SpeedTelemetryCard(
-                            title = com.example.model.AppStrings.currentUpload(appLanguage),
+                            title = AppStrings.currentUpload(appLanguage),
                             speed = speedSample.uploadFormatted,
                             peak = "$peakPrefix${FormatUtils.formatSpeed(speedSample.peakUploadBps)}",
                             icon = Icons.Default.ArrowUpward,
@@ -171,24 +203,36 @@ fun SpeedMeterScreen(
                 }
             }
         } else {
-            // Phone Single-Column Layout
-            SpeedometerDial(
-                currentSpeedBps = speedSample.downloadBps,
-                formattedSpeed = speedSample.downloadFormatted,
-                appLanguage = appLanguage,
-                onOpenSpeedTest = openSpeedTest,
-                modifier = Modifier.size(dimensions.speedometerDialSize)
-            )
+            // Optical Glass Hero Stage wrapping Speedometer Dial
+            GlassContainer(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(30.dp),
+                borderColor = glassStyle.accentPrimary.copy(alpha = 0.30f),
+                contentPadding = PaddingValues(vertical = 18.dp, horizontal = 14.dp)
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    SpeedometerDial(
+                        currentSpeedBps = speedSample.downloadBps,
+                        formattedSpeed = speedSample.downloadFormatted,
+                        appLanguage = appLanguage,
+                        onOpenSpeedTest = openSpeedTest,
+                        modifier = Modifier.size(dimensions.speedometerDialSize)
+                    )
+                }
+            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
-            // Real-time Upload & Download Cards
+            // Real-time Download & Upload Bento Tiles
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 SpeedTelemetryCard(
-                    title = com.example.model.AppStrings.currentDownload(appLanguage),
+                    title = AppStrings.currentDownload(appLanguage),
                     speed = speedSample.downloadFormatted,
                     peak = "$peakPrefix${FormatUtils.formatSpeed(speedSample.peakDownloadBps)}",
                     icon = Icons.Default.ArrowDownward,
@@ -197,7 +241,7 @@ fun SpeedMeterScreen(
                 )
 
                 SpeedTelemetryCard(
-                    title = com.example.model.AppStrings.currentUpload(appLanguage),
+                    title = AppStrings.currentUpload(appLanguage),
                     speed = speedSample.uploadFormatted,
                     peak = "$peakPrefix${FormatUtils.formatSpeed(speedSample.peakUploadBps)}",
                     icon = Icons.Default.ArrowUpward,
@@ -207,10 +251,10 @@ fun SpeedMeterScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
-        // High-Tech Continuous Throughput Graph spanning container
-        com.example.ui.components.ContinuousThroughputGraph(
+        // Continuous Throughput Wave Graph
+        ContinuousThroughputGraph(
             dataPoints = speedHistory,
             currentSpeedBps = speedSample.downloadBps,
             isOffline = isOffline,
@@ -219,86 +263,89 @@ fun SpeedMeterScreen(
         )
 
         if (!dimensions.isTablet) {
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+            IosLiquidGlassSectionHeader(
+                title = AppStrings.networkDiagnostics(appLanguage)
+            )
+            Spacer(modifier = Modifier.height(6.dp))
             NetworkDiagnosticsCard(speedSample = speedSample, appLanguage = appLanguage)
         }
 
-        Spacer(modifier = Modifier.height(28.dp))
+        Spacer(modifier = Modifier.height(chromePadding.calculateBottomPadding()))
     }
 }
 
 @Composable
 fun NetworkDiagnosticsCard(
-    speedSample: com.example.model.LiveSpeedSample,
-    appLanguage: com.example.model.AppLanguage,
+    speedSample: LiveSpeedSample,
+    appLanguage: AppLanguage,
     modifier: Modifier = Modifier
 ) {
-    val glassStyle = com.example.ui.theme.LocalLiquidGlass.current
+    val glassStyle = LocalLiquidGlass.current
 
-    val connectionNameTranslated = if (appLanguage == com.example.model.AppLanguage.ARABIC) {
+    val connectionNameTranslated = if (appLanguage == AppLanguage.ARABIC) {
         when (speedSample.connectionType) {
-            com.example.model.NetworkType.WIFI -> "واي فاي"
-            com.example.model.NetworkType.CELLULAR_5G -> "شبكة الجيل الخامس 5G"
-            com.example.model.NetworkType.CELLULAR_4G -> "شبكة الجيل الرابع 4G"
-            com.example.model.NetworkType.CELLULAR_3G -> "شبكة الجيل الثالث 3G"
-            com.example.model.NetworkType.CELLULAR_GENERIC -> "بيانات الجوال"
-            com.example.model.NetworkType.ETHERNET -> "إيثرنت"
-            com.example.model.NetworkType.OFFLINE -> "غير متصل"
+            NetworkType.WIFI -> "واي فاي"
+            NetworkType.CELLULAR_5G -> "شبكة الجيل الخامس 5G"
+            NetworkType.CELLULAR_4G -> "شبكة الجيل الرابع 4G"
+            NetworkType.CELLULAR_3G -> "شبكة الجيل الثالث 3G"
+            NetworkType.CELLULAR_GENERIC -> "بيانات الجوال"
+            NetworkType.ETHERNET -> "إيثرنت"
+            NetworkType.OFFLINE -> "غير متصل"
         }
     } else {
         when (speedSample.connectionType) {
-            com.example.model.NetworkType.WIFI -> "Wi-Fi"
-            com.example.model.NetworkType.CELLULAR_5G -> "5G Cellular"
-            com.example.model.NetworkType.CELLULAR_4G -> "4G LTE"
-            com.example.model.NetworkType.CELLULAR_3G -> "3G Mobile"
-            com.example.model.NetworkType.CELLULAR_GENERIC -> "Cellular Data"
-            com.example.model.NetworkType.ETHERNET -> "Ethernet"
-            com.example.model.NetworkType.OFFLINE -> "Disconnected"
+            NetworkType.WIFI -> "Wi-Fi"
+            NetworkType.CELLULAR_5G -> "5G Cellular"
+            NetworkType.CELLULAR_4G -> "4G LTE"
+            NetworkType.CELLULAR_3G -> "3G Mobile"
+            NetworkType.CELLULAR_GENERIC -> "Cellular Data"
+            NetworkType.ETHERNET -> "Ethernet"
+            NetworkType.OFFLINE -> "Disconnected"
         }
     }
 
-    val disconnectedLabel = if (appLanguage == com.example.model.AppLanguage.ARABIC) "غير متصل" else "Disconnected"
-    val unknownLabel = if (appLanguage == com.example.model.AppLanguage.ARABIC) "غير متوفر" else "Unavailable"
-    val latencyUnit = if (appLanguage == com.example.model.AppLanguage.ARABIC) "مللي ثانية" else "ms"
+    val disconnectedLabel = if (appLanguage == AppLanguage.ARABIC) "غير متصل" else "Disconnected"
+    val unknownLabel = if (appLanguage == AppLanguage.ARABIC) "غير متوفر" else "Unavailable"
+    val latencyUnit = if (appLanguage == AppLanguage.ARABIC) "مللي ثانية" else "ms"
 
-    GlassContainer(modifier = modifier.fillMaxWidth()) {
-        Column {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IosLiquidGlassIconBadge(
-                    icon = Icons.Default.NetworkCheck,
-                    contentDescription = com.example.model.AppStrings.networkDiagnostics(appLanguage),
-                    size = 28.dp,
-                    iconSize = 15.dp,
-                    tintColor = glassStyle.accentPrimary,
-                    shape = RoundedCornerShape(8.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = com.example.model.AppStrings.networkDiagnostics(appLanguage),
-                    color = glassStyle.textPrimary,
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 0.5.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
+    // Apple Settings-style grouped inset panel
+    GlassContainer(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        contentPadding = PaddingValues(vertical = 6.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             DiagnosticRow(
-                label = com.example.model.AppStrings.activeInterface(appLanguage),
-                value = if (speedSample.connectionName == "Disconnected") disconnectedLabel else speedSample.connectionName
+                icon = Icons.Default.Router,
+                tint = glassStyle.accentPrimary,
+                label = AppStrings.activeInterface(appLanguage),
+                value = if (speedSample.connectionName == "Disconnected") disconnectedLabel else speedSample.connectionName,
+                useMono = false
             )
+            IosLiquidGlassInsetDivider()
             DiagnosticRow(
-                label = com.example.model.AppStrings.localIp(appLanguage),
-                value = if (speedSample.ipAddress == "Unknown") unknownLabel else speedSample.ipAddress
+                icon = Icons.Default.Public,
+                tint = glassStyle.accentSecondary,
+                label = AppStrings.localIp(appLanguage),
+                value = if (speedSample.ipAddress == "Unknown") unknownLabel else speedSample.ipAddress,
+                useMono = true
             )
+            IosLiquidGlassInsetDivider()
             DiagnosticRow(
-                label = com.example.model.AppStrings.estimatedLatency(appLanguage),
-                value = "${speedSample.pingMs} $latencyUnit"
+                icon = Icons.Default.NetworkCheck,
+                tint = glassStyle.statusWarning,
+                label = AppStrings.estimatedLatency(appLanguage),
+                value = "${speedSample.pingMs} $latencyUnit",
+                useMono = true
             )
+            IosLiquidGlassInsetDivider()
             DiagnosticRow(
-                label = com.example.model.AppStrings.connectionState(appLanguage),
-                value = connectionNameTranslated
+                icon = Icons.Default.SignalCellularAlt,
+                tint = glassStyle.statusSafe,
+                label = AppStrings.connectionState(appLanguage),
+                value = connectionNameTranslated,
+                useMono = false
             )
         }
     }
@@ -308,30 +355,57 @@ fun NetworkDiagnosticsCard(
 fun SpeedometerDial(
     currentSpeedBps: Double,
     formattedSpeed: String,
-    appLanguage: com.example.model.AppLanguage,
+    appLanguage: AppLanguage,
     modifier: Modifier = Modifier,
     onOpenSpeedTest: () -> Unit = {}
 ) {
-    val glassStyle = com.example.ui.theme.LocalLiquidGlass.current
-    val dimensions = com.example.ui.theme.LocalAppDimensions.current
+    val glassStyle = LocalLiquidGlass.current
+    val dimensions = LocalAppDimensions.current
 
-    // 0 to 100 Mbps mapping
     val currentMbps = (currentSpeedBps / 1_000_000.0).toFloat().coerceIn(0f, 100f)
     val sweepFraction = (currentMbps / 100f).coerceIn(0.02f, 1f)
 
     val animatedSweep by animateFloatAsState(
         targetValue = sweepFraction,
-        animationSpec = tween(durationMillis = 600),
+        animationSpec = tween(durationMillis = 550),
         label = "speedometer_sweep"
     )
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Canvas(modifier = Modifier.fillMaxSize()) {
             val strokeWidth = dimensions.speedometerDialStroke.toPx()
-            val arcSize = size.width - strokeWidth * 2
-            val topLeft = Offset(strokeWidth, strokeWidth)
+            val tickInset = 10.dp.toPx()
+            val arcMargin = strokeWidth + tickInset
+            val arcSize = size.width - arcMargin * 2f
+            val topLeft = Offset(arcMargin, arcMargin)
+            val center = Offset(size.width / 2f, size.height / 2f)
 
-            // Background Track Arc (240 degrees, from 150 to 390)
+            // Calibrated outer tick ring (37 ticks over 240 deg)
+            val tickOuterR = size.width / 2f - 2.dp.toPx()
+            val totalTicks = 36
+            for (i in 0..totalTicks) {
+                val frac = i / totalTicks.toFloat()
+                val deg = 150f + frac * 240f
+                val rad = Math.toRadians(deg.toDouble())
+                val isMajor = i % 6 == 0
+                val innerR = tickOuterR - (if (isMajor) 7.dp.toPx() else 4.dp.toPx())
+                val isLit = frac <= animatedSweep
+                drawLine(
+                    color = if (isLit) glassStyle.accentPrimary.copy(alpha = 0.85f) else glassStyle.textTertiary.copy(alpha = 0.25f),
+                    start = Offset(
+                        center.x + innerR * cos(rad).toFloat(),
+                        center.y + innerR * sin(rad).toFloat()
+                    ),
+                    end = Offset(
+                        center.x + tickOuterR * cos(rad).toFloat(),
+                        center.y + tickOuterR * sin(rad).toFloat()
+                    ),
+                    strokeWidth = if (isMajor) 2.dp.toPx() else 1.2.dp.toPx(),
+                    cap = StrokeCap.Round
+                )
+            }
+
+            // Track arc (240 deg)
             drawArc(
                 color = glassStyle.progressTrackBg,
                 startAngle = 150f,
@@ -342,7 +416,7 @@ fun SpeedometerDial(
                 style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
             )
 
-            // Foreground Active Arc
+            // Active luminous refractive arc
             val activeSweep = 240f * animatedSweep
             drawArc(
                 brush = Brush.sweepGradient(
@@ -358,52 +432,34 @@ fun SpeedometerDial(
                 style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
             )
 
-            // Indicator dot at tip
+            // Specular tip pearl dot
             val angleRad = Math.toRadians((150f + activeSweep).toDouble())
             val radius = arcSize / 2f
-            val cx = size.width / 2f + radius * cos(angleRad).toFloat()
-            val cy = size.height / 2f + radius * sin(angleRad).toFloat()
+            val cx = center.x + radius * cos(angleRad).toFloat()
+            val cy = center.y + radius * sin(angleRad).toFloat()
 
             drawCircle(
-                color = if (glassStyle.isDark) Color.White else glassStyle.textPrimary,
-                radius = 6.dp.toPx(),
+                color = glassStyle.accentPrimary.copy(alpha = 0.35f),
+                radius = 9.dp.toPx(),
+                center = Offset(cx, cy)
+            )
+            drawCircle(
+                color = Color.White,
+                radius = 5.5.dp.toPx(),
                 center = Offset(cx, cy)
             )
         }
 
-        // Center Speed Readout sitting on soft Neumorphic / iOS Liquid Glass circular well
-        val speedTestLabel = if (appLanguage == com.example.model.AppLanguage.ARABIC) "قياس سرعة الإنترنت" else "Test Internet Speed"
+        val speedTestLabel = if (appLanguage == AppLanguage.ARABIC) "قياس سرعة الإنترنت" else "Test Internet Speed"
         Box(
             modifier = Modifier
                 .size(dimensions.speedometerInnerWell)
-                .neumorphicDepth(
+                .tactileSpringPress(pressedScale = 0.94f, onClick = onOpenSpeedTest)
+                .iosLiquidGlassSurface(
                     shape = CircleShape,
-                    lightColor = glassStyle.neumorphicHighlight.copy(alpha = 0.5f),
-                    darkColor = glassStyle.neumorphicShadow,
-                    offsetDp = 4.dp
-                )
-                .then(
-                    if (glassStyle.iosLiquidGlassEnabled) {
-                        Modifier.iosLiquidGlassSurface(
-                            shape = CircleShape,
-                            tintColor = glassStyle.accentPrimary,
-                            isFilledAccent = false,
-                            elevation = 4.dp
-                        )
-                    } else {
-                        Modifier
-                            .clip(CircleShape)
-                            .background(
-                                Brush.linearGradient(
-                                    listOf(glassStyle.neumorphicSurface, glassStyle.neumorphicBase)
-                                )
-                            )
-                            .border(
-                                1.dp,
-                                Brush.linearGradient(listOf(glassStyle.neumorphicBorderLight, glassStyle.neumorphicBorderDark)),
-                                CircleShape
-                            )
-                    }
+                    tintColor = glassStyle.accentPrimary,
+                    isFilledAccent = false,
+                    elevation = if (glassStyle.iosLiquidGlassEnabled) 8.dp else 2.dp
                 )
                 .clickable(
                     role = Role.Button,
@@ -415,28 +471,29 @@ fun SpeedometerDial(
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(6.dp)
+                modifier = Modifier.padding(8.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Speed,
                     contentDescription = speedTestLabel,
                     tint = glassStyle.accentPrimary,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(22.dp)
                 )
-                Spacer(modifier = Modifier.height(2.dp))
+                Spacer(modifier = Modifier.height(3.dp))
                 Text(
                     text = formattedSpeed,
+                    fontFamily = HyperMonoFontFamily,
                     color = glassStyle.textPrimary,
-                    fontSize = 20.sp,
+                    fontSize = 19.sp,
                     fontWeight = FontWeight.ExtraBold
                 )
-                Spacer(modifier = Modifier.height(2.dp))
+                Spacer(modifier = Modifier.height(3.dp))
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = com.example.model.AppStrings.liveBandwidth(appLanguage),
+                        text = AppStrings.liveBandwidth(appLanguage),
                         color = glassStyle.textTertiary,
                         fontSize = 10.sp
                     )
@@ -444,7 +501,7 @@ fun SpeedometerDial(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.OpenInNew,
                         contentDescription = speedTestLabel,
-                        tint = glassStyle.accentPrimary.copy(alpha = 0.85f),
+                        tint = glassStyle.accentPrimary,
                         modifier = Modifier.size(10.dp)
                     )
                 }
@@ -458,81 +515,104 @@ fun SpeedTelemetryCard(
     title: String,
     speed: String,
     peak: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     accentColor: Color,
     modifier: Modifier = Modifier
 ) {
-    val glassStyle = com.example.ui.theme.LocalLiquidGlass.current
-    val cardShape = RoundedCornerShape(20.dp)
+    val glassStyle = LocalLiquidGlass.current
 
-    Box(
-        modifier = modifier
-            .neumorphicDepth(
-                shape = cardShape,
-                lightColor = glassStyle.neumorphicHighlight.copy(alpha = 0.45f),
-                darkColor = glassStyle.neumorphicShadow,
-                offsetDp = 3.dp
-            )
-            .clip(cardShape)
-            .background(
-                Brush.linearGradient(
-                    listOf(glassStyle.neumorphicSurface, glassStyle.neumorphicBase)
-                )
-            )
-            .border(
-                1.dp,
-                Brush.linearGradient(listOf(glassStyle.neumorphicBorderLight.copy(alpha = 0.3f), accentColor.copy(alpha = 0.4f))),
-                cardShape
-            )
-            .padding(14.dp)
+    GlassContainer(
+        modifier = modifier,
+        shape = RoundedCornerShape(22.dp),
+        borderColor = accentColor.copy(alpha = 0.35f),
+        contentPadding = PaddingValues(15.dp)
     ) {
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IosLiquidGlassIconBadge(
                     icon = icon,
                     contentDescription = title,
-                    size = 28.dp,
+                    size = 30.dp,
                     iconSize = 15.dp,
                     tintColor = accentColor,
                     shape = CircleShape
                 )
-                Spacer(modifier = Modifier.width(6.dp))
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = title,
                     color = glassStyle.textSecondary,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.SemiBold
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = speed,
+                fontFamily = HyperMonoFontFamily,
                 color = glassStyle.textPrimary,
-                fontSize = 19.sp,
+                fontSize = 18.sp,
                 fontWeight = FontWeight.ExtraBold
             )
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(3.dp))
             Text(
                 text = peak,
+                fontFamily = HyperMonoFontFamily,
                 color = glassStyle.textTertiary,
-                fontSize = 11.sp
+                fontSize = 10.5.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
 }
 
 @Composable
-fun DiagnosticRow(label: String, value: String) {
-    val glassStyle = com.example.ui.theme.LocalLiquidGlass.current
+fun DiagnosticRow(
+    icon: ImageVector,
+    tint: Color,
+    label: String,
+    value: String,
+    useMono: Boolean = false
+) {
+    val glassStyle = LocalLiquidGlass.current
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 5.dp),
+            .padding(horizontal = 14.dp, vertical = 11.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = label, color = glassStyle.textSecondary, fontSize = 12.sp)
-        Text(text = value, color = glassStyle.textPrimary, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.weight(1f)
+        ) {
+            IosLiquidGlassIconBadge(
+                icon = icon,
+                contentDescription = null,
+                size = 28.dp,
+                iconSize = 15.dp,
+                tintColor = tint,
+                shape = RoundedCornerShape(8.dp)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = label,
+                color = glassStyle.textSecondary,
+                fontSize = 12.5.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = value,
+            fontFamily = if (useMono) HyperMonoFontFamily else com.example.ui.theme.HyperDisplayFontFamily,
+            color = glassStyle.textPrimary,
+            fontSize = 12.5.sp,
+            fontWeight = FontWeight.Bold
+        )
     }
 }

@@ -61,14 +61,9 @@ object DataForecastCalculator {
         val daysElapsed = (elapsedMillis / (1000L * 60 * 60 * 24)).toInt().coerceIn(1, 31)
         val totalCycleDays = (daysElapsed + daysRemainingInCycle).coerceAtLeast(28)
 
-        // Calculate average daily burn rate from past history
+        // Calculate average daily burn rate from past history and active today's spike
         val cycleDailyAverage = if (usedMobileBytes > 0L) usedMobileBytes / daysElapsed else 0L
-        // Smooth burn rate: take daily average or today's activity
-        val burnRate = when {
-            cycleDailyAverage > 0L -> cycleDailyAverage
-            mobileTodayBytes > 0L -> mobileTodayBytes
-            else -> 0L
-        }
+        val burnRate = maxOf(cycleDailyAverage, mobileTodayBytes).coerceAtLeast(0L)
 
         // Safe daily runway calculation
         val safeDailyBytes = if (daysRemainingInCycle > 0) {

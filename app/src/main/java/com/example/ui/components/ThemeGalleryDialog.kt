@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,11 +30,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -59,7 +56,7 @@ import com.example.ui.theme.LocalLiquidGlass
 import com.example.ui.theme.createLiquidGlassStyle
 
 /**
- * Compact 3-dot palette swatch card used in the Multi-Theme horizontal strip and full Gallery.
+ * Optical iOS 26 Liquid Glass Palette Swatch Card used in the Multi-Theme Engine strip & Gallery.
  */
 @Composable
 fun ThemeSwatchCard(
@@ -71,7 +68,7 @@ fun ThemeSwatchCard(
 ) {
     val glassStyle = LocalLiquidGlass.current
     val previewStyle = remember(themeMode) { createLiquidGlassStyle(themeMode) }
-    val shape = RoundedCornerShape(14.dp)
+    val shape = RoundedCornerShape(16.dp)
 
     val animatedBg by animateColorAsState(
         targetValue = when {
@@ -94,8 +91,8 @@ fun ThemeSwatchCard(
         modifier = modifier
             .tactileSpringPress(pressedScale = 0.96f, onClick = onClick)
             .then(
-                if (glassStyle.isNeumorphic) {
-                    Modifier.neumorphicDepth(
+                when {
+                    glassStyle.isNeumorphic -> Modifier.neumorphicDepth(
                         shape = shape,
                         lightColor = glassStyle.neumorphicHighlight,
                         darkColor = glassStyle.neumorphicShadow,
@@ -104,12 +101,20 @@ fun ThemeSwatchCard(
                         surfaceColor = if (isSelected) Color.Unspecified else glassStyle.neumorphicSurface,
                         blurDp = 6.dp
                     )
-                } else Modifier
+                    isSelected && glassStyle.iosLiquidGlassEnabled -> Modifier.iosLiquidGlassSurface(
+                        shape = shape,
+                        tintColor = previewStyle.accentPrimary,
+                        isFilledAccent = false,
+                        isPressed = true,
+                        elevation = 4.dp
+                    )
+                    else -> Modifier
+                }
             )
             .clip(shape)
             .background(animatedBg)
-            .border(width = if (isSelected) 1.4.dp else 0.8.dp, color = borderColor, shape = shape)
-            .padding(horizontal = 10.dp, vertical = 9.dp)
+            .border(width = if (isSelected) 1.5.dp else 0.8.dp, color = borderColor, shape = shape)
+            .padding(horizontal = 11.dp, vertical = 10.dp)
             .testTag("theme_swatch_${themeMode.name.lowercase()}")
     ) {
         Column {
@@ -118,14 +123,22 @@ fun ThemeSwatchCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // 3 live color swatch dots: surface, primary accent, secondary accent
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                // Live gradient preview + 3 palette dots
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
                     Box(
                         modifier = Modifier
-                            .size(11.dp)
+                            .width(20.dp)
+                            .height(11.dp)
                             .clip(CircleShape)
-                            .background(previewStyle.surfaceColor)
-                            .border(0.7.dp, previewStyle.textTertiary.copy(alpha = 0.45f), CircleShape)
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(previewStyle.surfaceColor, previewStyle.accentPrimary)
+                                )
+                            )
+                            .border(0.6.dp, previewStyle.textTertiary.copy(alpha = 0.4f), CircleShape)
                     )
                     Box(
                         modifier = Modifier
@@ -146,17 +159,17 @@ fun ThemeSwatchCard(
                         imageVector = Icons.Default.CheckCircle,
                         contentDescription = null,
                         tint = previewStyle.accentPrimary,
-                        modifier = Modifier.size(14.dp)
+                        modifier = Modifier.size(15.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(7.dp))
 
             Text(
                 text = themeMode.titleEn,
                 color = glassStyle.textPrimary,
-                fontSize = 11.5.sp,
+                fontSize = 12.sp,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -174,7 +187,7 @@ fun ThemeSwatchCard(
 }
 
 /**
- * Searchable & filterable Multi-Theme Engine gallery allowing instant selection across all 66 themes.
+ * Searchable & filterable Apple iOS 26 Liquid Glass Multi-Theme Engine gallery across all 66 themes.
  */
 @Composable
 fun ThemeGalleryDialog(
@@ -207,21 +220,14 @@ fun ThemeGalleryDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Box(
+        GlassContainer(
             modifier = Modifier
                 .fillMaxWidth(0.94f)
                 .widthIn(max = 580.dp)
-                .fillMaxHeight(0.82f)
-                .clip(RoundedCornerShape(24.dp))
-                .background(
-                    brush = if (glassStyle.isNeumorphic) {
-                        Brush.verticalGradient(listOf(glassStyle.surfaceColor, glassStyle.neumorphicBase))
-                    } else {
-                        glassStyle.backdropBrush
-                    }
-                )
-                .border(1.1.dp, glassStyle.borderColor, RoundedCornerShape(24.dp))
-                .padding(16.dp)
+                .fillMaxHeight(0.84f),
+            shape = RoundedCornerShape(30.dp),
+            borderColor = glassStyle.accentPrimary.copy(alpha = 0.45f),
+            contentPadding = PaddingValues(18.dp)
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 // Header
@@ -234,17 +240,17 @@ fun ThemeGalleryDialog(
                         IosLiquidGlassIconBadge(
                             icon = Icons.Default.Palette,
                             contentDescription = null,
-                            size = 36.dp,
-                            iconSize = 18.dp,
+                            size = 38.dp,
+                            iconSize = 19.dp,
                             tintColor = glassStyle.accentPrimary,
-                            shape = RoundedCornerShape(10.dp)
+                            shape = RoundedCornerShape(12.dp)
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text(
                                 text = "Multi-Theme Engine",
                                 color = glassStyle.textPrimary,
-                                fontSize = 15.sp,
+                                fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
@@ -269,66 +275,27 @@ fun ThemeGalleryDialog(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                // Live Search Field
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    placeholder = {
-                        Text(
-                            text = if (appLanguage == AppLanguage.ARABIC) {
-                                "ابحث عن ثيم (مثل Dracula, Monokai, Glass...)"
-                            } else {
-                                "Search themes (Dracula, Monokai, Glass...)"
-                            },
-                            fontSize = 12.sp,
-                            color = glassStyle.textTertiary
-                        )
-                    },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = null,
-                            tint = glassStyle.accentPrimary,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    },
-                    trailingIcon = {
-                        if (searchQuery.isNotEmpty()) {
-                            IconButton(onClick = { searchQuery = "" }) {
-                                Icon(
-                                    imageVector = Icons.Default.Close,
-                                    contentDescription = "Clear",
-                                    tint = glassStyle.textTertiary,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
-                        }
-                    },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    textStyle = androidx.compose.ui.text.TextStyle(
-                        color = glassStyle.textPrimary,
-                        fontSize = 12.5.sp
-                    ),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = glassStyle.accentPrimary,
-                        unfocusedBorderColor = glassStyle.borderColor,
-                        focusedContainerColor = glassStyle.cardSubtleBg,
-                        unfocusedContainerColor = glassStyle.cardSubtleBg
-                    ),
-                    shape = RoundedCornerShape(14.dp)
+                // Spotlight-style iOS 26 Capsule Search Bar
+                IosLiquidGlassSearchBar(
+                    query = searchQuery,
+                    onQueryChange = { searchQuery = it },
+                    placeholder = if (appLanguage == AppLanguage.ARABIC) {
+                        "ابحث عن ثيم (مثل Dracula, Monokai, Glass...)"
+                    } else {
+                        "Search themes (Dracula, Monokai, Glass...)"
+                    }
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
 
-                // Category Filter Strip
+                // Category Filter Capsule Strip
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .horizontalScroll(rememberScrollState()),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(7.dp)
                 ) {
                     GalleryFilterChip(
                         label = if (appLanguage == AppLanguage.ARABIC) "الكل (${selectableThemes.size})" else "All (${selectableThemes.size})",
@@ -354,8 +321,8 @@ fun ThemeGalleryDialog(
                         .fillMaxWidth()
                         .weight(1f),
                     contentPadding = PaddingValues(bottom = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(9.dp),
+                    verticalArrangement = Arrangement.spacedBy(9.dp)
                 ) {
                     items(filteredThemes, key = { it.name }) { mode ->
                         ThemeSwatchCard(
@@ -379,10 +346,11 @@ private fun GalleryFilterChip(
     onClick: () -> Unit
 ) {
     val glassStyle = LocalLiquidGlass.current
-    val shape = RoundedCornerShape(12.dp)
+    val shape = CircleShape
 
     Box(
         modifier = Modifier
+            .defaultMinSize(minHeight = 36.dp)
             .iosLiquidGlassSurface(
                 shape = shape,
                 tintColor = if (isSelected) glassStyle.accentPrimary else glassStyle.textSecondary,
@@ -390,7 +358,7 @@ private fun GalleryFilterChip(
                 elevation = if (isSelected && glassStyle.iosLiquidGlassEnabled) 3.dp else 0.dp
             )
             .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 7.dp),
+            .padding(horizontal = 13.dp, vertical = 7.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
