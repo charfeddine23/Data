@@ -64,6 +64,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -1093,7 +1094,11 @@ fun SettingsScreen(
                         Image(
                             painter = painterResource(id = R.drawable.ic_brand_logo),
                             contentDescription = "HyperNet",
-                            modifier = Modifier.size(dimensions.headerIconSize)
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(1.5.dp)
+                                .clip(CircleShape)
                         )
                     }
                     Spacer(modifier = Modifier.width(12.dp))

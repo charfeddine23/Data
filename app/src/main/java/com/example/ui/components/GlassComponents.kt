@@ -80,6 +80,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -369,7 +370,7 @@ fun DashboardHeader(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.weight(1f, fill = false)
         ) {
-            // Optical Liquid Glass Medallion around the HyperNet Brand Mark
+            // Optical Liquid Glass Medallion matching the external HyperNet icon
             Box(
                 modifier = Modifier
                     .size(40.dp)
@@ -384,7 +385,11 @@ fun DashboardHeader(
                 Image(
                     painter = painterResource(id = R.drawable.ic_brand_logo),
                     contentDescription = "HyperNet",
-                    modifier = Modifier.size(26.dp)
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(1.2.dp)
+                        .clip(CircleShape)
                 )
             }
 
